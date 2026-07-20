@@ -1,16 +1,46 @@
-# React + Vite
+# Ayusydah — Health Supplement E-Commerce Store
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive e-commerce frontend for Ayusydah, a natural wellness supplement brand. Built with React and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 18** (Vite)
+- **Tailwind CSS v4** — utility-first styling with custom brand color tokens
+- **React Router** — client-side routing
+- **Lucide React** + **React Icons** — iconography
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Sticky header with mega navigation (hover dropdowns with category images)
+- Auto-rotating hero banner slider
+- Product cards with ratings, discount badges, and cart/wishlist actions
+- Responsive design (mobile hamburger menu, adaptive grids)
+- Newsletter signup, testimonial slider, brand carousel
+- Cookie consent banner
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+\`\`\`
+src/
+  components/
+    layout/     → Header, Footer, PromoBar, UtilityBar
+    product/    → ProductCard
+    category/   → CategoryCard
+    ui/         → PromoBanner, CookieBanner
+  sections/     → HeroSlider, BestSellers, Testimonials, etc.
+  data/         → Mock JSON data (products, categories, brands, testimonials)
+  pages/        → Home
+\`\`\`
+
+## Getting Started
+
+\`\`\`bash
+npm install
+npm run dev
+\`\`\`
+
+Visit \`http://localhost:5173\`
+
+## Notes
+
+This is currently a frontend-only build using mock JSON data — no backend/database is connected yet.
