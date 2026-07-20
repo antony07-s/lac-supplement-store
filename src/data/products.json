@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "name": "Ayusydah Blood Pressure Support",
+    "image": "BP4",
+    "price": 79.90,
+    "originalPrice": 99.90,
+    "rating": 4.5,
+    "reviews": 128
+  },
+  {
+    "id": 2,
+    "name": "Ayusydah Digestive Health Formula",
+    "image": "https://picsum.photos/seed/prod2/400",
+    "price": 65.00,
+    "originalPrice": 65.00,
+    "rating": 4.2,
+    "reviews": 84
+  },
+  {
+    "id": 3,
+    "name": "Ayusydah Immune Support Complex",
+    "image": "https://picsum.photos/seed/prod3/400",
+    "price": 55.90,
+    "originalPrice": 72.00,
+    "rating": 4.8,
+    "reviews": 203
+  },
+  {
+    "id": 4,
+    "name": "Ayusydah Eye Health Formula",
+    "image": "https://picsum.photos/seed/prod4/400",
+    "price": 48.50,
+    "originalPrice": 60.00,
+    "rating": 4.3,
+    "reviews": 67
+  },
+  {
+    "id": 5,
+    "name": "Ayusydah Multivitamin Daily",
+    "image": "https://picsum.photos/seed/prod5/400",
+    "price": 39.90,
+    "originalPrice": 39.90,
+    "rating": 4.6,
+    "reviews": 156
+  }
+]

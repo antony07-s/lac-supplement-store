@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "Vitamins & Supplements", "image": "https://picsum.photos/seed/cat1/400" },
+  { "id": 2, "name": "Beauty & Slimming", "image": "https://picsum.photos/seed/cat2/400" },
+  { "id": 3, "name": "Protein & Fitness", "image": "https://picsum.photos/seed/cat3/400" },
+  { "id": 4, "name": "Wellness", "image": "https://picsum.photos/seed/cat4/400" },
+  { "id": 5, "name": "Food", "image": "https://picsum.photos/seed/cat5/400" },
+  { "id": 6, "name": "Sports Nutrition", "image": "https://picsum.photos/seed/cat6/400" }
+]

@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "Immune Support", "image": "https://picsum.photos/seed/goal1/400" },
+  { "id": 2, "name": "Heart Health", "image": "https://picsum.photos/seed/goal2/400" },
+  { "id": 3, "name": "Energy & Vitality", "image": "https://picsum.photos/seed/goal3/400" },
+  { "id": 4, "name": "Sleep Support", "image": "https://picsum.photos/seed/goal4/400" },
+  { "id": 5, "name": "Weight Management", "image": "https://picsum.photos/seed/goal5/400" },
+  { "id": 6, "name": "Stress Relief", "image": "https://picsum.photos/seed/goal6/400" }
+]

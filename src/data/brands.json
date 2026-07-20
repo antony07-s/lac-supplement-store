@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "Ayusydah", "logo": "https://picsum.photos/seed/brand1/200/100" },
+  { "id": 2, "name": "PureLeaf", "logo": "https://picsum.photos/seed/brand2/200/100" },
+  { "id": 3, "name": "VitaCore", "logo": "https://picsum.photos/seed/brand3/200/100" },
+  { "id": 4, "name": "NatureBoost", "logo": "https://picsum.photos/seed/brand4/200/100" },
+  { "id": 5, "name": "WellSpring", "logo": "https://picsum.photos/seed/brand5/200/100" },
+  { "id": 6, "name": "HerbalCo", "logo": "https://picsum.photos/seed/brand6/200/100" }
+]
