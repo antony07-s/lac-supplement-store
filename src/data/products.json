@@ -6,7 +6,9 @@
     "price": 79.90,
     "originalPrice": 99.90,
     "rating": 4.5,
-    "reviews": 128
+    "reviews": 128,
+    "description": "Traditionally used to help maintain healthy blood pressure levels. Formulated with natural circulation-support ingredients, 100% natural, 15 capsules per bottle.",
+    "category": "Vitamins & Supplements"
   },
   {
     "id": 2,
@@ -15,7 +17,9 @@
     "price": 65.00,
     "originalPrice": 65.00,
     "rating": 4.2,
-    "reviews": 84
+    "reviews": 84,
+    "description": "A daily digestive support formula designed to promote gut health and comfortable digestion.",
+    "category": "Vitamins & Supplements"
   },
   {
     "id": 3,
@@ -24,7 +28,9 @@
     "price": 55.90,
     "originalPrice": 72.00,
     "rating": 4.8,
-    "reviews": 203
+    "reviews": 203,
+    "description": "A powerful blend to support your immune system year-round, with key vitamins and antioxidants.",
+    "category": "Vitamins & Supplements"
   },
   {
     "id": 4,
@@ -33,7 +39,9 @@
     "price": 48.50,
     "originalPrice": 60.00,
     "rating": 4.3,
-    "reviews": 67
+    "reviews": 67,
+    "description": "Supports long-term eye health with lutein and essential nutrients for daily eye strain relief.",
+    "category": "Vitamins & Supplements"
   },
   {
     "id": 5,
@@ -42,6 +50,8 @@
     "price": 39.90,
     "originalPrice": 39.90,
     "rating": 4.6,
-    "reviews": 156
+    "reviews": 156,
+    "description": "A complete daily multivitamin covering essential vitamins and minerals for everyday wellness.",
+    "category": "Vitamins & Supplements"
   }
 ]
