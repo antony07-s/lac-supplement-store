@@ -5,12 +5,12 @@ import toast from 'react-hot-toast'
 function Newsletter() {
   const [email, setEmail] = useState('')
 
- const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     if (!email) return
     toast.success('Thanks for subscribing! Check your inbox soon.')
     setEmail('')
-}
+  }
 
   return (
     <section className="bg-brand-blue text-center text-white"><div className="page-shell py-12">

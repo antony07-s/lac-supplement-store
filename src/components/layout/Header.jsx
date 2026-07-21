@@ -39,7 +39,7 @@ function Header() {
                     {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
 
-                <Link to="/" aria-label="Ayusydah home" className="flex shrink-0 items-center gap-2 text-xl font-extrabold tracking-[-.06em] text-brand-blue sm:text-2xl"><span aria-hidden="true" className="grid h-8 w-8 place-items-center rounded-xl bg-brand-blue text-sm text-brand-gold">A</span>AYUSYDAH<span className="text-brand-gold">.</span></Link>
+                <Link to="/" aria-label="Ayusydah home" className="flex shrink-0 items-center gap-2 text-xl font-extrabold tracking-[-.06em] text-brand-blue sm:text-2xl">AYUSYDAH<span className="text-brand-gold">.</span></Link>
 
                 <div className="hidden lg:block flex-1 max-w-2xl">
                     <form onSubmit={submitSearch} className="relative block"><button type="submit" aria-label="Submit search" className="absolute left-2 top-1/2 z-10 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-stone-400 hover:bg-stone-100 hover:text-brand-blue"><Search size={17} /></button><input

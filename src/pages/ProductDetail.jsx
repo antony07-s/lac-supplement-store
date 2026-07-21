@@ -16,7 +16,7 @@ function ProductDetail() {
 
   if (!product) {
     return (
-    <div className="page-shell section-space text-center">
+      <div className="page-shell section-space text-center">
         <p className="text-gray-600">Product not found.</p>
         <Link to="/" className="text-brand-blue hover:underline">Back to Home</Link>
       </div>
@@ -74,9 +74,8 @@ function ProductDetail() {
             </button>
             <button
               onClick={() => toggleWishlist(product)}
-              className={`px-5 rounded-full border ${
-                inWishlist ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-500 hover:text-brand-blue'
-              }`}
+              className={`px-5 rounded-full border ${inWishlist ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-500 hover:text-brand-blue'
+                }`}
             >
               <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />
             </button>

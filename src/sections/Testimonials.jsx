@@ -40,9 +40,8 @@ function Testimonials() {
           <button
             key={index}
             onClick={() => setCurrent(index)}
-            className={`w-2 h-2 rounded-full ${
-              index === current ? 'bg-brand-blue' : 'bg-gray-300'
-            }`}
+            className={`w-2 h-2 rounded-full ${index === current ? 'bg-brand-blue' : 'bg-gray-300'
+              }`}
           />
         ))}
       </div>
