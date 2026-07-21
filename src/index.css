@@ -50,7 +50,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
     outline: 3px solid #bd8b35;
-    outline-offset: 3px;
+    outline-offset: 1px;
 }
 
 img {
