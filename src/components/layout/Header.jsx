@@ -101,55 +101,61 @@ function Header() {
             </div>
 
             {/* Desktop nav row */}
-            <nav className="hidden border-t border-stone-100 bg-[#f7f8f4] lg:block">
-                <ul className="page-shell flex items-center justify-between gap-2 py-3 text-[11px] font-bold text-gray-800 whitespace-nowrap lg:gap-3 lg:text-sm">
-                    {navItems.map((item, index) => {
-                        const alignRight = index >= 3
+            <nav className="hidden border-t border-stone-100 bg-[#f7f8f4] lg:block relative">
+    <ul className="page-shell flex items-center justify-between gap-2 py-3 text-[11px] font-bold text-gray-800 whitespace-nowrap lg:gap-3 lg:text-sm">
+        {navItems.map((item) => (
+            <li
+                key={item}
+                onMouseEnter={() => setOpenItem(item)}
+                onMouseLeave={() => setOpenItem(null)}
+                onFocus={() => setOpenItem(item)}
+                onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpenItem(null) }}
+                className={`hover:text-brand-blue relative shrink-0 border-b-2 pb-2 transition-colors ${openItem === item ? 'border-brand-blue text-brand-blue' : 'border-transparent'
+                    }`}
+            >
+                <Link className="inline-flex items-center gap-1" to={`/category/${encodeURIComponent(item)}`}>
+                    {item}
+                    <ChevronDown aria-hidden="true" size={14} className={`transition-transform ${openItem === item ? 'rotate-180' : ''}`} />
+                </Link>
+            </li>
+        ))}
+    </ul>
 
-                        return (
-                            <li
-                                key={item}
-                                onMouseEnter={() => setOpenItem(item)}
-                                onMouseLeave={() => setOpenItem(null)}
-                                onFocus={() => setOpenItem(item)}
-                                onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpenItem(null) }}
-                                className={`hover:text-brand-blue relative shrink-0 border-b-2 pb-2 transition-colors ${openItem === item ? 'border-brand-blue text-brand-blue' : 'border-transparent'
-                                    }`}
-                            >
-                                <Link className="inline-flex items-center gap-1" to={`/category/${encodeURIComponent(item)}`}>{item}<ChevronDown aria-hidden="true" size={14} className={`transition-transform ${openItem === item ? 'rotate-180' : ''}`} /></Link>
-
-                                {openItem === item && navDropdowns[item] && (
-                                    <div style={{ width: 'min(650px, calc(100vw - 2rem))' }} className={`absolute top-full z-50 max-w-[calc(100vw-2rem)] pt-3 ${alignRight ? 'right-0' : 'left-0'}`}>
-                                        <div className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-5 shadow-2xl shadow-emerald-950/15 lg:p-6">
-                                            <div className="mb-3 grid grid-cols-2 gap-4 border-b border-gray-200 pb-4 sm:grid-cols-4">
-                                                {navDropdowns[item].featured.map((f) => (
-                                                    <div key={f.label} className="min-w-0 text-center text-xs font-semibold leading-4 text-gray-700">
-                                                        <span aria-hidden="true" className="mx-auto mb-2 grid h-14 w-14 place-items-center rounded-full bg-[#edf3e9] text-lg font-extrabold text-brand-blue">{f.label.charAt(0)}</span>
-                                                        {f.label}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-brand-blue sm:grid-cols-3">
-                                                {navDropdowns[item].links.map((link) => (
-                                                    <li key={link}><Link to={`/category/${encodeURIComponent(item)}`} className="rounded py-1 hover:underline">{link}</Link></li>
-                                                ))}
-                                            </ul>
-                                            <div className="mt-4 pt-3 border-t border-gray-200 text-center">
-                                                <Link
-                                                    to={`/category/${encodeURIComponent(item)}`}
-                                                    className="text-sm text-brand-blue font-semibold hover:underline cursor-pointer"
-                                                >
-                                                    View All
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </li>
-                        )
-                    })}
+    {openItem && navDropdowns[openItem] && (
+        <div
+            onMouseEnter={() => setOpenItem(openItem)}
+            onMouseLeave={() => setOpenItem(null)}
+            className="page-shell absolute left-0 right-0 top-full z-50 pt-3"
+        >
+            <div className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl shadow-emerald-950/15 lg:p-6" style={{ width: 'min(650px, calc(100vw - 2rem))' }}>
+                <div className="mb-3 grid grid-cols-2 gap-4 border-b border-gray-200 pb-3 sm:grid-cols-4">
+                    {navDropdowns[openItem].featured.map((f) => (
+                        <div key={f.label} className="min-w-0 text-center text-xs font-semibold leading-4 text-gray-700">
+                            <span aria-hidden="true" className="mx-auto mb-2 grid h-14 w-14 place-items-center rounded-full bg-[#edf3e9] text-lg font-extrabold text-brand-blue">
+                                {f.label.charAt(0)}
+                            </span>
+                            {f.label}
+                        </div>
+                    ))}
+                </div>
+                <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-brand-blue sm:grid-cols-3">
+                    {navDropdowns[openItem].links.map((link) => (
+                        <li key={link}>
+                            <Link to={`/category/${encodeURIComponent(openItem)}`} className="rounded py-1 hover:underline">
+                                {link}
+                            </Link>
+                        </li>
+                    ))}
                 </ul>
-            </nav>
+                <div className="mt-4 pt-3 border-t border-gray-200 text-center">
+                    <Link to={`/category/${encodeURIComponent(openItem)}`} className="text-sm text-brand-blue font-semibold hover:underline cursor-pointer">
+                        View All
+                    </Link>
+                </div>
+            </div>
+        </div>
+    )}
+</nav>
 
             {/* Mobile menu */}
             {mobileMenuOpen && (
