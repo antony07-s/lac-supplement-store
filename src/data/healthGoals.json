@@ -1,8 +1,8 @@
 [
-  { "id": 1, "name": "Immune Support", "image": "https://picsum.photos/seed/goal1/400" },
-  { "id": 2, "name": "Heart Health", "image": "https://picsum.photos/seed/goal2/400" },
-  { "id": 3, "name": "Energy & Vitality", "image": "https://picsum.photos/seed/goal3/400" },
-  { "id": 4, "name": "Sleep Support", "image": "https://picsum.photos/seed/goal4/400" },
-  { "id": 5, "name": "Weight Management", "image": "https://picsum.photos/seed/goal5/400" },
-  { "id": 6, "name": "Stress Relief", "image": "https://picsum.photos/seed/goal6/400" }
+  { "id": 1, "name": "Immune Support", "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=700&q=80" },
+  { "id": 2, "name": "Heart Health", "image": "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?auto=format&fit=crop&w=700&q=80" },
+  { "id": 3, "name": "Energy & Vitality", "image": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=700&q=80" },
+  { "id": 4, "name": "Sleep Support", "image": "https://images.unsplash.com/photo-1511295742362-92c96b1cf484?auto=format&fit=crop&w=700&q=80" },
+  { "id": 5, "name": "Weight Management", "image": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=700&q=80" },
+  { "id": 6, "name": "Stress Relief", "image": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=700&q=80" }
 ]

@@ -1,90 +1,17 @@
-import { Star, Heart, ShoppingCart } from 'lucide-react'
+import { Star, Heart, ShoppingBag } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import bp4 from '../../assets/BP4.png'
 import { useCart } from '../../context/CartContext.jsx'
-import { useState } from 'react'
 import { useWishlist } from '../../context/WishlistContext.jsx'
-import { Link } from 'react-router-dom'
-
 const localImages = { BP4: bp4 }
-
 function ProductCard({ product }) {
-    const imageSrc = localImages[product.image] || product.image
-    const hasDiscount = product.originalPrice > product.price
-    const discountPercent = hasDiscount
-        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-        : 0
-    const { addToCart } = useCart()
-    const [justAdded, setJustAdded] = useState(false)
-
-    const handleAddToCart = () => {
-        addToCart(product)
-        setJustAdded(true)
-        setTimeout(() => setJustAdded(false), 1200)
-    }
-    const { toggleWishlist, isInWishlist } = useWishlist()
-    const inWishlist = isInWishlist(product.id)
-    return (
-        <div className="group border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-shadow duration-300 relative">
-            {hasDiscount && (
-                <span className="absolute top-3 left-3 bg-brand-gold text-white text-xs font-bold px-2 py-1 rounded-full z-10">
-                    -{discountPercent}%
-                </span>
-            )}
-
-            <button
-                onClick={() => toggleWishlist(product)}
-                className={`absolute top-3 right-3 z-10 ${inWishlist ? 'text-red-500' : 'text-gray-400 hover:text-brand-blue'}`}
-            >
-                <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />
-            </button>
-
-            <Link to={`/product/${product.id}`}>
-                <div className="overflow-hidden rounded-lg bg-gray-50 mb-3">
-                    <img
-                        src={imageSrc}
-                        alt={product.name}
-                        loading="lazy"
-                        className="w-full h-48 object-contain p-2 transition-transform duration-300 group-hover:scale-105"
-                    />
-                </div>
-
-                <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 mb-1">
-                    {product.name}
-                </h3>
-            </Link>
-
-            <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 mb-1">
-                {product.name}
-            </h3>
-
-            <div className="flex items-center gap-1 mb-2">
-                <Star size={14} className="fill-brand-gold text-brand-gold" />
-                <span className="text-xs text-gray-600">
-                    {product.rating} ({product.reviews})
-                </span>
-            </div>
-
-            <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg font-bold text-brand-blue">
-                    RM {product.price.toFixed(2)}
-                </span>
-                {hasDiscount && (
-                    <span className="text-sm text-gray-400 line-through">
-                        RM {product.originalPrice.toFixed(2)}
-                    </span>
-                )}
-            </div>
-
-            <button
-                onClick={handleAddToCart}
-                className={`w-full flex items-center justify-center gap-2 text-white text-sm font-semibold py-2 rounded-full transition-colors ${justAdded ? 'bg-green-600' : 'bg-brand-blue hover:bg-brand-blue-dark'
-                    }`}
-            >
-                <ShoppingCart size={16} />
-                {justAdded ? 'Added!' : 'Add to Cart'}
-            </button>
-        </div>
-    )
+  const { addToCart } = useCart(); const { toggleWishlist, isInWishlist } = useWishlist(); const inWishlist = isInWishlist(product.id); const image = localImages[product.image] || product.image; const discount = product.originalPrice > product.price ? Math.round((1 - product.price / product.originalPrice) * 100) : null
+  const add = () => { addToCart(product); toast.success(`${product.name} added to bag`) }
+  return <article className="group relative flex min-w-0 flex-col rounded-2xl border border-stone-200 bg-white p-3 shadow-[0_1px_2px_rgba(24,48,31,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-950/10">
+    {discount && <span className="absolute left-5 top-5 z-10 rounded-full bg-brand-gold px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white">SAVE {discount}%</span>}<button onClick={() => toggleWishlist(product)} aria-label={`${inWishlist ? 'Remove' : 'Add'} ${product.name} ${inWishlist ? 'from' : 'to'} wishlist`} className={`absolute right-5 top-5 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/90 shadow-sm ${inWishlist ? 'text-rose-500' : 'text-stone-500 hover:text-brand-blue'}`}><Heart size={18} fill={inWishlist ? 'currentColor' : 'none'} /></button>
+    <Link to={`/product/${product.id}`} className="overflow-hidden rounded-xl bg-[#f4f5ef]"><img src={image} alt={product.name} loading="lazy" decoding="async" className="aspect-square w-full object-cover transition duration-500 group-hover:scale-105" /></Link>
+    <div className="flex flex-1 flex-col px-1 pt-4"><p className="text-[11px] font-bold uppercase tracking-widest text-brand-blue/65">Ayusydah</p><Link to={`/product/${product.id}`} className="mt-1 text-sm font-bold leading-5 text-stone-800 hover:text-brand-blue">{product.name}</Link><div className="mt-2 flex items-center gap-1 text-xs text-stone-500"><Star size={14} className="fill-brand-gold text-brand-gold"/><span>{product.rating} <span className="text-stone-400">({product.reviews})</span></span></div><div className="mt-3 flex items-baseline gap-2"><span className="text-lg font-extrabold text-brand-blue">RM {product.price.toFixed(2)}</span>{discount && <del className="text-xs text-stone-400">RM {product.originalPrice.toFixed(2)}</del>}</div><button onClick={add} className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-blue px-3 text-xs font-bold text-white transition hover:bg-brand-blue-dark"><ShoppingBag size={16}/>Add to bag</button></div>
+  </article>
 }
-
 export default ProductCard

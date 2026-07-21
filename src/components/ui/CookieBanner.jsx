@@ -6,8 +6,8 @@ function CookieBanner() {
   if (!visible) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-gray-300 px-8 py-4 flex items-center justify-between gap-6 z-50">
-      <p className="text-xs">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 text-gray-300"><div className="page-shell flex flex-col items-start justify-between gap-3 py-4 sm:flex-row sm:items-center">
+      <p className="text-xs leading-5">
         Cookies allow us to optimise and personalise your experience. By continuing to use the website, you agree to our{' '}
         <span className="underline cursor-pointer hover:text-white">Privacy Policy</span> and{' '}
         <span className="underline cursor-pointer hover:text-white">Terms & Conditions</span>.
@@ -18,7 +18,7 @@ function CookieBanner() {
       >
         CONTINUE
       </button>
-    </div>
+    </div></div>
   )
 }
 

@@ -1,0 +1,7 @@
+function Block({ className = '' }) { return <div aria-hidden="true" className={`shimmer rounded-xl ${className}`} /> }
+export function ProductCardSkeleton() { return <div className="rounded-2xl border border-stone-200 bg-white p-3"><Block className="aspect-square" /><Block className="mt-4 h-3 w-2/5" /><Block className="mt-2 h-4 w-4/5" /><Block className="mt-4 h-10 w-full rounded-full" /></div> }
+export function GridSkeleton({ count = 5 }) { return <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">{Array.from({ length: count }, (_, i) => <ProductCardSkeleton key={i} />)}</div> }
+export function CategoryGridSkeleton({ count = 6 }) { return <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">{Array.from({ length: count }, (_, i) => <Block key={i} className="aspect-[4/3]" />)}</div> }
+export function BrandGridSkeleton({ count = 6 }) { return <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">{Array.from({ length: count }, (_, i) => <Block key={i} className="h-24" />)}</div> }
+export function HeroSkeleton() { return <div className="shimmer h-[390px] sm:h-[460px]" /> }
+export function DetailSkeleton() { return <div className="grid gap-10 md:grid-cols-2"><Block className="aspect-square" /><div className="space-y-4"><Block className="h-5 w-1/4" /><Block className="h-10 w-4/5" /><Block className="h-5 w-1/3" /><Block className="h-24 w-full" /><Block className="h-12 w-full rounded-full" /></div></div> }

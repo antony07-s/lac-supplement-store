@@ -1,18 +1,20 @@
+import { Link } from 'react-router-dom'
+
 function CategoryCard({ category }) {
   return (
-    <div className="group cursor-pointer text-center">
-      <div className="overflow-hidden rounded-xl shadow-sm">
+    <Link to={`/category/${encodeURIComponent(category.name)}`} className="group block min-w-0 text-center">
+      <div className="overflow-hidden rounded-2xl bg-stone-100 shadow-sm transition duration-300 group-hover:shadow-lg">
         <img
           src={category.image}
           alt={category.name}
           loading="lazy"
-          className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105"
+          className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
-      <p className="mt-3 font-semibold text-gray-800 group-hover:text-brand-blue">
+      <p className="mt-3 text-sm font-bold text-stone-800 group-hover:text-brand-blue">
         {category.name}
       </p>
-    </div>
+    </Link>
   )
 }
 

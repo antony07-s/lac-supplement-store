@@ -13,7 +13,7 @@
   {
     "id": 2,
     "name": "Ayusydah Digestive Health Formula",
-    "image": "https://picsum.photos/seed/prod2/400",
+    "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=85",
     "price": 65.00,
     "originalPrice": 65.00,
     "rating": 4.2,
@@ -24,7 +24,7 @@
   {
     "id": 3,
     "name": "Ayusydah Immune Support Complex",
-    "image": "https://picsum.photos/seed/prod3/400",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=85",
     "price": 55.90,
     "originalPrice": 72.00,
     "rating": 4.8,
@@ -35,7 +35,7 @@
   {
     "id": 4,
     "name": "Ayusydah Eye Health Formula",
-    "image": "https://picsum.photos/seed/prod4/400",
+    "image": "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=800&q=85",
     "price": 48.50,
     "originalPrice": 60.00,
     "rating": 4.3,
@@ -46,7 +46,7 @@
   {
     "id": 5,
     "name": "Ayusydah Multivitamin Daily",
-    "image": "https://picsum.photos/seed/prod5/400",
+    "image": "https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?auto=format&fit=crop&w=800&q=85",
     "price": 39.90,
     "originalPrice": 39.90,
     "rating": 4.6,

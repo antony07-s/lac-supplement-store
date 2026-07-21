@@ -3,11 +3,9 @@ import CategoryCard from '../components/category/CategoryCard.jsx'
 
 function ShopByHealthGoal() {
   return (
-    <section className="px-8 py-12">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        Shop by Health Goal
-      </h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+    <section className="page-shell section-space">
+      <p className="eyebrow">Start with what matters</p><h2 className="section-title mt-2 mb-8">Shop by health goal</h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-5">
         {healthGoals.map((goal) => (
           <CategoryCard key={goal.id} category={goal} />
         ))}

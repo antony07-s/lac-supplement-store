@@ -1,3 +1,5 @@
+/* Context providers intentionally export their consumer hook from the same module. */
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState } from 'react'
 
 const WishlistContext = createContext()

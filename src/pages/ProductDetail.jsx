@@ -4,6 +4,7 @@ import products from '../data/products.json'
 import bp4 from '../assets/BP4.png'
 import { useCart } from '../context/CartContext.jsx'
 import { useWishlist } from '../context/WishlistContext.jsx'
+import toast from 'react-hot-toast'
 
 const localImages = { BP4: bp4 }
 
@@ -15,7 +16,7 @@ function ProductDetail() {
 
   if (!product) {
     return (
-      <div className="px-8 py-16 text-center">
+    <div className="page-shell section-space text-center">
         <p className="text-gray-600">Product not found.</p>
         <Link to="/" className="text-brand-blue hover:underline">Back to Home</Link>
       </div>
@@ -26,7 +27,7 @@ function ProductDetail() {
   const inWishlist = isInWishlist(product.id)
 
   return (
-    <div className="px-8 py-12 max-w-5xl mx-auto">
+    <main className="page-shell section-space max-w-5xl">
       <Link
         to={`/category/${encodeURIComponent(product.category)}`}
         className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-brand-blue mb-6"
@@ -35,13 +36,13 @@ function ProductDetail() {
         Back to {product.category}
       </Link>
 
-      <div className="grid md:grid-cols-2 gap-10">
-        <div className="bg-gray-50 rounded-xl flex items-center justify-center p-8">
-          <img src={imageSrc} alt={product.name} className="max-h-96 object-contain" />
+      <div className="grid gap-8 md:grid-cols-2 md:gap-12">
+        <div className="flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-[#f1f4ed] p-6">
+          <img src={imageSrc} alt={product.name} loading="eager" className="h-full w-full object-contain mix-blend-multiply" />
         </div>
 
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">{product.name}</h1>
+          <p className="eyebrow mb-3">Ayusydah wellness</p><h1 className="section-title mb-3">{product.name}</h1>
 
           <div className="flex items-center gap-1 mb-4">
             <Star size={16} className="fill-brand-gold text-brand-gold" />
@@ -61,11 +62,11 @@ function ProductDetail() {
             )}
           </div>
 
-          <p className="text-gray-600 mb-8">{product.description}</p>
+          <p className="text-sm leading-7 text-stone-600 mb-8">{product.description}</p>
 
           <div className="flex gap-3">
             <button
-              onClick={() => addToCart(product)}
+              onClick={() => { addToCart(product); toast.success(`${product.name} added to bag`) }}
               className="flex-1 flex items-center justify-center gap-2 bg-brand-blue text-white font-semibold py-3 rounded-full hover:bg-brand-blue-dark transition-colors"
             >
               <ShoppingCart size={18} />
@@ -82,7 +83,7 @@ function ProductDetail() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
 
