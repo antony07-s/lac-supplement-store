@@ -19,10 +19,12 @@ import FAQ from './pages/FAQ.jsx'
 import Careers from './pages/Careers.jsx'
 import SiteMap from './pages/SiteMap.jsx'
 import ContactUs from './pages/ContactUs.jsx'
+import ScrollToTop from './components/ScrollToTop.jsx'
 
 function App() {
   return (
     <>
+      <ScrollToTop />
       <Toaster position="top-center" />
       <PromoBar />
       <UtilityBar />
