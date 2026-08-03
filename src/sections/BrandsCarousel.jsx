@@ -14,7 +14,7 @@ function BrandsCarousel() {
   }, [])
 
   return (
-    <section className="bg-[#f4f6f0]">
+    <section className="bg-[#f4f7fc]">
       <div className="page-shell section-space">
         <p className="eyebrow">Trusted standards</p>
         <h2 className="section-title mt-2 mb-8">Featured brands</h2>

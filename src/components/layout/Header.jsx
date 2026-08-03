@@ -146,11 +146,11 @@ function Header() {
                         onMouseLeave={() => setOpenItem(null)}
                         className="page-shell absolute left-0 right-0 top-full z-50 pt-3"
                     >
-                        <div className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl shadow-emerald-950/15 lg:p-6" style={{ width: 'min(650px, calc(100vw - 2rem))' }}>
+                        <div className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl shadow-blue-950/15 lg:p-6" style={{ width: 'min(650px, calc(100vw - 2rem))' }}>
                             <div className="mb-3 grid grid-cols-2 gap-4 border-b border-gray-200 pb-3 sm:grid-cols-4">
                                 {navDropdowns[openItem].featured.map((f) => (
                                     <div key={f.label} className="min-w-0 text-center text-xs font-semibold leading-4 text-gray-700">
-                                        <span aria-hidden="true" className="mx-auto mb-2 grid h-14 w-14 place-items-center rounded-full bg-[#edf3e9] text-lg font-extrabold text-brand-blue">
+                                        <span aria-hidden="true" className="mx-auto mb-2 grid h-14 w-14 place-items-center rounded-full bg-[#edf4ff] text-lg font-extrabold text-brand-blue">
                                             {f.label.charAt(0)}
                                         </span>
                                         {f.label}

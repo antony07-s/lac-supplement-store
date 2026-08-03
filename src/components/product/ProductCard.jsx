@@ -24,7 +24,7 @@ function ProductCard({ product }) {
     }
 
     return (
-        <article className="group relative flex h-full min-w-0 flex-col rounded-2xl border border-stone-200 bg-white p-3 shadow-[0_1px_2px_rgba(24,48,31,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-950/10">
+        <article className="group relative flex h-full min-w-0 flex-col rounded-2xl border border-stone-200 bg-white p-3 shadow-[0_1px_2px_rgba(23,37,84,.05)] transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-950/10">
             {discount && (
                 <span className="absolute left-5 top-5 z-10 rounded-full bg-brand-gold px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white">
                     SAVE {discount}%
@@ -41,7 +41,7 @@ function ProductCard({ product }) {
 
             <Link
                 to={`/product/${product._id}`}
-                className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-[#f4f5ef] p-4"
+                className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-[#f4f7fc] p-4"
             >
                 <img
                     src={image}

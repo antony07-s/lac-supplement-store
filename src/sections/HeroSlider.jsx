@@ -1,27 +1,51 @@
-import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-const slides = [
-  { id: 1, eyebrow: 'New daily ritual', heading: 'Wellness that fits your life.', copy: 'Thoughtfully selected vitamins and natural nutrition, delivered to your door.', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=1800&q=90' },
-  { id: 2, eyebrow: 'Feel your best', heading: 'Small habits. Lasting vitality.', copy: 'Build a nourishing routine with dependable support for every day.', image: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1800&q=90' },
-  { id: 3, eyebrow: 'Member favourites', heading: 'A better way to replenish.', copy: 'Shop essentials formulated to support energy, balance and recovery.', image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1800&q=90' },
+// Temporary wellness imagery. Replace these URLs with Ayusydah-owned campaign images when available.
+const heroImages = [
+  'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=85',
 ]
 
-function HeroSlider() {
-  const [current, setCurrent] = useState(0)
-  const [paused, setPaused] = useState(false)
-  useEffect(() => { if (!paused) { const timer = setInterval(() => setCurrent((i) => (i + 1) % slides.length), 6000); return () => clearInterval(timer) } }, [paused])
-  const active = slides[current]
-  const previous = () => setCurrent((i) => (i - 1 + slides.length) % slides.length)
-  const next = () => setCurrent((i) => (i + 1) % slides.length)
-  return <section aria-label="Featured wellness offers" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} className="relative isolate overflow-hidden bg-[#e8efe5]">
-    <img src={active.image} alt="" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-center" />
-    <div className="absolute inset-0 bg-gradient-to-r from-[#143a25]/95 via-[#143a25]/72 to-[#143a25]/10" />
-    <div className="page-shell relative flex min-h-[390px] items-center py-16 sm:min-h-[460px]">
-      <div className="max-w-xl text-white"><p className="eyebrow !text-[#f7e7c2]">{active.eyebrow}</p><h1 className="mt-3 text-4xl font-bold tracking-[-.05em] sm:text-5xl lg:text-6xl">{active.heading}</h1><p className="mt-5 max-w-md text-base leading-7 text-white/90 sm:text-lg">{active.copy}</p><Link to="/category/Vitamins%20%26%20Supplements" className="mt-7 inline-flex min-h-11 items-center rounded-full bg-white px-6 text-sm font-bold text-brand-blue transition hover:bg-brand-gold hover:text-white">Shop essentials</Link></div>
+function ImageTicker({ direction = 'up' }) {
+  const images = [...heroImages, ...heroImages]
+
+  return (
+    <div className="min-w-0 overflow-hidden">
+      <div className={direction === 'up' ? 'hero-ticker-up space-y-3' : 'hero-ticker-down space-y-3'}>
+        {images.map((image, index) => (
+          <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl bg-blue-100 shadow-lg shadow-blue-950/10">
+            <img src={image} alt="" loading="lazy" className="aspect-[4/5] w-full object-cover" />
+          </div>
+        ))}
+      </div>
     </div>
-    <div className="absolute inset-x-0 bottom-5"><div className="page-shell flex items-center justify-between"><div className="flex gap-2">{slides.map((slide, i) => <button key={slide.id} onClick={() => setCurrent(i)} aria-label={`Show slide ${i + 1}`} aria-current={i === current} className={`h-2.5 rounded-full transition-all ${i === current ? 'w-7 bg-white' : 'w-2.5 bg-white/55'}`} />)}</div><div className="flex gap-2"><button onClick={previous} aria-label="Previous slide" className="grid h-11 w-11 place-items-center rounded-full bg-white/90 text-brand-blue hover:bg-white"><ChevronLeft size={20} /></button><button onClick={next} aria-label="Next slide" className="grid h-11 w-11 place-items-center rounded-full bg-white/90 text-brand-blue hover:bg-white"><ChevronRight size={20} /></button></div></div></div>
-  </section>
+  )
 }
+
+function HeroSlider() {
+  return (
+    <section aria-label="Ayusydah wellness collection" className="relative isolate overflow-hidden bg-[#102a62]">
+      <div className="page-shell grid min-h-[500px] items-center gap-8 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.86fr)] lg:py-0">
+        <div className="relative z-10 py-6 text-white lg:py-14">
+          <p className="eyebrow !text-[#f7e7c2]">Everyday wellness</p>
+          <h1 className="mt-4 max-w-xl text-4xl font-bold tracking-[-.055em] sm:text-5xl lg:text-6xl">Small rituals. Stronger you.</h1>
+          <p className="mt-6 max-w-md text-base leading-7 text-white/85 sm:text-lg">Discover considered supplements and everyday essentials that make wellness feel simple.</p>
+          <Link to="/category/Vitamins%20%26%20Supplements" className="mt-8 inline-flex min-h-11 items-center rounded-full bg-white px-6 text-sm font-bold text-brand-blue transition hover:bg-brand-gold hover:text-white">Shop essentials</Link>
+          <p className="mt-8 text-xs font-semibold uppercase tracking-[.16em] text-white/55">Wellness, thoughtfully selected</p>
+        </div>
+
+        <div className="relative hidden h-[500px] gap-3 overflow-hidden rounded-3xl border border-white/10 bg-blue-950/20 p-3 shadow-2xl shadow-blue-950/30 sm:grid sm:grid-cols-2 lg:h-[590px]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-[#102a62] to-transparent" />
+          <ImageTicker direction="up" />
+          <ImageTicker direction="down" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-[#102a62] to-transparent" />
+        </div>
+      </div>
+      <div className="pointer-events-none absolute inset-y-0 left-[42%] hidden w-80 bg-[radial-gradient(circle,rgba(88,145,255,.22),transparent_68%)] lg:block" />
+    </section>
+  )
+}
+
 export default HeroSlider

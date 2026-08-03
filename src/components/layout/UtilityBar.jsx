@@ -2,7 +2,7 @@ import { MapPin } from 'lucide-react'
 
 function UtilityBar() {
   return (
-    <div className="border-b border-emerald-950/10 bg-[#eef3ea] text-xs text-stone-600"><div className="page-shell flex items-center justify-between gap-3 py-2">
+    <div className="border-b border-blue-950/10 bg-[#eef4ff] text-xs text-stone-600"><div className="page-shell flex items-center justify-between gap-3 py-2">
       <span className="font-medium">Free delivery on orders over RM 80</span>
 
       <div className="flex items-center gap-4">

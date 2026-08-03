@@ -14,7 +14,7 @@ function BestSellers() {
   }, [])
 
   return (
-    <section className="bg-[#f4f6f0]">
+    <section className="bg-[#f4f7fc]">
       <div className="page-shell section-space">
         <p className="eyebrow">Our range</p>
         <h2 className="section-title mt-2 mb-8">Explore our products</h2>

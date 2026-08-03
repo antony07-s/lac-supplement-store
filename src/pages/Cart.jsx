@@ -61,7 +61,7 @@ function Cart() {
 
           return (
             <div key={item._id} className="flex items-center gap-3 border-b border-gray-200 pb-4 sm:gap-4">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f1f4ed] p-2">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f2f6ff] p-2">
                 {imageSrc ? <img src={imageSrc} alt={item.name} onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain" /> : <span className="text-xs text-stone-500">No image</span>}
               </div>
               <div className="min-w-0 flex-1">

@@ -72,7 +72,7 @@ function ProductDetail() {
       </Link>
 
       <div className="grid gap-8 md:grid-cols-2 md:gap-12">
-        <div className="flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-[#f1f4ed] p-6">
+        <div className="flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-[#f2f6ff] p-6">
           {imageSrc ? (
             <img src={imageSrc} alt={product.name} loading="eager" onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain mix-blend-multiply" />
           ) : (
