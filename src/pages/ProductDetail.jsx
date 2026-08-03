@@ -101,7 +101,7 @@ function ProductDetail() {
           )}
 
           <div className="flex gap-3">
-            <button onClick={() => { addToCart(product, quantity); toast.success(`${quantity} × ${product.name} added to bag`) }} disabled={isOutOfStock} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60">
+            <button onClick={() => { addToCart(product, quantity); toast.success(`${quantity} ${product.name} added to bag`) }} disabled={isOutOfStock} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60">
               <ShoppingCart size={18} /> Add to Cart
             </button>
             <button onClick={() => toggleWishlist(product)} aria-label={`${inWishlist ? 'Remove' : 'Add'} ${product.name} ${inWishlist ? 'from' : 'to'} wishlist`} className={`rounded-full border px-5 ${inWishlist ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-500 hover:text-brand-blue'}`}><Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} /></button>

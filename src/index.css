@@ -146,6 +146,7 @@ img {
     .hero-ticker-down {
         animation-play-state: paused;
     }
+
 }
 
 @media (max-width: 640px) {
