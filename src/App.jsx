@@ -1,9 +1,11 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+
 import PromoBar from './components/layout/PromoBar.jsx'
 import UtilityBar from './components/layout/UtilityBar.jsx'
 import Header from './components/layout/Header.jsx'
 import Footer from './components/layout/Footer.jsx'
+
 import Home from './pages/Home.jsx'
 import ProductDetail from './pages/ProductDetail.jsx'
 import CookieBanner from './components/ui/CookieBanner.jsx'
@@ -20,15 +22,30 @@ import Careers from './pages/Careers.jsx'
 import SiteMap from './pages/SiteMap.jsx'
 import ContactUs from './pages/ContactUs.jsx'
 import ScrollToTop from './components/ScrollToTop.jsx'
+import MyOrders from './pages/MyOrders.jsx'
 
 function App() {
+  const location = useLocation()
+
+  const isAuthPage =
+    location.pathname === '/login' ||
+    location.pathname === '/register'
+
   return (
     <>
       <ScrollToTop />
+
       <Toaster position="top-center" />
-      <PromoBar />
-      <UtilityBar />
-      <Header />
+
+      {/* Show website header only on normal pages */}
+      {!isAuthPage && (
+        <>
+          <PromoBar />
+          <UtilityBar />
+          <Header />
+        </>
+      )}
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/product/:id" element={<ProductDetail />} />
@@ -36,8 +53,12 @@ function App() {
         <Route path="/search" element={<ProductListing />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/my-orders" element={<MyOrders />} />
+
+        {/* Authentication pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -46,8 +67,14 @@ function App() {
         <Route path="/site-map" element={<SiteMap />} />
         <Route path="/contact-us" element={<ContactUs />} />
       </Routes>
-      <Footer />
-      <CookieBanner />
+
+      {/* Show footer only on normal pages */}
+      {!isAuthPage && (
+        <>
+          <Footer />
+          <CookieBanner />
+        </>
+      )}
     </>
   )
 }

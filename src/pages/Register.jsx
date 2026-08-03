@@ -1,18 +1,34 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Mail, Lock, User } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import api from '../api/axios.js'
+import { useAuth } from '../context/AuthContext.jsx'
 
 function Register() {
     const [form, setForm] = useState({ name: '', email: '', password: '' })
+    const [showPassword, setShowPassword] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
+    const { login } = useAuth()
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        toast.success('Registration submitted — demo only, no backend connected yet')
+        setLoading(true)
+        try {
+            const res = await api.post('/auth/register', form)
+            login(res.data.user, res.data.token)
+            toast.success(`Welcome, ${res.data.user.name}!`)
+            navigate('/')
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Registration failed')
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -54,14 +70,22 @@ function Register() {
                     <div className="relative">
                         <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             name="password"
                             value={form.password}
                             onChange={handleChange}
                             placeholder="Password"
                             required
-                            className="w-full border border-gray-300 rounded-lg pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                            minLength={6}
+                            className="w-full border border-gray-300 rounded-lg pl-11 pr-11 py-3 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-blue"
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                     </div>
 
                     <p className="text-xs text-gray-400">
@@ -71,9 +95,11 @@ function Register() {
 
                     <button
                         type="submit"
-                        className="w-full bg-brand-blue text-white font-semibold py-3 rounded-full hover:bg-brand-blue-dark transition-colors"
+                        disabled={loading}
+                        className="w-full flex items-center justify-center gap-2 bg-brand-blue text-white font-semibold py-3 rounded-full hover:bg-brand-blue-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                        Create Account
+                        {loading && <Loader2 size={18} className="animate-spin" />}
+                        {loading ? 'Creating account...' : 'Create Account'}
                     </button>
                 </form>
 

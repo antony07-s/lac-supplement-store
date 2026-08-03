@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { navDropdowns } from '../../data/navData.js'
 import { useCart } from '../../context/CartContext.jsx'
 import { useWishlist } from '../../context/WishlistContext.jsx'
+import { useAuth } from '../../context/AuthContext.jsx'
 import { Link, useNavigate } from 'react-router-dom'
 
 const navItems = [
@@ -23,6 +24,13 @@ function Header() {
     const navigate = useNavigate()
     const { cartCount } = useCart()
     const { wishlistItems } = useWishlist()
+    const { user, logout } = useAuth()
+
+    const handleLogout = () => {
+        logout()
+        setAccountMenuOpen(false)
+    }
+
     const submitSearch = (event) => {
         event.preventDefault()
         const term = query.trim()
@@ -56,25 +64,36 @@ function Header() {
                             className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-700 hover:text-brand-blue"
                         >
                             <User size={22} />
-                            <span>Register | Login</span>
+                            <span>{user ? user.name : 'Register | Login'}</span>
                         </button>
 
                         {accountMenuOpen && (
                             <div className="absolute top-full right-0 mt-3 w-56 bg-white border border-gray-200 shadow-lg rounded-lg py-3 z-50">
-                                <Link
-                                    to="/register"
-                                    onClick={() => setAccountMenuOpen(false)}
-                                    className="block px-5 py-2 text-sm text-gray-700 hover:text-brand-blue hover:bg-gray-50"
-                                >
-                                    Register an Account
-                                </Link>
-                                <Link
-                                    to="/login"
-                                    onClick={() => setAccountMenuOpen(false)}
-                                    className="block px-5 py-2 text-sm text-gray-700 hover:text-brand-blue hover:bg-gray-50 border-t border-gray-100 mt-1 pt-3"
-                                >
-                                    Login
-                                </Link>
+                                {user ? (
+                                    <button
+                                        onClick={handleLogout}
+                                        className="block w-full text-left px-5 py-2 text-sm text-gray-700 hover:text-brand-blue hover:bg-gray-50"
+                                    >
+                                        Logout
+                                    </button>
+                                ) : (
+                                    <>
+                                        <Link
+                                            to="/register"
+                                            onClick={() => setAccountMenuOpen(false)}
+                                            className="block px-5 py-2 text-sm text-gray-700 hover:text-brand-blue hover:bg-gray-50"
+                                        >
+                                            Register an Account
+                                        </Link>
+                                        <Link
+                                            to="/login"
+                                            onClick={() => setAccountMenuOpen(false)}
+                                            className="block px-5 py-2 text-sm text-gray-700 hover:text-brand-blue hover:bg-gray-50 border-t border-gray-100 mt-1 pt-3"
+                                        >
+                                            Login
+                                        </Link>
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>
@@ -102,60 +121,60 @@ function Header() {
 
             {/* Desktop nav row */}
             <nav className="hidden border-t border-stone-100 bg-[#f7f8f4] lg:block relative">
-    <ul className="page-shell flex items-center justify-between gap-2 py-3 text-[11px] font-bold text-gray-800 whitespace-nowrap lg:gap-3 lg:text-sm">
-        {navItems.map((item) => (
-            <li
-                key={item}
-                onMouseEnter={() => setOpenItem(item)}
-                onMouseLeave={() => setOpenItem(null)}
-                onFocus={() => setOpenItem(item)}
-                onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpenItem(null) }}
-                className={`hover:text-brand-blue relative shrink-0 border-b-2 pb-2 transition-colors ${openItem === item ? 'border-brand-blue text-brand-blue' : 'border-transparent'
-                    }`}
-            >
-                <Link className="inline-flex items-center gap-1" to={`/category/${encodeURIComponent(item)}`}>
-                    {item}
-                    <ChevronDown aria-hidden="true" size={14} className={`transition-transform ${openItem === item ? 'rotate-180' : ''}`} />
-                </Link>
-            </li>
-        ))}
-    </ul>
-
-    {openItem && navDropdowns[openItem] && (
-        <div
-            onMouseEnter={() => setOpenItem(openItem)}
-            onMouseLeave={() => setOpenItem(null)}
-            className="page-shell absolute left-0 right-0 top-full z-50 pt-3"
-        >
-            <div className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl shadow-emerald-950/15 lg:p-6" style={{ width: 'min(650px, calc(100vw - 2rem))' }}>
-                <div className="mb-3 grid grid-cols-2 gap-4 border-b border-gray-200 pb-3 sm:grid-cols-4">
-                    {navDropdowns[openItem].featured.map((f) => (
-                        <div key={f.label} className="min-w-0 text-center text-xs font-semibold leading-4 text-gray-700">
-                            <span aria-hidden="true" className="mx-auto mb-2 grid h-14 w-14 place-items-center rounded-full bg-[#edf3e9] text-lg font-extrabold text-brand-blue">
-                                {f.label.charAt(0)}
-                            </span>
-                            {f.label}
-                        </div>
-                    ))}
-                </div>
-                <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-brand-blue sm:grid-cols-3">
-                    {navDropdowns[openItem].links.map((link) => (
-                        <li key={link}>
-                            <Link to={`/category/${encodeURIComponent(openItem)}`} className="rounded py-1 hover:underline">
-                                {link}
+                <ul className="page-shell flex items-center justify-between gap-2 py-3 text-[11px] font-bold text-gray-800 whitespace-nowrap lg:gap-3 lg:text-sm">
+                    {navItems.map((item) => (
+                        <li
+                            key={item}
+                            onMouseEnter={() => setOpenItem(item)}
+                            onMouseLeave={() => setOpenItem(null)}
+                            onFocus={() => setOpenItem(item)}
+                            onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpenItem(null) }}
+                            className={`hover:text-brand-blue relative shrink-0 border-b-2 pb-2 transition-colors ${openItem === item ? 'border-brand-blue text-brand-blue' : 'border-transparent'
+                                }`}
+                        >
+                            <Link className="inline-flex items-center gap-1" to={`/category/${encodeURIComponent(item)}`}>
+                                {item}
+                                <ChevronDown aria-hidden="true" size={14} className={`transition-transform ${openItem === item ? 'rotate-180' : ''}`} />
                             </Link>
                         </li>
                     ))}
                 </ul>
-                <div className="mt-4 pt-3 border-t border-gray-200 text-center">
-                    <Link to={`/category/${encodeURIComponent(openItem)}`} className="text-sm text-brand-blue font-semibold hover:underline cursor-pointer">
-                        View All
-                    </Link>
-                </div>
-            </div>
-        </div>
-    )}
-</nav>
+
+                {openItem && navDropdowns[openItem] && (
+                    <div
+                        onMouseEnter={() => setOpenItem(openItem)}
+                        onMouseLeave={() => setOpenItem(null)}
+                        className="page-shell absolute left-0 right-0 top-full z-50 pt-3"
+                    >
+                        <div className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl shadow-emerald-950/15 lg:p-6" style={{ width: 'min(650px, calc(100vw - 2rem))' }}>
+                            <div className="mb-3 grid grid-cols-2 gap-4 border-b border-gray-200 pb-3 sm:grid-cols-4">
+                                {navDropdowns[openItem].featured.map((f) => (
+                                    <div key={f.label} className="min-w-0 text-center text-xs font-semibold leading-4 text-gray-700">
+                                        <span aria-hidden="true" className="mx-auto mb-2 grid h-14 w-14 place-items-center rounded-full bg-[#edf3e9] text-lg font-extrabold text-brand-blue">
+                                            {f.label.charAt(0)}
+                                        </span>
+                                        {f.label}
+                                    </div>
+                                ))}
+                            </div>
+                            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-brand-blue sm:grid-cols-3">
+                                {navDropdowns[openItem].links.map((link) => (
+                                    <li key={link}>
+                                        <Link to={`/category/${encodeURIComponent(openItem)}`} className="rounded py-1 hover:underline">
+                                            {link}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className="mt-4 pt-3 border-t border-gray-200 text-center">
+                                <Link to={`/category/${encodeURIComponent(openItem)}`} className="text-sm text-brand-blue font-semibold hover:underline cursor-pointer">
+                                    View All
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </nav>
 
             {/* Mobile menu */}
             {mobileMenuOpen && (
@@ -174,7 +193,13 @@ function Header() {
                             </li>
                         ))}
                         <li className="py-3 flex items-center gap-2">
-                            <Link to="/register">Register</Link> | <Link to="/login">Login</Link>
+                            {user ? (
+                                <button onClick={handleLogout} className="text-red-500">Logout</button>
+                            ) : (
+                                <>
+                                    <Link to="/register">Register</Link> | <Link to="/login">Login</Link>
+                                </>
+                            )}
                         </li>
                         <li className="py-3 border-t border-gray-100">
                             <Link onClick={() => setMobileMenuOpen(false)} to="/wishlist">My Wishlist</Link>

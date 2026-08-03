@@ -1,9 +1,29 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
-import testimonials from '../data/testimonials.json'
+import api from '../api/axios.js'
 
 function Testimonials() {
+  const [testimonials, setTestimonials] = useState([])
+  const [loading, setLoading] = useState(true)
   const [current, setCurrent] = useState(0)
+
+  useEffect(() => {
+    api.get('/testimonials')
+      .then((res) => setTestimonials(res.data))
+      .catch((err) => console.error('Failed to load testimonials:', err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <section className="px-8 py-12 text-center max-w-2xl mx-auto">
+        <p className="text-gray-500">Loading testimonials...</p>
+      </section>
+    )
+  }
+
+  if (testimonials.length === 0) return null
+
   const testimonial = testimonials[current]
 
   const goPrev = () => setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length)
