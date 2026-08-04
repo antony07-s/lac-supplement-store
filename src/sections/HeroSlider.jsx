@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom'
 
-// Temporary wellness imagery. Replace these URLs with Ayusydah-owned campaign images when available.
+// Real Ayusydah product photography, sourced from Cloudinary.
 const heroImages = [
-  'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=900&q=85',
-  'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85',
-  'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=900&q=85',
-  'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=85',
+  'https://res.cloudinary.com/pggies6d/image/upload/v1785653704/ayusydah-products/blood-pressure.jpg',
+  'https://res.cloudinary.com/pggies6d/image/upload/v1785653703/ayusydah-products/ashwagandha.jpg',
+  'https://res.cloudinary.com/pggies6d/image/upload/v1785653693/ayusydah-products/curcumin.jpg',
+  'https://res.cloudinary.com/pggies6d/image/upload/v1785653669/ayusydah-products/green-spirulina-extract.jpg',
+  'https://res.cloudinary.com/pggies6d/image/upload/v1785653694/ayusydah-products/colon-cleanser.jpg',
+  'https://res.cloudinary.com/pggies6d/image/upload/v1785653692/ayusydah-products/acne-pimple.jpg',
+  'https://res.cloudinary.com/pggies6d/image/upload/v1785653680/ayusydah-products/carrot-extract.jpg',
+  'https://res.cloudinary.com/pggies6d/image/upload/v1785653687/ayusydah-products/broccoli-sprout.jpg',
 ]
 
 function ImageTicker({ direction = 'up' }) {
@@ -27,7 +31,7 @@ function ImageTicker({ direction = 'up' }) {
 function HeroSlider() {
   return (
     <section aria-label="Ayusydah wellness collection" className="relative isolate overflow-hidden bg-[#102a62]">
-      <div className="page-shell grid min-h-[500px] items-center gap-8 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.86fr)] lg:py-0">
+      <div className="page-shell grid min-h-[320px] items-center gap-8 py-10 sm:min-h-[500px] lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.86fr)] lg:py-0">
         <div className="relative z-10 py-6 text-white lg:py-14">
           <p className="eyebrow !text-[#f7e7c2]">Everyday wellness</p>
           <h1 className="mt-4 max-w-xl text-4xl font-bold tracking-[-.055em] sm:text-5xl lg:text-6xl">Small rituals. Stronger you.</h1>
@@ -36,7 +40,7 @@ function HeroSlider() {
           <p className="mt-8 text-xs font-semibold uppercase tracking-[.16em] text-white/55">Wellness, thoughtfully selected</p>
         </div>
 
-        <div className="relative hidden h-[500px] gap-3 overflow-hidden rounded-3xl border border-white/10 bg-blue-950/20 p-3 shadow-2xl shadow-blue-950/30 sm:grid sm:grid-cols-2 lg:h-[590px]">
+        <div className="relative hidden h-[590px] gap-3 overflow-hidden rounded-3xl border border-white/10 bg-blue-950/20 p-3 shadow-2xl shadow-blue-950/30 lg:grid lg:grid-cols-2">
           <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-[#102a62] to-transparent" />
           <ImageTicker direction="up" />
           <ImageTicker direction="down" />
