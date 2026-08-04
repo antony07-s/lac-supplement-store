@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext.jsx'
 import { useWishlist } from '../context/WishlistContext.jsx'
 import api from '../api/axios.js'
 import toast from 'react-hot-toast'
+import ProductCard from '../components/product/ProductCard.jsx'
 
 const localImages = { BP4: bp4 }
 
@@ -15,6 +16,8 @@ function ProductDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [quantity, setQuantity] = useState(1)
+  const [relatedProducts, setRelatedProducts] = useState([])
+  const [adding, setAdding] = useState(false)
   const { addToCart } = useCart()
   const { toggleWishlist, isInWishlist } = useWishlist()
 
@@ -40,6 +43,22 @@ function ProductDetail() {
     return () => { active = false }
   }, [id])
 
+  useEffect(() => {
+    if (!product?._id || !product.category) return undefined
+
+    let active = true
+    api.get('/products')
+      .then((res) => {
+        if (!active) return
+        setRelatedProducts(res.data
+          .filter((candidate) => candidate._id !== product._id && candidate.category === product.category)
+          .slice(0, 5))
+      })
+      .catch((err) => console.error('Failed to load related products:', err))
+
+    return () => { active = false }
+  }, [product?._id, product?.category])
+
   if (loading) {
     return <div className="page-shell section-space text-center"><p className="text-gray-500">Loading product...</p></div>
   }
@@ -63,6 +82,14 @@ function ProductDetail() {
   const canIncreaseQuantity = stockLimit === null || quantity < stockLimit
   const price = Number(product.price) || 0
   const originalPrice = Number(product.originalPrice) || 0
+
+  const handleAddToCart = () => {
+    if (adding) return
+    setAdding(true)
+    addToCart(product, quantity)
+    toast.success(`${quantity} ${product.name} added to bag`, { id: `add-${product._id}` })
+    setTimeout(() => setAdding(false), 700)
+  }
 
   return (
     <main className="page-shell section-space max-w-5xl">
@@ -101,13 +128,25 @@ function ProductDetail() {
           )}
 
           <div className="flex gap-3">
-            <button onClick={() => { addToCart(product, quantity); toast.success(`${quantity} ${product.name} added to bag`) }} disabled={isOutOfStock} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60">
-              <ShoppingCart size={18} /> Add to Cart
+            <button onClick={handleAddToCart} disabled={isOutOfStock || adding} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60">
+              <ShoppingCart size={18} /> {adding ? 'Adding...' : 'Add to Cart'}
             </button>
             <button onClick={() => toggleWishlist(product)} aria-label={`${inWishlist ? 'Remove' : 'Add'} ${product.name} ${inWishlist ? 'from' : 'to'} wishlist`} className={`rounded-full border px-5 ${inWishlist ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-500 hover:text-brand-blue'}`}><Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} /></button>
           </div>
         </div>
       </div>
+
+      {relatedProducts.length > 0 && (
+        <section className="mt-16 border-t border-stone-200 pt-12">
+          <p className="eyebrow">More to explore</p>
+          <h2 className="section-title mt-2 mb-8">You may also like</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
+            {relatedProducts.map((relatedProduct) => (
+              <ProductCard key={relatedProduct._id} product={relatedProduct} />
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   )
 }

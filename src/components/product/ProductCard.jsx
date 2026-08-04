@@ -1,6 +1,7 @@
 import { Star, Heart, ShoppingBag } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { useState } from 'react'
 import bp4 from '../../assets/BP4.png'
 import { useCart } from '../../context/CartContext.jsx'
 import { useWishlist } from '../../context/WishlistContext.jsx'
@@ -18,9 +19,14 @@ function ProductCard({ product }) {
         ? Math.round((1 - price / originalPrice) * 100)
         : null
 
+    const [adding, setAdding] = useState(false)
+
     const add = () => {
+        if (adding) return
+        setAdding(true)
         addToCart(product)
-        toast.success(`${product.name} added to bag`)
+        toast.success(`${product.name} added to bag`, { id: `add-${product._id}` })
+        setTimeout(() => setAdding(false), 700)
     }
 
     return (
@@ -80,10 +86,11 @@ function ProductCard({ product }) {
 
                 <button
                     onClick={add}
-                    className="mt-auto flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-blue px-3 text-xs font-bold text-white transition hover:bg-brand-blue-dark"
+                    disabled={adding}
+                    className="mt-auto flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-blue px-3 text-xs font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"
                 >
                     <ShoppingBag size={16} />
-                    Add to bag
+                    {adding ? 'Adding...' : 'Add to bag'}
                 </button>
             </div>
         </article>

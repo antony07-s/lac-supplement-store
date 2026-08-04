@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link, useSearchParams } from 'react-router-dom'
+import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom'
 import api from '../api/axios.js'
 import ProductCard from '../components/product/ProductCard.jsx'
 
 function ProductListing() {
     const PRODUCTS_PER_PAGE = 10
     const { category } = useParams()
+    const location = useLocation()
     const [searchParams] = useSearchParams()
     const [products, setProducts] = useState([])
     const [loading, setLoading] = useState(true)
@@ -14,6 +15,7 @@ function ProductListing() {
 
     const searchTerm = searchParams.get('q')?.trim() || ''
     const decodedCategory = category ? decodeURIComponent(category) : ''
+    const showAllProducts = location.pathname === '/products'
 
     useEffect(() => {
         api.get('/products')
@@ -27,9 +29,9 @@ function ProductListing() {
 
     const filteredProducts = searchTerm
         ? products.filter((p) => `${p.name} ${p.description} ${p.category}`.toLowerCase().includes(searchTerm.toLowerCase()))
-        : products.filter((p) => p.category === decodedCategory)
+        : showAllProducts ? products : products.filter((p) => p.category === decodedCategory)
 
-    const title = searchTerm ? `Search results for "${searchTerm}"` : decodedCategory
+    const title = searchTerm ? `Search results for "${searchTerm}"` : showAllProducts ? 'All products' : decodedCategory
     const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE))
     const page = Math.min(currentPage, totalPages)
     const paginatedProducts = filteredProducts.slice(
@@ -41,7 +43,7 @@ function ProductListing() {
         // A new search/category always starts from the first results page.
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentPage(1)
-    }, [searchTerm, decodedCategory])
+    }, [searchTerm, decodedCategory, showAllProducts])
 
     return (
         <main className="page-shell section-space">

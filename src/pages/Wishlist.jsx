@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 import { useWishlist } from '../context/WishlistContext.jsx'
 import { useCart } from '../context/CartContext.jsx'
 import bp4 from '../assets/BP4.png'
@@ -8,6 +10,15 @@ const localImages = { BP4: bp4 }
 function Wishlist() {
     const { wishlistItems, toggleWishlist } = useWishlist()
     const { addToCart } = useCart()
+    const [addingId, setAddingId] = useState(null)
+
+    const handleAddToCart = (item) => {
+        if (addingId === item._id) return
+        setAddingId(item._id)
+        addToCart(item)
+        toast.success(`${item.name} added to bag`, { id: `add-${item._id}` })
+        setTimeout(() => setAddingId(null), 700)
+    }
 
     if (wishlistItems.length === 0) {
         return (
@@ -28,6 +39,7 @@ function Wishlist() {
             <div className="space-y-4">
                 {wishlistItems.map((item) => {
                     const imageSrc = localImages[item.image] || item.image
+                    const isAdding = addingId === item._id
                     return (
                         <div key={item._id} className="flex items-center gap-4 border-b border-gray-200 pb-4">
                             <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f2f6ff] p-2">
@@ -38,10 +50,11 @@ function Wishlist() {
                                 <p className="text-sm text-brand-blue font-semibold">RM {(Number(item.price) || 0).toFixed(2)}</p>
                             </div>
                             <button
-                                onClick={() => addToCart(item)}
-                                className="text-xs bg-brand-blue text-white font-semibold px-4 py-2 rounded-full hover:bg-brand-blue-dark"
+                                onClick={() => handleAddToCart(item)}
+                                disabled={isAdding}
+                                className="text-xs bg-brand-blue text-white font-semibold px-4 py-2 rounded-full hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                Add to Cart
+                                {isAdding ? 'Adding...' : 'Add to Cart'}
                             </button>
                             <button
                                 onClick={() => toggleWishlist(item)}

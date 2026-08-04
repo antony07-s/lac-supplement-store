@@ -32,12 +32,12 @@ function Newsletter() {
           className="min-h-11 flex-1 rounded-full px-5 py-3 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-brand-gold"
         />
         <button
-          type="submit"
-          className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-gold px-6 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-        >
-          <Mail size={16} />
-          Submit
-        </button>
+  type="submit"
+  className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-brand-blue-dark hover:bg-slate-100 transition-colors"
+>
+  <Mail size={16} />
+  Submit
+</button>
       </form>
 
     </div></section>

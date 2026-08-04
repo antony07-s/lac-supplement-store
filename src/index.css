@@ -16,6 +16,7 @@
 
 * {
     box-sizing: border-box;
+    user-select: none;
 }
 
 html {
@@ -44,17 +45,12 @@ textarea {
     -webkit-tap-highlight-color: transparent;
 }
 
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-    outline: 3px solid #bd8b35;
-    outline-offset: 1px;
-}
 
 img {
     max-width: 100%;
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .page-shell {
@@ -67,7 +63,7 @@ img {
 }
 
 .eyebrow {
-    color: #a36618;
+    color: #1e3a8a;
     font-size: .72rem;
     font-weight: 800;
     letter-spacing: .14em;
@@ -142,6 +138,7 @@ img {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .hero-ticker-up,
     .hero-ticker-down {
         animation-play-state: paused;
