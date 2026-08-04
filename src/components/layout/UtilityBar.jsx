@@ -5,7 +5,7 @@ const regions = ['Malaysia', 'India']
 
 function UtilityBar() {
   const [regionOpen, setRegionOpen] = useState(false)
-  const [selectedRegion, setSelectedRegion] = useState('india')
+  const [selectedRegion, setSelectedRegion] = useState('India')
 
   return (
     <div className="border-b border-blue-950/10 bg-[#eef4ff] text-xs text-stone-600">
