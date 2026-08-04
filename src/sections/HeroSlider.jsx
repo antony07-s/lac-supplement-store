@@ -6,7 +6,7 @@ const heroImages = [
   'https://res.cloudinary.com/pggies6d/image/upload/v1785653703/ayusydah-products/ashwagandha.jpg',
   'https://res.cloudinary.com/pggies6d/image/upload/v1785653693/ayusydah-products/curcumin.jpg',
   'https://res.cloudinary.com/pggies6d/image/upload/v1785653669/ayusydah-products/green-spirulina-extract.jpg',
-  'https://res.cloudinary.com/pggies6d/image/upload/v1785653694/ayusydah-products/colon-cleanser.jpg',
+  // 'https://res.cloudinary.com/pggies6d/image/upload/v1785653694/ayusydah-products/colon-cleanser.jpg',
   'https://res.cloudinary.com/pggies6d/image/upload/v1785653692/ayusydah-products/acne-pimple.jpg',
   'https://res.cloudinary.com/pggies6d/image/upload/v1785653680/ayusydah-products/carrot-extract.jpg',
   'https://res.cloudinary.com/pggies6d/image/upload/v1785653687/ayusydah-products/broccoli-sprout.jpg',
