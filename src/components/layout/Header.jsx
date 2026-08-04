@@ -1,5 +1,5 @@
 import { User, Heart, ShoppingCart, Menu, X, Search, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { navDropdowns } from '../../data/navData.js'
 import { useCart } from '../../context/CartContext.jsx'
 import { useWishlist } from '../../context/WishlistContext.jsx'
@@ -25,6 +25,16 @@ function Header() {
     const { cartCount } = useCart()
     const { wishlistItems } = useWishlist()
     const { user, logout } = useAuth()
+    const closeTimer = useRef(null)
+
+    const handleMenuEnter = (item) => {
+        clearTimeout(closeTimer.current)
+        setOpenItem(item)
+    }
+
+    const handleMenuLeave = () => {
+        closeTimer.current = setTimeout(() => setOpenItem(null), 150)
+    }
 
     const handleLogout = () => {
         logout()
@@ -70,12 +80,21 @@ function Header() {
                         {accountMenuOpen && (
                             <div className="absolute top-full right-0 mt-3 w-56 bg-white border border-gray-200 shadow-lg rounded-lg py-3 z-50">
                                 {user ? (
-                                    <button
-                                        onClick={handleLogout}
-                                        className="block w-full text-left px-5 py-2 text-sm text-gray-700 hover:text-brand-blue hover:bg-gray-50"
-                                    >
-                                        Logout
-                                    </button>
+                                    <>
+                                        <Link
+                                            to="/my-orders"
+                                            onClick={() => setAccountMenuOpen(false)}
+                                            className="block px-5 py-2 text-sm text-gray-700 hover:text-brand-blue hover:bg-gray-50"
+                                        >
+                                            My Orders
+                                        </Link>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="block w-full text-left px-5 py-2 text-sm text-gray-700 hover:text-brand-blue hover:bg-gray-50 border-t border-gray-100 mt-1 pt-3"
+                                        >
+                                            Logout
+                                        </button>
+                                    </>
                                 ) : (
                                     <>
                                         <Link
@@ -125,10 +144,10 @@ function Header() {
                     {navItems.map((item) => (
                         <li
                             key={item}
-                            onMouseEnter={() => setOpenItem(item)}
-                            onMouseLeave={() => setOpenItem(null)}
-                            onFocus={() => setOpenItem(item)}
-                            onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpenItem(null) }}
+                            onMouseEnter={() => handleMenuEnter(item)}
+                            onMouseLeave={handleMenuLeave}
+                            onFocus={() => handleMenuEnter(item)}
+                            onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) handleMenuLeave() }}
                             className={`hover:text-brand-blue relative shrink-0 border-b-2 pb-2 transition-colors ${openItem === item ? 'border-brand-blue text-brand-blue' : 'border-transparent'
                                 }`}
                         >
@@ -141,12 +160,13 @@ function Header() {
                 </ul>
 
                 {openItem && navDropdowns[openItem] && (
-                    <div
-                        onMouseEnter={() => setOpenItem(openItem)}
-                        onMouseLeave={() => setOpenItem(null)}
-                        className="page-shell absolute left-0 right-0 top-full z-50 pt-3"
-                    >
-                        <div className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl shadow-blue-950/15 lg:p-6" style={{ width: 'min(650px, calc(100vw - 2rem))' }}>
+    <div className="page-shell absolute left-0 right-0 top-full z-50 pt-3">
+        <div
+            onMouseEnter={() => handleMenuEnter(openItem)}
+            onMouseLeave={handleMenuLeave}
+            className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl shadow-blue-950/15 lg:p-6"
+            style={{ width: 'min(650px, calc(100vw - 2rem))' }}
+        >
                             <div className="mb-3 grid grid-cols-2 gap-4 border-b border-gray-200 pb-3 sm:grid-cols-4">
                                 {navDropdowns[openItem].featured.map((f) => (
                                     <div key={f.label} className="min-w-0 text-center text-xs font-semibold leading-4 text-gray-700">
@@ -192,6 +212,11 @@ function Header() {
                                 </Link>
                             </li>
                         ))}
+                        {user && (
+                            <li className="py-3 border-b border-gray-100">
+                                <Link onClick={() => setMobileMenuOpen(false)} to="/my-orders">My Orders</Link>
+                            </li>
+                        )}
                         <li className="py-3 flex items-center gap-2">
                             {user ? (
                                 <button onClick={handleLogout} className="text-red-500">Logout</button>
