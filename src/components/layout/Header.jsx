@@ -160,13 +160,13 @@ function Header() {
                 </ul>
 
                 {openItem && navDropdowns[openItem] && (
-    <div className="page-shell absolute left-0 right-0 top-full z-50 pt-3">
-        <div
-            onMouseEnter={() => handleMenuEnter(openItem)}
-            onMouseLeave={handleMenuLeave}
-            className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl shadow-blue-950/15 lg:p-6"
-            style={{ width: 'min(650px, calc(100vw - 2rem))' }}
-        >
+                    <div className="page-shell absolute left-0 right-0 top-full z-50 pt-3">
+                        <div
+                            onMouseEnter={() => handleMenuEnter(openItem)}
+                            onMouseLeave={handleMenuLeave}
+                            className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl shadow-blue-950/15 lg:p-6"
+                            style={{ width: 'min(650px, calc(100vw - 2rem))' }}
+                        >
                             <div className="mb-3 grid grid-cols-2 gap-4 border-b border-gray-200 pb-3 sm:grid-cols-4">
                                 {navDropdowns[openItem].featured.map((f) => (
                                     <div key={f.label} className="min-w-0 text-center text-xs font-semibold leading-4 text-gray-700">

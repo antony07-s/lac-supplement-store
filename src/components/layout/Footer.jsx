@@ -10,6 +10,8 @@ const linkRoutes = {
   'Site Map': '/site-map',
   'Contact Us': '/contact-us',
   'My Wishlist': '/wishlist',
+  'My Orders': '/my-orders',
+  'Track My Orders': '/my-orders',
 };
 
 const footerColumns = [
