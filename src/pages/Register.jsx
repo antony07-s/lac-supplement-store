@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, ShieldCheck, Truck, Leaf } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../api/axios.js'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -32,83 +32,125 @@ function Register() {
     }
 
     return (
-        <div className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-gray-50">
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 md:p-10">
-                <div className="text-center mb-8">
-                    <span className="text-2xl font-bold text-brand-blue">AYUSYDAH<span className="text-brand-gold">.</span></span>
-                    <h1 className="text-xl font-semibold text-gray-800 mt-4">Create Your Account</h1>
-                    <p className="text-sm text-gray-500 mt-1">Join us for exclusive deals and faster checkout</p>
+        <div className="min-h-screen grid lg:grid-cols-2">
+            {/* Brand panel */}
+            <div className="hidden lg:flex flex-col justify-between bg-brand-blue text-white p-12 relative overflow-hidden">
+                <div className="relative z-10">
+                    <Link to="/" className="text-2xl font-bold">
+                        AYUSYDAH<span className="text-brand-gold">.</span>
+                    </Link>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="relative">
-                        <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                            type="text"
-                            name="name"
-                            value={form.name}
-                            onChange={handleChange}
-                            placeholder="Full Name"
-                            required
-                            className="w-full border border-gray-300 rounded-lg pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
-                        />
-                    </div>
-
-                    <div className="relative">
-                        <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                            type="email"
-                            name="email"
-                            value={form.email}
-                            onChange={handleChange}
-                            placeholder="Email"
-                            required
-                            className="w-full border border-gray-300 rounded-lg pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
-                        />
-                    </div>
-
-                    <div className="relative">
-                        <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                            type={showPassword ? 'text' : 'password'}
-                            name="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            placeholder="Password"
-                            required
-                            minLength={6}
-                            className="w-full border border-gray-300 rounded-lg pl-11 pr-11 py-3 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-blue"
-                        >
-                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                    </div>
-
-                    <p className="text-xs text-gray-400">
-                        By registering, you agree to our{' '}
-                        <Link to="/coming-soon" className="text-brand-blue hover:underline">Terms & Conditions</Link>
+                <div className="relative z-10 max-w-md">
+                    <h2 className="text-3xl font-bold leading-tight mb-4">
+                        Join the Ayusydah community
+                    </h2>
+                    <p className="text-white/80 text-sm leading-relaxed">
+                        Create an account for exclusive deals, faster checkout, and a wellness journey tailored to you.
                     </p>
+                </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full flex items-center justify-center gap-2 bg-brand-blue text-white font-semibold py-3 rounded-full hover:bg-brand-blue-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                        {loading && <Loader2 size={18} className="animate-spin" />}
-                        {loading ? 'Creating account...' : 'Create Account'}
-                    </button>
-                </form>
+                <div className="relative z-10 space-y-4">
+                    <div className="flex items-center gap-3 text-sm text-white/80">
+                        <ShieldCheck size={18} className="text-brand-gold shrink-0" />
+                        Secure account, encrypted checkout
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-white/80">
+                        <Truck size={18} className="text-brand-gold shrink-0" />
+                        Track every order from your dashboard
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-white/80">
+                        <Leaf size={18} className="text-brand-gold shrink-0" />
+                        100% natural, trusted wellness essentials
+                    </div>
+                </div>
 
-                <p className="text-center text-sm text-gray-500 mt-8">
-                    Already have an account?{' '}
-                    <Link to="/login" className="text-brand-blue font-semibold hover:underline">
-                        Login
+                <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-white/5" />
+                <div className="absolute top-1/3 -left-16 w-56 h-56 rounded-full bg-white/5" />
+            </div>
+
+            {/* Form panel */}
+            <div className="flex items-center justify-center px-6 py-16 bg-white">
+                <div className="w-full max-w-sm">
+                    <Link to="/" className="lg:hidden block text-center text-2xl font-bold text-brand-blue mb-8">
+                        AYUSYDAH<span className="text-brand-gold">.</span>
                     </Link>
-                </p>
+
+                    <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
+                    <p className="text-sm text-gray-500 mt-1 mb-8">Join Ayusydah in under a minute</p>
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Full name</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={form.name}
+                                onChange={handleChange}
+                                placeholder="Your name"
+                                required
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={form.email}
+                                onChange={handleChange}
+                                placeholder="you@example.com"
+                                required
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    name="password"
+                                    value={form.password}
+                                    onChange={handleChange}
+                                    placeholder="At least 6 characters"
+                                    required
+                                    minLength={6}
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-11 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-gray-400">
+                            By continuing, you agree to our{' '}
+                            <Link to="/coming-soon" className="text-brand-blue hover:underline">Terms & Conditions</Link>
+                        </p>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full flex items-center justify-center gap-2 bg-brand-blue text-white font-semibold py-2.5 rounded-lg hover:bg-brand-blue-dark transition-colors disabled:opacity-60"
+                        >
+                            {loading && <Loader2 size={16} className="animate-spin" />}
+                            {loading ? 'Creating account...' : 'Create account'}
+                        </button>
+                    </form>
+
+                    <p className="text-center text-sm text-gray-500 mt-8">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-brand-blue font-semibold hover:underline">
+                            Sign in
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
     )

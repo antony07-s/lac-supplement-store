@@ -23,6 +23,11 @@ import SiteMap from './pages/SiteMap.jsx'
 import ContactUs from './pages/ContactUs.jsx'
 import ScrollToTop from './components/ScrollToTop.jsx'
 import MyOrders from './pages/MyOrders.jsx'
+import AdminRoute from './components/admin/AdminRoute.jsx'
+import AdminDashboard from './pages/admin/AdminDashboard.jsx'
+import ManageProducts from './pages/admin/ManageProducts.jsx'
+import AddProduct from './pages/admin/AddProduct.jsx'
+import EditProduct from './pages/admin/EditProduct.jsx'
 
 function App() {
   const location = useLocation()
@@ -67,6 +72,10 @@ function App() {
         <Route path="/careers" element={<Careers />} />
         <Route path="/site-map" element={<SiteMap />} />
         <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="/admin/products" element={<AdminRoute><ManageProducts /></AdminRoute>} />
+        <Route path="/admin/products/add" element={<AdminRoute><AddProduct /></AdminRoute>} />
+        <Route path="/admin/products/edit/:id" element={<AdminRoute><EditProduct /></AdminRoute>} />
       </Routes>
 
       {/* Show footer only on normal pages */}

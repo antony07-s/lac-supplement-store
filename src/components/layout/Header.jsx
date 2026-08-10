@@ -81,6 +81,15 @@ function Header() {
                             <div className="absolute top-full right-0 mt-3 w-56 bg-white border border-gray-200 shadow-lg rounded-lg py-3 z-50">
                                 {user ? (
                                     <>
+                                        {user.isAdmin && (
+                                            <Link
+                                                to="/admin"
+                                                onClick={() => setAccountMenuOpen(false)}
+                                                className="block px-5 py-2 text-sm text-brand-blue font-semibold hover:bg-gray-50"
+                                            >
+                                                Admin Dashboard
+                                            </Link>
+                                        )}
                                         <Link
                                             to="/my-orders"
                                             onClick={() => setAccountMenuOpen(false)}
@@ -212,6 +221,11 @@ function Header() {
                                 </Link>
                             </li>
                         ))}
+                        {user?.isAdmin && (
+                            <li className="py-3 border-b border-gray-100">
+                                <Link onClick={() => setMobileMenuOpen(false)} to="/admin" className="text-brand-blue font-semibold">Admin Dashboard</Link>
+                            </li>
+                        )}
                         {user && (
                             <li className="py-3 border-b border-gray-100">
                                 <Link onClick={() => setMobileMenuOpen(false)} to="/my-orders">My Orders</Link>
