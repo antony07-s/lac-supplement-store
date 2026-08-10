@@ -35,6 +35,10 @@ function AddProduct() {
       toast.error('Please select a product image')
       return
     }
+    if (Number(form.price) < 0 || Number(form.originalPrice) < 0) {
+      toast.error('Price cannot be negative')
+      return
+    }
     setSaving(true)
     try {
       const uploadData = new FormData()
@@ -87,6 +91,7 @@ function AddProduct() {
                 onChange={handleChange}
                 step="0.01"
                 required
+                min="0"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
               />
             </div>
@@ -98,6 +103,7 @@ function AddProduct() {
                 value={form.originalPrice}
                 onChange={handleChange}
                 step="0.01"
+                min="0"
                 placeholder="Optional"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
               />

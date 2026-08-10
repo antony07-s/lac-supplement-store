@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import api from '../api/axios.js'
 import CategoryCard from '../components/category/CategoryCard.jsx'
+import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 
 function ShopByHealthGoal() {
   const [goals, setGoals] = useState([])
@@ -20,11 +21,13 @@ function ShopByHealthGoal() {
       {loading ? (
         <p className="text-gray-500">Loading...</p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-5">
+        <StaggerGrid className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-5">
           {goals.map((goal) => (
-            <CategoryCard key={goal._id} category={goal} />
+            <StaggerItem key={goal._id}>
+              <CategoryCard category={goal} />
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGrid>
       )}
     </section>
   )

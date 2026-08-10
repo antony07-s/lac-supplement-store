@@ -8,6 +8,7 @@ import Testimonials from '../sections/Testimonials.jsx'
 import Newsletter from '../sections/Newsletter.jsx'
 import { useEffect, useState } from 'react'
 import { GridSkeleton, HeroSkeleton } from '../components/ui/Shimmer.jsx'
+import Reveal from '../components/Frame/Reveal.jsx'
 
 function Home() {
     const [loading, setLoading] = useState(true)
@@ -18,11 +19,13 @@ function Home() {
             <HeroSlider />
             <FeaturedCategories />
             <BestSellers />
-            <PromoBanner
-                title="VIP Club Members Get Extra 10% Off"
-                subtitle="Join Ayusydah rewards and unlock exclusive pricing on every order"
-                ctaText="Join Now"
-            />
+            <Reveal direction="fade">
+                <PromoBanner
+                    title="VIP Club Members Get Extra 10% Off"
+                    subtitle="Join Ayusydah rewards and unlock exclusive pricing on every order"
+                    ctaText="Join Now"
+                />
+            </Reveal>
             <ShopByHealthGoal />
             <BrandsCarousel />
             <Testimonials />

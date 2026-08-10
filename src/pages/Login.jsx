@@ -18,6 +18,7 @@ function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        if (loading) return
         setLoading(true)
         try {
             const res = await api.post('/auth/login', form)
@@ -25,7 +26,7 @@ function Login() {
             toast.success(`Welcome back, ${res.data.user.name}!`)
             navigate('/')
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Login failed')
+            toast.error(err.response?.data?.message || 'Login failed', { id: 'login-error' })
         } finally {
             setLoading(false)
         }
@@ -81,7 +82,7 @@ function Login() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address <span className="text-red-500">*</span></label>
                             <input
                                 type="email"
                                 name="email"
@@ -89,13 +90,14 @@ function Login() {
                                 onChange={handleChange}
                                 placeholder="you@example.com"
                                 required
+                                autoComplete="email"
                                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                             />
                         </div>
 
                         <div>
                             <div className="flex items-center justify-between mb-1.5">
-                                <label className="block text-sm font-medium text-gray-700">Password</label>
+                                <label className="block text-sm font-medium text-gray-700">Password <span className="text-red-500">*</span></label>
                                 <Link to="/coming-soon" className="text-xs text-brand-blue hover:underline">
                                     Forgot password?
                                 </Link>
@@ -108,6 +110,7 @@ function Login() {
                                     onChange={handleChange}
                                     placeholder="••••••••"
                                     required
+                                    autoComplete="current-password"
                                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-11 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                                 />
                                 <button

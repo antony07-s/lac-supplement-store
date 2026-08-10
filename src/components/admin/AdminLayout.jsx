@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Package, PlusCircle, ArrowLeft, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Package, PlusCircle, ShoppingBag, ArrowLeft, Menu, X } from 'lucide-react'
 
 const navItems = [
   { label: 'Dashboard', to: '/admin', icon: LayoutDashboard },
   { label: 'Products', to: '/admin/products', icon: Package },
   { label: 'Add Product', to: '/admin/products/add', icon: PlusCircle },
+  { label: 'Orders', to: '/admin/orders', icon: ShoppingBag },
 ]
 
 function AdminLayout({ children, title, subtitle }) {

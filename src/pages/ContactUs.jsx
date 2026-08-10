@@ -1,18 +1,29 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { Mail, Phone, MapPin } from 'lucide-react'
+import api from '../api/axios.js'
 
 function ContactUs() {
     const [form, setForm] = useState({ name: '', email: '', message: '' })
+    const [submitting, setSubmitting] = useState(false)
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        toast.success('Message sent — demo only, no backend connected yet')
-        setForm({ name: '', email: '', message: '' })
+        if (submitting) return
+        setSubmitting(true)
+        try {
+            await api.post('/contact', form)
+            toast.success('Message sent! We\'ll get back to you soon.')
+            setForm({ name: '', email: '', message: '' })
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to send message. Try again.')
+        } finally {
+            setSubmitting(false)
+        }
     }
 
     return (
@@ -65,9 +76,10 @@ function ContactUs() {
                 />
                 <button
                     type="submit"
-                    className="w-full bg-brand-blue text-white font-semibold py-3 rounded-full hover:bg-brand-blue-dark transition-colors"
+                    disabled={submitting}
+                    className="w-full bg-brand-blue text-white font-semibold py-3 rounded-full hover:bg-brand-blue-dark transition-colors disabled:opacity-70"
                 >
-                    Send Message
+                    {submitting ? 'Sending...' : 'Send Message'}
                 </button>
             </form>
         </main>

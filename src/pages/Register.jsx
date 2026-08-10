@@ -18,6 +18,7 @@ function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        if (loading) return
         setLoading(true)
         try {
             const res = await api.post('/auth/register', form)
@@ -25,7 +26,7 @@ function Register() {
             toast.success(`Welcome, ${res.data.user.name}!`)
             navigate('/')
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Registration failed')
+            toast.error(err.response?.data?.message || 'Registration failed', { id: 'register-error' })
         } finally {
             setLoading(false)
         }
@@ -81,7 +82,7 @@ function Register() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Full name</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Full name <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 name="name"
@@ -89,12 +90,13 @@ function Register() {
                                 onChange={handleChange}
                                 placeholder="Your name"
                                 required
+                                autoComplete="name"
                                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address <span className="text-red-500">*</span></label>
                             <input
                                 type="email"
                                 name="email"
@@ -102,12 +104,13 @@ function Register() {
                                 onChange={handleChange}
                                 placeholder="you@example.com"
                                 required
+                                autoComplete="email"
                                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Password <span className="text-red-500">*</span></label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -117,6 +120,7 @@ function Register() {
                                     placeholder="At least 6 characters"
                                     required
                                     minLength={6}
+                                    autoComplete="new-password"
                                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-11 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                                 />
                                 <button

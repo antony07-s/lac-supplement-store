@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import api from '../api/axios.js'
 import CategoryCard from '../components/category/CategoryCard.jsx'
+import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 
 function FeaturedCategories() {
   const [categories, setCategories] = useState([])
@@ -20,11 +21,13 @@ function FeaturedCategories() {
       {loading ? (
         <p className="text-gray-500">Loading categories...</p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-5">
+        <StaggerGrid className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-5">
           {categories.map((cat) => (
-            <CategoryCard key={cat._id} category={cat} />
+            <StaggerItem key={cat._id}>
+              <CategoryCard category={cat} />
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGrid>
       )}
     </section>
   )
