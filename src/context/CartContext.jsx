@@ -53,12 +53,16 @@ export function CartProvider({ children }) {
   const { user } = useAuth()
   const [cartItems, setCartItems] = useState(getStoredCart)
   const hasMergedForUser = useRef(null)
+  const isFirstRun = useRef(true)
 
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems))
   }, [cartItems])
 
   useEffect(() => {
+    const wasFirstRun = isFirstRun.current
+    isFirstRun.current = false
+
     if (!user) {
       hasMergedForUser.current = null
       return
@@ -70,10 +74,9 @@ export function CartProvider({ children }) {
       .then((res) => {
         if (!active) return
         const serverItems = Array.isArray(res.data) ? res.data : []
-        setCartItems((currentLocalItems) => {
-          const merged = mergeCarts(currentLocalItems, serverItems)
-          return merged
-        })
+        setCartItems((currentLocalItems) => (
+          wasFirstRun ? serverItems : mergeCarts(currentLocalItems, serverItems)
+        ))
         hasMergedForUser.current = user.id
       })
       .catch((err) => console.error('Failed to load saved cart:', err))
@@ -96,12 +99,12 @@ export function CartProvider({ children }) {
       if (existingItem) {
         return previousItems.map((item) => item._id === product._id
           ? {
-              ...item,
-              ...product,
-              quantity: stockLimit === null
-                ? getSafeQuantity(item.quantity) + requestedQuantity
-                : Math.min(getSafeQuantity(item.quantity) + requestedQuantity, stockLimit),
-            }
+            ...item,
+            ...product,
+            quantity: stockLimit === null
+              ? getSafeQuantity(item.quantity) + requestedQuantity
+              : Math.min(getSafeQuantity(item.quantity) + requestedQuantity, stockLimit),
+          }
           : item)
       }
 
