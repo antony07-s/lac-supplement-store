@@ -30,7 +30,7 @@ function ContactUs() {
             toast.success('Thank you. Your enquiry has been sent and our team will respond shortly.')
             setForm({ name: '', email: '', subject: '', message: '' })
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to send message. Try again.')
+            toast.error(err.response?.data?.message || 'The enquiry service is taking too long. Please try again shortly.')
         } finally {
             setSubmitting(false)
         }

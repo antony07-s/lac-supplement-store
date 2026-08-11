@@ -21,7 +21,7 @@ function Newsletter() {
       toast.success(response.data.message)
       setEmail('')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Something went wrong. Try again.')
+      toast.error(err.response?.data?.message || 'The subscription service is taking too long. Please try again shortly.')
     } finally {
       setSubmitting(false)
     }
