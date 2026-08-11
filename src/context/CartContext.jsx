@@ -1,6 +1,8 @@
 /* Context providers intentionally export their consumer hook from the same module. */
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import api from '../api/axios.js'
+import { useAuth } from './AuthContext.jsx'
 
 const CartContext = createContext()
 const CART_STORAGE_KEY = 'ayusydah-cart'
@@ -32,12 +34,58 @@ const getSafePrice = (price) => {
   return Number.isFinite(parsedPrice) ? parsedPrice : 0
 }
 
+const mergeCarts = (localItems, serverItems) => {
+  const merged = [...serverItems]
+  localItems.forEach((localItem) => {
+    const existing = merged.find((item) => item._id === localItem._id)
+    if (existing) {
+      const stockLimit = getStockLimit(existing)
+      const combined = getSafeQuantity(existing.quantity) + getSafeQuantity(localItem.quantity)
+      existing.quantity = stockLimit === null ? combined : Math.min(combined, stockLimit)
+    } else {
+      merged.push(localItem)
+    }
+  })
+  return merged
+}
+
 export function CartProvider({ children }) {
+  const { user } = useAuth()
   const [cartItems, setCartItems] = useState(getStoredCart)
+  const hasMergedForUser = useRef(null)
 
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems))
   }, [cartItems])
+
+  useEffect(() => {
+    if (!user) {
+      hasMergedForUser.current = null
+      return
+    }
+    if (hasMergedForUser.current === user.id) return
+
+    let active = true
+    api.get('/cart')
+      .then((res) => {
+        if (!active) return
+        const serverItems = Array.isArray(res.data) ? res.data : []
+        setCartItems((currentLocalItems) => {
+          const merged = mergeCarts(currentLocalItems, serverItems)
+          return merged
+        })
+        hasMergedForUser.current = user.id
+      })
+      .catch((err) => console.error('Failed to load saved cart:', err))
+
+    return () => { active = false }
+  }, [user])
+
+  useEffect(() => {
+    if (!user || hasMergedForUser.current !== user.id) return
+    const items = cartItems.map((item) => ({ productId: item._id, quantity: getSafeQuantity(item.quantity) }))
+    api.put('/cart', { items }).catch((err) => console.error('Failed to sync cart:', err))
+  }, [cartItems, user])
 
   const addToCart = (product, quantity = 1) => {
     setCartItems((previousItems) => {
