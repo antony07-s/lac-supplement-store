@@ -39,20 +39,26 @@ export function WishlistProvider({ children }) {
 
   useEffect(() => {
     if (!user) {
+      if (previousUserId.current !== null) {
+        setWishlistItems([])
+        localStorage.removeItem(WISHLIST_STORAGE_KEY)
+      }
       hasLoadedForUser.current = null
+      previousUserId.current = null
       return
     }
+
     if (hasLoadedForUser.current === user.id) return
 
-    let active = true
-    const isNewLogin = previousUserId.current !== user.id
+    const isGuestToUserTransition = previousUserId.current === null
 
+    let active = true
     api.get('/wishlist')
       .then((res) => {
         if (!active) return
         const serverItems = Array.isArray(res.data) ? res.data : []
         setWishlistItems((currentLocalItems) => (
-          isNewLogin ? mergeWishlists(currentLocalItems, serverItems) : serverItems
+          isGuestToUserTransition ? mergeWishlists(currentLocalItems, serverItems) : serverItems
         ))
         hasLoadedForUser.current = user.id
         previousUserId.current = user.id
