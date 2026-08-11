@@ -53,16 +53,13 @@ export function CartProvider({ children }) {
   const { user } = useAuth()
   const [cartItems, setCartItems] = useState(getStoredCart)
   const hasMergedForUser = useRef(null)
-  const isFirstRun = useRef(true)
+  const previousUserId = useRef(user?.id ?? null)
 
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems))
   }, [cartItems])
 
   useEffect(() => {
-    const wasFirstRun = isFirstRun.current
-    isFirstRun.current = false
-
     if (!user) {
       hasMergedForUser.current = null
       return
@@ -70,14 +67,17 @@ export function CartProvider({ children }) {
     if (hasMergedForUser.current === user.id) return
 
     let active = true
+    const isNewLogin = previousUserId.current !== user.id
+
     api.get('/cart')
       .then((res) => {
         if (!active) return
         const serverItems = Array.isArray(res.data) ? res.data : []
         setCartItems((currentLocalItems) => (
-          wasFirstRun ? serverItems : mergeCarts(currentLocalItems, serverItems)
+          isNewLogin ? mergeCarts(currentLocalItems, serverItems) : serverItems
         ))
         hasMergedForUser.current = user.id
+        previousUserId.current = user.id
       })
       .catch((err) => console.error('Failed to load saved cart:', err))
 
