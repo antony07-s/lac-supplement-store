@@ -10,13 +10,13 @@ import App from './App.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <CartProvider>
-        <WishlistProvider>
-          <AuthProvider>
+      <AuthProvider>
+        <CartProvider>
+          <WishlistProvider>
             <App />
-          </AuthProvider>
-        </WishlistProvider>
-      </CartProvider>
+          </WishlistProvider>
+        </CartProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )
