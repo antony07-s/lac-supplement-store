@@ -5,12 +5,11 @@ import api from '../../api/axios.js'
 import AdminLayout from '../../components/admin/AdminLayout.jsx'
 
 const categories = [
-  'Vitamins & Supplements',
-  'Beauty & Slimming',
-  'Protein & Fitness',
-  'Food',
-  'Wellness',
-  'Sports Nutrition',
+  'Health Concerns',
+  'Ayurveda',
+  'Beauty & Hair',
+  'Food & Nutrition',
+  'Brands',
 ]
 
 function EditProduct() {
@@ -97,7 +96,7 @@ function EditProduct() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Price (RM)</label>
               <input

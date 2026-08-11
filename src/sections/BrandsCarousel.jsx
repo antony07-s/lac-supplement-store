@@ -10,7 +10,7 @@ function BrandsCarousel() {
   useEffect(() => {
     api.get('/brands')
       .then((res) => setBrands(res.data))
-      .catch((err) => console.error('Failed to load brands:', err))
+      .catch(() => setBrands([]))
       .finally(() => setLoading(false))
   }, [])
 

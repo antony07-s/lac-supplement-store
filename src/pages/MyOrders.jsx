@@ -14,7 +14,7 @@ function MyOrders() {
     }
     api.get(`/orders/user/${user.id}`)
       .then((res) => setOrders(res.data))
-      .catch((err) => console.error('Failed to load orders:', err))
+      .catch(() => setOrders([]))
       .finally(() => setLoading(false))
   }, [user])
 

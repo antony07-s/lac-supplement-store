@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Package, PlusCircle, ShoppingBag, ArrowLeft, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Package, PlusCircle, ShoppingBag, ArrowLeft, Menu } from 'lucide-react'
 
 const navItems = [
   { label: 'Dashboard', to: '/admin', icon: LayoutDashboard },
@@ -9,11 +9,8 @@ const navItems = [
   { label: 'Orders', to: '/admin/orders', icon: ShoppingBag },
 ]
 
-function AdminLayout({ children, title, subtitle }) {
-  const location = useLocation()
-  const [mobileNavOpen, setMobileNavOpen] = useState(false)
-
-  const SidebarContent = () => (
+function SidebarContent({ location, onNavigate }) {
+  return (
     <>
       <div className="px-6 py-6 border-b border-gray-800">
         <span className="text-xl font-bold text-white">AYUSYDAH<span className="text-brand-gold">.</span></span>
@@ -27,7 +24,7 @@ function AdminLayout({ children, title, subtitle }) {
             <Link
               key={to}
               to={to}
-              onClick={() => setMobileNavOpen(false)}
+              onClick={onNavigate}
               className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 active ? 'bg-brand-blue text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
               }`}
@@ -42,7 +39,7 @@ function AdminLayout({ children, title, subtitle }) {
       <div className="px-3 py-4 border-t border-gray-800">
         <Link
           to="/"
-          onClick={() => setMobileNavOpen(false)}
+          onClick={onNavigate}
           className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
         >
           <ArrowLeft size={18} />
@@ -51,12 +48,18 @@ function AdminLayout({ children, title, subtitle }) {
       </div>
     </>
   )
+}
+
+function AdminLayout({ children, title, subtitle }) {
+  const location = useLocation()
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const closeMobileNav = () => setMobileNavOpen(false)
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Desktop sidebar */}
       <aside className="w-64 bg-gray-900 text-white flex-col shrink-0 hidden md:flex">
-        <SidebarContent />
+        <SidebarContent location={location} onNavigate={closeMobileNav} />
       </aside>
 
       {/* Mobile sidebar (slide-in) */}
@@ -64,7 +67,7 @@ function AdminLayout({ children, title, subtitle }) {
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileNavOpen(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-64 bg-gray-900 text-white flex flex-col">
-            <SidebarContent />
+            <SidebarContent location={location} onNavigate={closeMobileNav} />
           </aside>
         </div>
       )}

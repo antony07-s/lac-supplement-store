@@ -24,16 +24,15 @@ function Cart() {
 
     setPlacing(true)
     try {
+      const idempotencyKey = crypto.randomUUID()
       await api.post('/orders', {
-        user: user.id,
         items: cartItems.map((item) => ({
           product: item._id,
           name: item.name,
           price: Number(item.price) || 0,
           quantity: item.quantity,
         })),
-        totalAmount: total,
-      })
+      }, { headers: { 'Idempotency-Key': idempotencyKey } })
       clearCart()
       toast.success('Order placed successfully!')
       navigate('/')
@@ -73,7 +72,7 @@ function Cart() {
                   <button type="button" onClick={() => updateCartQuantity(item._id, item.quantity + 1)} disabled={!canIncrease} aria-label={`Increase ${item.name} quantity`} className="grid h-9 w-9 place-items-center rounded-r-full text-brand-blue transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"><Plus size={15} /></button>
                 </div>
               </div>
-              <div className="flex shrink-0 flex-col items-end gap-3">
+              <div className="flex shrink-0 flex-col items-end gap-3 text-right">
                 <p className="font-semibold text-brand-blue">RM {(itemPrice * item.quantity).toFixed(2)}</p>
                 <button type="button" onClick={() => removeFromCart(item._id)} aria-label={`Remove ${item.name} from cart`} className="inline-flex items-center gap-1 text-xs font-semibold text-stone-500 hover:text-rose-600"><Trash2 size={14} /> Remove</button>
               </div>

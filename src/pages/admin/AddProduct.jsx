@@ -5,12 +5,11 @@ import api from '../../api/axios.js'
 import AdminLayout from '../../components/admin/AdminLayout.jsx'
 
 const categories = [
-  'Vitamins & Supplements',
-  'Beauty & Slimming',
-  'Protein & Fitness',
-  'Food',
-  'Wellness',
-  'Sports Nutrition',
+  'Health Concerns',
+  'Ayurveda',
+  'Beauty & Hair',
+  'Food & Nutrition',
+  'Brands',
 ]
 
 function AddProduct() {
@@ -81,7 +80,7 @@ function AddProduct() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Price (RM) <span className="text-red-500">*</span></label>
               <input
@@ -111,9 +110,10 @@ function AddProduct() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Category</label>
+            <label htmlFor="category" className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Category</label>
             <select
               name="category"
+              id="category"
               value={form.category}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"

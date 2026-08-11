@@ -23,6 +23,7 @@ import Careers from './pages/Careers.jsx'
 import SiteMap from './pages/SiteMap.jsx'
 import ContactUs from './pages/ContactUs.jsx'
 import ScrollToTop from './components/ScrollToTop.jsx'
+import Seo from './components/Seo.jsx'
 import MyOrders from './pages/MyOrders.jsx'
 import AdminRoute from './components/admin/AdminRoute.jsx'
 import AdminDashboard from './pages/admin/AdminDashboard.jsx'
@@ -41,6 +42,7 @@ function App() {
   return (
     <>
       <ScrollToTop />
+      <Seo />
 
       <Toaster position="top-center" />
 

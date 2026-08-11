@@ -17,16 +17,13 @@ function ManageOrders() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchOrders()
-  }, [])
-
-  const fetchOrders = () => {
-    setLoading(true)
+    let active = true
     api.get('/orders')
-      .then((res) => setOrders(res.data))
-      .catch(() => toast.error('Failed to load orders'))
-      .finally(() => setLoading(false))
-  }
+      .then((res) => { if (active) setOrders(res.data) })
+      .catch(() => { if (active) toast.error('Failed to load orders') })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [])
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
@@ -48,7 +45,7 @@ function ManageOrders() {
         <p className="text-gray-500">No orders yet.</p>
       ) : (
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden overflow-x-auto">
-          <table className="w-full text-sm text-left">
+          <table className="min-w-[780px] w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-500 uppercase text-xs tracking-wide">
               <tr>
                 <th className="px-5 py-4">Order</th>

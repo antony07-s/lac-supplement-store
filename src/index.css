@@ -14,9 +14,10 @@
     font-synthesis: none;
 }
 
-* {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
-    user-select: none;
 }
 
 html {
@@ -28,6 +29,10 @@ body {
     margin: 0;
     overflow-x: hidden;
     background: #f8fafc;
+}
+
+#root {
+    min-width: 0;
 }
 
 button,
@@ -49,8 +54,16 @@ textarea {
 img {
     max-width: 100%;
     -webkit-user-drag: none;
-    user-select: none;
     -webkit-user-select: none;
+}
+
+
+button,
+a,
+input,
+select,
+textarea {
+    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease, color .18s ease, transform .18s ease;
 }
 
 .page-shell {
@@ -139,6 +152,15 @@ img {
 
 @media (prefers-reduced-motion: reduce) {
 
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+    }
+
     .hero-ticker-up,
     .hero-ticker-down {
         animation-play-state: paused;
@@ -149,5 +171,11 @@ img {
 @media (max-width: 640px) {
     .page-shell {
         width: min(100% - 1.25rem, 76rem);
+    }
+
+    input,
+    select,
+    textarea {
+        max-width: 100%;
     }
 }

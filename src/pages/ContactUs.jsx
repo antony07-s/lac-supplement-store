@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin } from 'lucide-react'
 import api from '../api/axios.js'
 
 function ContactUs() {
-    const [form, setForm] = useState({ name: '', email: '', message: '' })
+    const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
     const [submitting, setSubmitting] = useState(false)
 
     const handleChange = (e) => {
@@ -14,11 +14,21 @@ function ContactUs() {
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (submitting) return
+        const normalized = {
+            name: form.name.trim(),
+            email: form.email.trim().toLowerCase(),
+            subject: form.subject.trim(),
+            message: form.message.trim(),
+        }
+        if (!normalized.name || !/^\S+@\S+\.\S+$/.test(normalized.email) || !normalized.subject || !normalized.message) {
+            toast.error('Please complete every field with valid details.')
+            return
+        }
         setSubmitting(true)
         try {
-            await api.post('/contact', form)
-            toast.success('Message sent! We\'ll get back to you soon.')
-            setForm({ name: '', email: '', message: '' })
+            await api.post('/contact', normalized)
+            toast.success('Thank you. Your enquiry has been sent and our team will respond shortly.')
+            setForm({ name: '', email: '', subject: '', message: '' })
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to send message. Try again.')
         } finally {
@@ -46,38 +56,60 @@ function ContactUs() {
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+                <label htmlFor="contact-name" className="sr-only">Name</label>
                 <input
+                    id="contact-name"
                     type="text"
                     name="name"
                     value={form.name}
                     onChange={handleChange}
                     placeholder="Your Name"
                     required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-blue"
+                    minLength="2"
+                    maxLength="100"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
                 />
+                <label htmlFor="contact-email" className="sr-only">Email</label>
                 <input
+                    id="contact-email"
                     type="email"
                     name="email"
                     value={form.email}
                     onChange={handleChange}
                     placeholder="Your Email"
                     required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-blue"
+                    maxLength="254"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
                 />
+                <label htmlFor="contact-subject" className="sr-only">Subject</label>
+                <input
+                    id="contact-subject"
+                    type="text"
+                    name="subject"
+                    value={form.subject}
+                    onChange={handleChange}
+                    placeholder="Subject"
+                    required
+                    maxLength="200"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
+                />
+                <label htmlFor="contact-message" className="sr-only">Message</label>
                 <textarea
+                    id="contact-message"
                     name="message"
                     value={form.message}
                     onChange={handleChange}
                     placeholder="Your Message"
                     required
                     rows={4}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-blue"
+                    maxLength="5000"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
                 />
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full bg-brand-blue text-white font-semibold py-3 rounded-full hover:bg-brand-blue-dark transition-colors disabled:opacity-70"
+                    className="w-full bg-brand-blue text-white font-semibold py-3 rounded-full transition duration-200 hover:-translate-y-0.5 hover:bg-brand-blue-dark disabled:opacity-70"
                 >
                     {submitting ? 'Sending...' : 'Send Message'}
                 </button>

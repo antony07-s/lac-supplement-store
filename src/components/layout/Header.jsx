@@ -1,20 +1,10 @@
 import { User, Heart, ShoppingCart, Menu, X, Search, ChevronDown } from 'lucide-react'
 import { useState, useRef } from 'react'
-import { navDropdowns } from '../../data/navData.js'
+import { navDropdowns, navigationItems } from '../../data/navData.js'
 import { useCart } from '../../context/CartContext.jsx'
 import { useWishlist } from '../../context/WishlistContext.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { Link, useNavigate } from 'react-router-dom'
-
-const navItems = [
-    'Brands',
-    'Vitamins & Supplements',
-    'Protein & Fitness',
-    'Beauty & Slimming',
-    'Food',
-    'Promotions',
-    'Health Guide',
-]
 
 function Header() {
     const [openItem, setOpenItem] = useState(null)
@@ -150,19 +140,19 @@ function Header() {
             {/* Desktop nav row */}
             <nav className="hidden border-t border-stone-100 bg-[#f7f8f4] lg:block relative">
                 <ul className="page-shell flex items-center justify-between gap-2 py-3 text-[11px] font-bold text-gray-800 whitespace-nowrap lg:gap-3 lg:text-sm">
-                    {navItems.map((item) => (
+                    {navigationItems.map((item) => (
                         <li
-                            key={item}
-                            onMouseEnter={() => handleMenuEnter(item)}
+                            key={item.label}
+                            onMouseEnter={() => navDropdowns[item.label] && handleMenuEnter(item.label)}
                             onMouseLeave={handleMenuLeave}
                             onFocus={() => handleMenuEnter(item)}
                             onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) handleMenuLeave() }}
-                            className={`hover:text-brand-blue relative shrink-0 border-b-2 pb-2 transition-colors ${openItem === item ? 'border-brand-blue text-brand-blue' : 'border-transparent'
+                            className={`hover:text-brand-blue relative shrink-0 border-b-2 pb-2 transition-colors ${openItem === item.label ? 'border-brand-blue text-brand-blue' : 'border-transparent'
                                 }`}
                         >
-                            <Link className="inline-flex items-center gap-1" to={`/category/${encodeURIComponent(item)}`}>
-                                {item}
-                                <ChevronDown aria-hidden="true" size={14} className={`transition-transform ${openItem === item ? 'rotate-180' : ''}`} />
+                            <Link className="inline-flex items-center gap-1" to={item.to}>
+                                {item.label}
+                                {navDropdowns[item.label] && <ChevronDown aria-hidden="true" size={14} className={`transition-transform ${openItem === item.label ? 'rotate-180' : ''}`} />}
                             </Link>
                         </li>
                     ))}
@@ -189,14 +179,14 @@ function Header() {
                             <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-brand-blue sm:grid-cols-3">
                                 {navDropdowns[openItem].links.map((link) => (
                                     <li key={link}>
-                                        <Link to={`/category/${encodeURIComponent(openItem)}`} className="rounded py-1 hover:underline">
+                                        <Link to={navigationItems.find((item) => item.label === openItem)?.to || '/products'} className="rounded py-1 hover:underline">
                                             {link}
                                         </Link>
                                     </li>
                                 ))}
                             </ul>
                             <div className="mt-4 pt-3 border-t border-gray-200 text-center">
-                                <Link to={`/category/${encodeURIComponent(openItem)}`} className="text-sm text-brand-blue font-semibold hover:underline cursor-pointer">
+                                <Link to={navigationItems.find((item) => item.label === openItem)?.to || '/products'} className="text-sm text-brand-blue font-semibold hover:underline cursor-pointer">
                                     View All
                                 </Link>
                             </div>
@@ -214,10 +204,10 @@ function Header() {
                         value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search products" className="mb-3 w-full rounded-full border border-gray-300 py-2 pl-4 pr-11 text-sm focus:border-brand-blue focus:outline-none"
                     /></form>
                     <ul className="flex flex-col gap-1 text-sm font-semibold text-gray-800">
-                        {navItems.map((item) => (
-                            <li key={item} className="border-b border-gray-100">
-                                <Link onClick={() => setMobileMenuOpen(false)} to={`/category/${encodeURIComponent(item)}`} className="block py-3">
-                                    {item}
+                        {navigationItems.map((item) => (
+                            <li key={item.label} className="border-b border-gray-100">
+                                <Link onClick={() => setMobileMenuOpen(false)} to={item.to} className="block py-3">
+                                    {item.label}
                                 </Link>
                             </li>
                         ))}

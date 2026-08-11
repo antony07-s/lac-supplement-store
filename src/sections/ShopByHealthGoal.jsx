@@ -10,7 +10,7 @@ function ShopByHealthGoal() {
   useEffect(() => {
     api.get('/health-goals')
       .then((res) => setGoals(res.data))
-      .catch((err) => console.error('Failed to load health goals:', err))
+      .catch(() => setGoals([]))
       .finally(() => setLoading(false))
   }, [])
 

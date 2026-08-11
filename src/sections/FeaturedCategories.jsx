@@ -10,7 +10,7 @@ function FeaturedCategories() {
   useEffect(() => {
     api.get('/categories')
       .then((res) => setCategories(res.data))
-      .catch((err) => console.error('Failed to load categories:', err))
+      .catch(() => setCategories([]))
       .finally(() => setLoading(false))
   }, [])
 

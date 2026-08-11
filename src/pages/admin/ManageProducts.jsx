@@ -10,16 +10,13 @@ function ManageProducts() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchProducts()
+    let active = true
+    api.get('/products', { params: { limit: 50 } })
+      .then((res) => { if (active) setProducts(Array.isArray(res.data) ? res.data : (res.data.products || [])) })
+      .catch(() => { if (active) toast.error('Failed to load products') })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
   }, [])
-
-  const fetchProducts = () => {
-    setLoading(true)
-    api.get('/products')
-      .then((res) => setProducts(res.data))
-      .catch(() => toast.error('Failed to load products'))
-      .finally(() => setLoading(false))
-  }
 
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return
@@ -48,7 +45,7 @@ function ManageProducts() {
         <p className="text-gray-500">Loading products...</p>
       ) : (
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <table className="w-full text-sm text-left">
+          <table className="min-w-[680px] w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-500 uppercase text-xs tracking-wide">
               <tr>
                 <th className="px-5 py-4">Product</th>

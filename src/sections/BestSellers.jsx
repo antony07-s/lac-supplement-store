@@ -10,10 +10,12 @@ function BestSellers() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get('/products')
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.error('Failed to load products:', err))
+    const controller = new AbortController()
+    api.get('/products', { params: { limit: 10 }, signal: controller.signal })
+      .then((res) => setProducts(Array.isArray(res.data) ? res.data : (res.data.products || [])))
+      .catch((err) => { if (err.code !== 'ERR_CANCELED') setProducts([]) })
       .finally(() => setLoading(false))
+    return () => controller.abort()
   }, [])
 
   return (

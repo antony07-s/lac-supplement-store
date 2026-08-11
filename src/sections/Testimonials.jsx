@@ -12,7 +12,7 @@ function Testimonials() {
   useEffect(() => {
     api.get('/testimonials')
       .then((res) => setTestimonials(res.data))
-      .catch((err) => console.error('Failed to load testimonials:', err))
+      .catch(() => setTestimonials([]))
       .finally(() => setLoading(false))
   }, [])
 

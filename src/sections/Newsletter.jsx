@@ -10,11 +10,15 @@ function Newsletter() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!email || submitting) return
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!/^\S+@\S+\.\S+$/.test(normalizedEmail) || submitting) {
+      toast.error('Enter a valid email address')
+      return
+    }
     setSubmitting(true)
     try {
-      await api.post('/newsletter', { email })
-      toast.success('Thanks for subscribing! Check your inbox soon.')
+      const response = await api.post('/newsletter', { email: normalizedEmail })
+      toast.success(response.data.message)
       setEmail('')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Something went wrong. Try again.')
@@ -41,12 +45,12 @@ function Newsletter() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
             required
-            className="min-h-11 flex-1 rounded-full px-5 py-3 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-brand-gold"
+           className="min-h-11 flex-1 rounded-full border border-transparent bg-white px-5 py-3 text-sm text-stone-800 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20"
           />
           <button
             type="submit"
             disabled={submitting}
-            className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-brand-blue-dark hover:bg-slate-100 transition-colors disabled:opacity-70"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-brand-blue-dark transition duration-200 hover:-translate-y-0.5 hover:bg-slate-100 disabled:opacity-70"
           >
             <Mail size={16} />
             {submitting ? 'Submitting...' : 'Submit'}

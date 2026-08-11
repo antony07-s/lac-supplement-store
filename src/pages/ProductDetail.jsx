@@ -35,7 +35,6 @@ function ProductDetail() {
     api.get(`/products/${id}`)
       .then((res) => { if (active) setProduct(res.data) })
       .catch((err) => {
-        console.error('Failed to load product:', err)
         if (active) {
           setProduct(null)
           setError(err.response?.status === 404 ? 'Product not found.' : 'Unable to load this product right now.')
@@ -50,14 +49,14 @@ function ProductDetail() {
     if (!product?._id || !product.category) return undefined
 
     let active = true
-    api.get('/products')
+        api.get('/products', { params: { category: product.category, limit: 6 } })
       .then((res) => {
         if (!active) return
-        setRelatedProducts(res.data
+        setRelatedProducts((Array.isArray(res.data) ? res.data : (res.data.products || []))
           .filter((candidate) => candidate._id !== product._id && candidate.category === product.category)
           .slice(0, 5))
       })
-      .catch((err) => console.error('Failed to load related products:', err))
+      .catch(() => { if (active) setRelatedProducts([]) })
 
     return () => { active = false }
   }, [product?._id, product?.category])
