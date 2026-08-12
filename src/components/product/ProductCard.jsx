@@ -45,19 +45,16 @@ function ProductCard({ product }) {
                 <Heart size={18} fill={inWishlist ? 'currentColor' : 'none'} />
             </button>
 
-            <Link
-                to={`/product/${product._id}`}
-                className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-[#f4f7fc] p-4"
-            >
-                <img
-                    src={image}
-                    alt={product.name}
-                    loading="lazy"
-                    decoding="async"
-                    onError={(event) => { event.currentTarget.style.display = 'none' }}
-                    className="h-full w-full object-contain"
-                />
-            </Link>
+           <Link to={`/product/${product._id}`} className="aspect-square w-full overflow-hidden bg-white flex items-center justify-center p-6 border-b border-stone-100">
+    <img
+        src={image}
+        alt={product.name}
+        loading="lazy"
+        decoding="async"
+        onError={(event) => { event.currentTarget.style.display = 'none' }}
+        className="h-full w-full object-contain"
+    />
+</Link>
 
             <div className="flex flex-1 flex-col px-1 pt-4">
                 <p className="text-[11px] font-bold uppercase tracking-widest text-brand-blue/65">
