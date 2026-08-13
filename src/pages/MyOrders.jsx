@@ -58,7 +58,7 @@ function MyOrders() {
   }
 
   return (
-    <div className="px-8 py-10 max-w-3xl mx-auto">
+    <div className="page-shell py-10 max-w-3xl">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">My Orders</h1>
 
       <div className="space-y-4">
@@ -81,13 +81,11 @@ function MyOrders() {
               ))}
             </div>
 
-            <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+            <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-3">
               <span className="text-xs text-gray-400">
                 {new Date(order.createdAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })}
               </span>
-              <span className="font-bold text-brand-blue">
-                RM {order.totalAmount.toFixed(2)}
-              </span>
+              <div className="flex items-center gap-3"><span className="font-bold text-brand-blue">RM {Number(order.totalAmount).toFixed(2)}</span><Link to={`/orders/${order._id}`} className="cursor-pointer text-sm font-semibold text-brand-blue hover:underline">View details</Link></div>
             </div>
           </div>
         ))}

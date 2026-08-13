@@ -45,20 +45,20 @@ function Wishlist() {
                             <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f2f6ff] p-2">
                                 {imageSrc ? <img src={imageSrc} alt={item.name} onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain" /> : <span className="text-[10px] text-stone-500">No image</span>}
                             </div>
-                            <div className="flex-1">
+                            <div className="min-w-0 flex-1">
                                 <p className="font-semibold text-gray-800">{item.name}</p>
                                 <p className="text-sm text-brand-blue font-semibold">RM {(Number(item.price) || 0).toFixed(2)}</p>
                             </div>
                             <button
                                 onClick={() => handleAddToCart(item)}
                                 disabled={isAdding}
-                                className="text-xs bg-brand-blue text-white font-semibold px-4 py-2 rounded-full hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
+                                className="cursor-pointer text-xs bg-brand-blue text-white font-semibold px-4 py-2 rounded-full hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {isAdding ? 'Adding...' : 'Add to Cart'}
                             </button>
                             <button
                                 onClick={() => toggleWishlist(item)}
-                                className="text-xs text-gray-400 hover:text-red-500"
+                                className="cursor-pointer text-xs text-gray-400 hover:text-red-500"
                             >
                                 Remove
                             </button>

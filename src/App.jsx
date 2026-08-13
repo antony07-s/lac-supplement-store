@@ -25,6 +25,8 @@ import ContactUs from './pages/ContactUs.jsx'
 import ScrollToTop from './components/ScrollToTop.jsx'
 import Seo from './components/Seo.jsx'
 import MyOrders from './pages/MyOrders.jsx'
+import OrderDetails from './pages/OrderDetails.jsx'
+import TrackOrder from './pages/TrackOrder.jsx'
 import AdminRoute from './components/admin/AdminRoute.jsx'
 import AdminDashboard from './pages/admin/AdminDashboard.jsx'
 import ManageProducts from './pages/admin/ManageProducts.jsx'
@@ -73,6 +75,8 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/my-orders" element={<MyOrders />} />
+            <Route path="/orders/:id" element={<OrderDetails />} />
+            <Route path="/track-order" element={<TrackOrder />} />
 
             {/* Authentication pages */}
             <Route path="/login" element={<Login />} />

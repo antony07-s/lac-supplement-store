@@ -39,7 +39,7 @@ function Header() {
 
     return (
         <header className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 shadow-sm backdrop-blur">
-            <div className="page-shell flex items-center justify-between gap-3 py-3 md:py-4">
+            <div className="page-shell flex items-center justify-between gap-3 py-3 pr-1 md:py-4">
                 <button
                     aria-label={mobileMenuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileMenuOpen} className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-stone-700 hover:bg-stone-100 lg:hidden"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -115,6 +115,10 @@ function Header() {
                             </div>
                         )}
                     </div>
+
+                    <Link to={user ? '/my-orders' : '/login'} aria-label={user ? 'My account' : 'Login or register'} className="flex cursor-pointer items-center text-gray-700 hover:text-brand-blue lg:hidden">
+                        <User size={22} />
+                    </Link>
 
                     <Link to="/wishlist" aria-label="Wishlist" className="flex items-center relative text-gray-700 hover:text-brand-blue">
                         <Heart size={22} />
@@ -223,7 +227,7 @@ function Header() {
                         )}
                         <li className="py-3 flex items-center gap-2">
                             {user ? (
-                                <button onClick={handleLogout} className="text-red-500">Logout</button>
+                                <button onClick={handleLogout} className="cursor-pointer text-red-500">Logout</button>
                             ) : (
                                 <>
                                     <Link to="/register">Register</Link> | <Link to="/login">Login</Link>

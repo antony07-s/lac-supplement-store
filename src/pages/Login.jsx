@@ -19,9 +19,14 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (loading) return
+        const email = form.email.trim().toLowerCase()
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !form.password) {
+            toast.error('Enter your email address and password.')
+            return
+        }
         setLoading(true)
         try {
-            const res = await api.post('/auth/login', form)
+            const res = await api.post('/auth/login', { email, password: form.password })
             login(res.data.user, res.data.token)
             toast.success(`Welcome back, ${res.data.user.name}!`)
             navigate('/')
@@ -90,6 +95,7 @@ function Login() {
                                 onChange={handleChange}
                                 placeholder="you@example.com"
                                 required
+                                maxLength={254}
                                 autoComplete="email"
                                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                             />
@@ -126,7 +132,7 @@ function Login() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex items-center justify-center gap-2 bg-brand-blue text-white font-semibold py-2.5 rounded-lg hover:bg-brand-blue-dark transition-colors disabled:opacity-60"
+                            className="w-full flex cursor-pointer items-center justify-center gap-2 bg-brand-blue text-white font-semibold py-2.5 rounded-lg hover:bg-brand-blue-dark transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {loading && <Loader2 size={16} className="animate-spin" />}
                             {loading ? 'Signing in...' : 'Sign in'}

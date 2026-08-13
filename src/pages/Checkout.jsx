@@ -33,7 +33,7 @@ function Checkout() {
     setPlacing(true)
     try {
       const idempotencyKey = crypto.randomUUID()
-      await api.post('/orders', {
+      const response = await api.post('/orders', {
         items: cartItems.map((item) => ({
           product: item._id,
           name: item.name,
@@ -44,7 +44,7 @@ function Checkout() {
       }, { headers: { 'Idempotency-Key': idempotencyKey } })
       clearCart()
       toast.success('Order placed successfully!')
-      navigate('/my-orders')
+      navigate(`/orders/${response.data._id}`)
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to place order')
     } finally {
@@ -108,7 +108,7 @@ function Checkout() {
           </div>
         </div>
 
-        <button type="submit" disabled={placing} className="w-full rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:opacity-60">
+        <button type="submit" disabled={placing} className="w-full cursor-pointer rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60">
           {placing ? 'Placing Order...' : 'Place Order'}
         </button>
       </form>

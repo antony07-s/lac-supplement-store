@@ -11,7 +11,7 @@ const linkRoutes = {
   'Contact Us': '/contact-us',
   'My Wishlist': '/wishlist',
   'My Orders': '/my-orders',
-  'Track My Orders': '/my-orders',
+  'Track My Orders': '/track-order',
 };
 
 const footerColumns = [
@@ -61,7 +61,7 @@ function Footer() {
                   <li key={link}>
                     <Link
                       to={linkRoutes[link] || '/'}
-                      className="hover:text-brand-gold"
+                      className="cursor-pointer hover:text-brand-gold"
                     >
                       {link}
                     </Link>

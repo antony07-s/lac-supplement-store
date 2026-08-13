@@ -19,9 +19,28 @@ function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (loading) return
+        const name = form.name.trim()
+        const email = form.email.trim().toLowerCase()
+        const passwordIsStrong = form.password.length >= 8
+            && /[a-z]/.test(form.password)
+            && /[A-Z]/.test(form.password)
+            && /\d/.test(form.password)
+            && /[^A-Za-z0-9]/.test(form.password)
+        if (!/^(?=.{2,100}$)[\p{L}][\p{L}\p{M}' -]*$/u.test(name)) {
+            toast.error('Enter a valid name using letters, spaces, hyphens, or apostrophes.')
+            return
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            toast.error('Enter a valid email address.')
+            return
+        }
+        if (!passwordIsStrong) {
+            toast.error('Use 8+ characters with uppercase, lowercase, a number, and a symbol.')
+            return
+        }
         setLoading(true)
         try {
-            const res = await api.post('/auth/register', form)
+            const res = await api.post('/auth/register', { name, email, password: form.password })
             login(res.data.user, res.data.token)
             toast.success(`Welcome, ${res.data.user.name}!`)
             navigate('/')
@@ -90,6 +109,9 @@ function Register() {
                                 onChange={handleChange}
                                 placeholder="Your name"
                                 required
+                                minLength={2}
+                                maxLength={100}
+                                pattern="[A-Za-zÀ-ÿ' -]+"
                                 autoComplete="name"
                                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                             />
@@ -104,6 +126,7 @@ function Register() {
                                 onChange={handleChange}
                                 placeholder="you@example.com"
                                 required
+                                maxLength={254}
                                 autoComplete="email"
                                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                             />
@@ -117,9 +140,10 @@ function Register() {
                                     name="password"
                                     value={form.password}
                                     onChange={handleChange}
-                                    placeholder="At least 6 characters"
+                                    placeholder="8+ characters, including a symbol"
                                     required
-                                    minLength={6}
+                                    minLength={8}
+                                    maxLength={128}
                                     autoComplete="new-password"
                                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-11 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                                 />
@@ -133,6 +157,7 @@ function Register() {
                             </div>
                         </div>
 
+                        <p className="text-xs text-gray-400">Use 8+ characters with uppercase, lowercase, a number, and a symbol.</p>
                         <p className="text-xs text-gray-400">
                             By continuing, you agree to our{' '}
                             <Link to="/coming-soon" className="text-brand-blue hover:underline">Terms & Conditions</Link>
@@ -141,7 +166,7 @@ function Register() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex items-center justify-center gap-2 bg-brand-blue text-white font-semibold py-2.5 rounded-lg hover:bg-brand-blue-dark transition-colors disabled:opacity-60"
+                            className="w-full flex cursor-pointer items-center justify-center gap-2 bg-brand-blue text-white font-semibold py-2.5 rounded-lg hover:bg-brand-blue-dark transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {loading && <Loader2 size={16} className="animate-spin" />}
                             {loading ? 'Creating account...' : 'Create account'}
