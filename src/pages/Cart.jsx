@@ -1,46 +1,24 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
 import { Minus, Plus, Trash2 } from 'lucide-react'
-import toast from 'react-hot-toast'
 import { useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import api from '../api/axios.js'
+import toast from 'react-hot-toast'
 import bp4 from '../assets/BP4.png'
 
 const localImages = { BP4: bp4 }
 
 function Cart() {
-  const { cartItems, clearCart, removeFromCart, updateCartQuantity, subtotal, total } = useCart()
+  const { cartItems, removeFromCart, updateCartQuantity, subtotal, total } = useCart()
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [placing, setPlacing] = useState(false)
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!user) {
       toast.error('Please login to place an order')
       navigate('/login')
       return
     }
-
-    setPlacing(true)
-    try {
-      const idempotencyKey = crypto.randomUUID()
-      await api.post('/orders', {
-        items: cartItems.map((item) => ({
-          product: item._id,
-          name: item.name,
-          price: Number(item.price) || 0,
-          quantity: item.quantity,
-        })),
-      }, { headers: { 'Idempotency-Key': idempotencyKey } })
-      clearCart()
-      toast.success('Order placed successfully!')
-      navigate('/')
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to place order')
-    } finally {
-      setPlacing(false)
-    }
+    navigate('/checkout')
   }
 
   if (cartItems.length === 0) {
@@ -85,7 +63,7 @@ function Cart() {
         <div className="flex items-center justify-between text-stone-600"><span>Subtotal</span><span>RM {subtotal.toFixed(2)}</span></div>
         <div className="flex items-center justify-between"><span className="text-lg font-bold text-gray-800">Total</span><span className="text-lg font-bold text-brand-blue">RM {total.toFixed(2)}</span></div>
       </div>
-      <button onClick={handleCheckout} disabled={placing} className="mt-6 w-full rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:opacity-60">{placing ? 'Placing Order...' : 'Proceed to Checkout'}</button>
+      <button onClick={handleCheckout} className="mt-6 w-full rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark">Proceed to Checkout</button>
     </main>
   )
 }

@@ -31,6 +31,7 @@ import ManageProducts from './pages/admin/ManageProducts.jsx'
 import AddProduct from './pages/admin/AddProduct.jsx'
 import EditProduct from './pages/admin/EditProduct.jsx'
 import ManageOrders from './pages/admin/ManageOrders.jsx'
+import Checkout from './pages/Checkout.jsx'
 
 function App() {
   const location = useLocation()
@@ -89,6 +90,7 @@ function App() {
             <Route path="/admin/products/add" element={<AdminRoute><AddProduct /></AdminRoute>} />
             <Route path="/admin/products/edit/:id" element={<AdminRoute><EditProduct /></AdminRoute>} />
             <Route path="/admin/orders" element={<AdminRoute><ManageOrders /></AdminRoute>} />
+            <Route path="/checkout" element={<Checkout />} />
           </Routes>
         </motion.div>
       </AnimatePresence>
