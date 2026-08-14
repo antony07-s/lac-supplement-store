@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import api from '../api/axios.js'
+import { getWithRetry } from '../api/axios.js'
 import CategoryCard from '../components/category/CategoryCard.jsx'
 import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 
@@ -8,7 +8,7 @@ function FeaturedCategories() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get('/categories')
+    getWithRetry('/categories')
       .then((res) => setCategories(res.data))
       .catch(() => setCategories([]))
       .finally(() => setLoading(false))
