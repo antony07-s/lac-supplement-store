@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../api/axios.js'
+import { getWithRetry } from '../api/axios.js'
 import ProductCard from '../components/product/ProductCard.jsx'
 import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 import Reveal from '../components/Frame/Reveal.jsx'
@@ -14,7 +14,7 @@ function BestSellers() {
     setLoading(true)
     setError('')
     try {
-      const res = await api.get('/products', { params: { limit: 10 }, signal })
+      const res = await getWithRetry('/products', { params: { limit: 10 }, signal })
       setProducts(Array.isArray(res.data) ? res.data : (res.data.products || []))
     } catch (err) {
       if (err.code !== 'ERR_CANCELED') {

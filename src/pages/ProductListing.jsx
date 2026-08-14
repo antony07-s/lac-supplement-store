@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom'
-import api from '../api/axios.js'
+import { getWithRetry } from '../api/axios.js'
 import ProductCard from '../components/product/ProductCard.jsx'
 
 function ProductListing() {
@@ -25,7 +25,7 @@ function ProductListing() {
         if (searchTerm) params.search = searchTerm
         else if (!showAllProducts && decodedCategory) params.category = decodedCategory
 
-        api.get('/products', { params, signal: controller.signal })
+        getWithRetry('/products', { params, signal: controller.signal })
             .then((res) => {
                 const returnedProducts = Array.isArray(res.data) ? res.data : (res.data.products || [])
                 const isLegacyResponse = Array.isArray(res.data)

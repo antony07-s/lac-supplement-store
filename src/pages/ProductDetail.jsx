@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import bp4 from '../assets/BP4.png'
 import { useCart } from '../context/CartContext.jsx'
 import { useWishlist } from '../context/WishlistContext.jsx'
-import api from '../api/axios.js'
+import { getWithRetry } from '../api/axios.js'
 import toast from 'react-hot-toast'
 import ProductCard from '../components/product/ProductCard.jsx'
 import Reveal from '../components/Frame/Reveal.jsx'
@@ -32,7 +32,7 @@ function ProductDetail() {
     setError('')
     setQuantity(1)
 
-    api.get(`/products/${id}`)
+    getWithRetry(`/products/${id}`)
       .then((res) => { if (active) setProduct(res.data) })
       .catch((err) => {
         if (active) {
@@ -49,7 +49,7 @@ function ProductDetail() {
     if (!product?._id || !product.category) return undefined
 
     let active = true
-        api.get('/products', { params: { category: product.category, limit: 6 } })
+        getWithRetry('/products', { params: { category: product.category, limit: 6 } })
       .then((res) => {
         if (!active) return
         setRelatedProducts((Array.isArray(res.data) ? res.data : (res.data.products || []))
