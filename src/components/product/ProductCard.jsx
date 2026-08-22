@@ -12,9 +12,10 @@ function ProductCard({ product }) {
     const { addToCart } = useCart()
     const { toggleWishlist, isInWishlist } = useWishlist()
     const inWishlist = isInWishlist(product._id)
-    const image = localImages[product.image] || product.image
-    const price = Number(product.price) || 0
-    const originalPrice = Number(product.originalPrice) || 0
+    const defaultVariant = Array.isArray(product.variants) ? product.variants.find((variant) => variant.isAvailable && Number(variant.stock) !== 0) || product.variants[0] : null
+    const image = localImages[defaultVariant?.image] || defaultVariant?.image || localImages[product.image] || product.image
+    const price = Number(defaultVariant?.price ?? product.price) || 0
+    const originalPrice = Number(defaultVariant?.originalPrice ?? product.originalPrice) || 0
     const discount = originalPrice > price
         ? Math.round((1 - price / originalPrice) * 100)
         : null
@@ -24,8 +25,8 @@ function ProductCard({ product }) {
     const add = () => {
         if (adding) return
         setAdding(true)
-        addToCart(product)
-        toast.success(`${product.name} added to bag`, { id: `add-${product._id}` })
+        addToCart(product, 1, defaultVariant)
+        toast.success(`${product.name}${defaultVariant ? ` — ${defaultVariant.packSize}` : ''} added to bag`, { id: `add-${product._id}-${defaultVariant?._id || 'default'}` })
         setTimeout(() => setAdding(false), 700)
     }
 

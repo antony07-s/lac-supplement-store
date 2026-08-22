@@ -37,7 +37,7 @@ const getSafePrice = (price) => {
 const mergeCarts = (localItems, serverItems) => {
   const merged = [...serverItems]
   localItems.forEach((localItem) => {
-    const existing = merged.find((item) => item._id === localItem._id)
+    const existing = merged.find((item) => item._id === localItem._id && item.variantId === localItem.variantId)
     if (existing) {
       const stockLimit = getStockLimit(existing)
       const combined = getSafeQuantity(existing.quantity) + getSafeQuantity(localItem.quantity)
@@ -103,21 +103,32 @@ export function CartProvider({ children }) {
   // otherwise we'd briefly overwrite their saved cart with an empty array.
   useEffect(() => {
     if (!user || hasLoadedForUser.current !== user.id) return
-    const items = cartItems.map((item) => ({ productId: item._id, quantity: getSafeQuantity(item.quantity) }))
+    const items = cartItems.map((item) => ({ productId: item._id, variantId: item.variantId, quantity: getSafeQuantity(item.quantity) }))
     api.put('/cart', { items }).catch((err) => console.error('Failed to sync cart:', err))
   }, [cartItems, user])
 
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = (product, quantity = 1, selectedVariant = null) => {
     setCartItems((previousItems) => {
       const requestedQuantity = getSafeQuantity(quantity)
-      const stockLimit = getStockLimit(product)
-      const existingItem = previousItems.find((item) => item._id === product._id)
+      const cartProduct = selectedVariant ? {
+        ...product,
+        variantId: selectedVariant._id,
+        packSize: selectedVariant.packSize,
+        sku: selectedVariant.sku,
+        image: selectedVariant.image || product.image,
+        price: selectedVariant.price,
+        originalPrice: selectedVariant.originalPrice ?? selectedVariant.price,
+        stock: selectedVariant.stock,
+        isAvailable: selectedVariant.isAvailable,
+      } : product
+      const stockLimit = getStockLimit(cartProduct)
+      const existingItem = previousItems.find((item) => item._id === cartProduct._id && item.variantId === cartProduct.variantId)
 
       if (existingItem) {
         return previousItems.map((item) => item._id === product._id
           ? {
               ...item,
-              ...product,
+              ...cartProduct,
               quantity: stockLimit === null
                 ? getSafeQuantity(item.quantity) + requestedQuantity
                 : Math.min(getSafeQuantity(item.quantity) + requestedQuantity, stockLimit),
@@ -127,15 +138,15 @@ export function CartProvider({ children }) {
 
       if (stockLimit === 0) return previousItems
       return [...previousItems, {
-        ...product,
+        ...cartProduct,
         quantity: stockLimit === null ? requestedQuantity : Math.min(requestedQuantity, stockLimit),
       }]
     })
   }
 
-  const updateCartQuantity = (productId, quantity) => {
+  const updateCartQuantity = (lineId, quantity) => {
     setCartItems((previousItems) => previousItems.map((item) => {
-      if (item._id !== productId) return item
+      if (getLineId(item) !== lineId) return item
       const stockLimit = getStockLimit(item)
       const requestedQuantity = getSafeQuantity(quantity)
       return {
@@ -145,8 +156,8 @@ export function CartProvider({ children }) {
     }))
   }
 
-  const removeFromCart = (productId) => {
-    setCartItems((previousItems) => previousItems.filter((item) => item._id !== productId))
+  const removeFromCart = (lineId) => {
+    setCartItems((previousItems) => previousItems.filter((item) => getLineId(item) !== lineId))
   }
 
   const clearCart = () => setCartItems([])
@@ -173,6 +184,8 @@ export function CartProvider({ children }) {
     </CartContext.Provider>
   )
 }
+
+export const getLineId = (item) => `${item._id}:${item.variantId || 'default'}`
 
 export function useCart() {
   return useContext(CartContext)

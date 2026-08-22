@@ -36,8 +36,7 @@ function Checkout() {
       const response = await api.post('/orders', {
         items: cartItems.map((item) => ({
           product: item._id,
-          name: item.name,
-          price: Number(item.price) || 0,
+          variantId: item.variantId,
           quantity: item.quantity,
         })),
         shippingAddress: form,

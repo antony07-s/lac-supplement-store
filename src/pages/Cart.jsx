@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Minus, Plus, Trash2 } from 'lucide-react'
-import { useCart } from '../context/CartContext.jsx'
+import { getLineId, useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import toast from 'react-hot-toast'
 import bp4 from '../assets/BP4.png'
@@ -30,6 +30,7 @@ function Cart() {
       <h1 className="mb-6 text-2xl font-bold text-gray-800">Your Cart</h1>
       <div className="mb-8 space-y-4">
         {cartItems.map((item) => {
+          const lineId = getLineId(item)
           const stock = Number(item.stock)
           const stockLimit = item.stock !== undefined && item.stock !== null && item.stock !== '' && Number.isFinite(stock) ? Math.max(0, Math.floor(stock)) : null
           const itemPrice = Number(item.price) || 0
@@ -37,22 +38,23 @@ function Cart() {
           const canIncrease = stockLimit === null || item.quantity < stockLimit
 
           return (
-            <div key={item._id} className="flex items-center gap-3 border-b border-gray-200 pb-4 sm:gap-4">
+            <div key={lineId} className="flex items-center gap-3 border-b border-gray-200 pb-4 sm:gap-4">
               <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f2f6ff] p-2">
                 {imageSrc ? <img src={imageSrc} alt={item.name} onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain" /> : <span className="text-xs text-stone-500">No image</span>}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-gray-800">{item.name}</p>
+                <p className="font-semibold text-gray-800">{item.name}{item.packSize ? ` — ${item.packSize}` : ''}</p>
+                {item.sku && <p className="mt-1 text-xs text-stone-500">SKU: {item.sku}</p>}
                 <p className="mt-1 text-sm text-stone-500">RM {itemPrice.toFixed(2)} each</p>
                 <div className="mt-3 inline-flex items-center rounded-full border border-stone-300 bg-white shadow-sm">
-                  <button type="button" onClick={() => updateCartQuantity(item._id, item.quantity - 1)} disabled={item.quantity === 1} aria-label={`Decrease ${item.name} quantity`} className="grid h-9 w-9 place-items-center rounded-l-full text-brand-blue transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"><Minus size={15} /></button>
+                  <button type="button" onClick={() => updateCartQuantity(lineId, item.quantity - 1)} disabled={item.quantity === 1} aria-label={`Decrease ${item.name} quantity`} className="grid h-9 w-9 place-items-center rounded-l-full text-brand-blue transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"><Minus size={15} /></button>
                   <span aria-live="polite" className="min-w-8 text-center text-sm font-bold text-stone-800">{item.quantity}</span>
-                  <button type="button" onClick={() => updateCartQuantity(item._id, item.quantity + 1)} disabled={!canIncrease} aria-label={`Increase ${item.name} quantity`} className="grid h-9 w-9 place-items-center rounded-r-full text-brand-blue transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"><Plus size={15} /></button>
+                  <button type="button" onClick={() => updateCartQuantity(lineId, item.quantity + 1)} disabled={!canIncrease} aria-label={`Increase ${item.name} quantity`} className="grid h-9 w-9 place-items-center rounded-r-full text-brand-blue transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"><Plus size={15} /></button>
                 </div>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-3 text-right">
                 <p className="font-semibold text-brand-blue">RM {(itemPrice * item.quantity).toFixed(2)}</p>
-                <button type="button" onClick={() => removeFromCart(item._id)} aria-label={`Remove ${item.name} from cart`} className="inline-flex items-center gap-1 text-xs font-semibold text-stone-500 hover:text-rose-600"><Trash2 size={14} /> Remove</button>
+                <button type="button" onClick={() => removeFromCart(lineId)} aria-label={`Remove ${item.name} from cart`} className="inline-flex items-center gap-1 text-xs font-semibold text-stone-500 hover:text-rose-600"><Trash2 size={14} /> Remove</button>
               </div>
             </div>
           )

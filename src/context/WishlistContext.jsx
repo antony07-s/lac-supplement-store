@@ -20,7 +20,7 @@ const getStoredWishlist = () => {
 const mergeWishlists = (localItems, serverItems) => {
   const merged = [...serverItems]
   localItems.forEach((localItem) => {
-    if (!merged.find((item) => item._id === localItem._id)) {
+    if (!merged.find((item) => item._id === localItem._id && item.variantId === localItem.variantId)) {
       merged.push(localItem)
     }
   })
@@ -70,22 +70,22 @@ export function WishlistProvider({ children }) {
 
   useEffect(() => {
     if (!user || hasLoadedForUser.current !== user.id) return
-    const productIds = wishlistItems.map((item) => item._id)
-    api.put('/wishlist', { productIds }).catch((err) => console.error('Failed to sync wishlist:', err))
+    const items = wishlistItems.map((item) => ({ productId: item._id, variantId: item.variantId }))
+    api.put('/wishlist', { items }).catch((err) => console.error('Failed to sync wishlist:', err))
   }, [wishlistItems, user])
 
   const toggleWishlist = (product) => {
     setWishlistItems((prev) => {
-      const exists = prev.find((item) => item._id === product._id)
+    const exists = prev.find((item) => item._id === product._id && item.variantId === product.variantId)
       if (exists) {
-        return prev.filter((item) => item._id !== product._id)
+        return prev.filter((item) => !(item._id === product._id && item.variantId === product.variantId))
       }
       return [...prev, product]
     })
   }
 
-  const isInWishlist = (productId) => {
-    return wishlistItems.some((item) => item._id === productId)
+  const isInWishlist = (productId, variantId) => {
+    return wishlistItems.some((item) => item._id === productId && item.variantId === variantId)
   }
 
   return (
