@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 const AuthContext = createContext()
 
@@ -25,6 +25,12 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('user')
     setUser(null)
   }
+
+  useEffect(() => {
+    const handleExpiredAuth = () => setUser(null)
+    window.addEventListener('ayusydah-auth-expired', handleExpiredAuth)
+    return () => window.removeEventListener('ayusydah-auth-expired', handleExpiredAuth)
+  }, [])
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

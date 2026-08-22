@@ -13,6 +13,35 @@ import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 
 const localImages = { BP4: bp4 }
 
+const descriptionHeadings = /(?:Key Benefits:|Available Sizes:|Pack Size:|Suggested Use:|How to Use:)/g
+
+const formatDescription = (description) => String(description || '')
+  .replace(/[□·]\s*/g, '\n• ')
+  .replace(/\s*(Key Benefits:|Available Sizes:|Pack Size:|Suggested Use:|How to Use:)/g, '\n$1\n')
+  .trim()
+
+function ProductDescription({ description }) {
+  const sections = formatDescription(description).split(descriptionHeadings).filter(Boolean)
+
+  return (
+    <div className="mb-8 space-y-3 text-sm leading-7 text-stone-600">
+      {sections.map((section, index) => {
+        const text = section.trim()
+        const isHeading = /^(Key Benefits:|Available Sizes:|Pack Size:|Suggested Use:|How to Use:)$/.test(text)
+        if (isHeading) {
+          return <h2 key={`${text}-${index}`} className="pt-1 text-sm font-bold text-stone-800">{text}</h2>
+        }
+        const precedingHeading = sections.slice(0, index).map((item) => item.trim()).reverse().find((item) => /^(Key Benefits:|Available Sizes:|Pack Size:|Suggested Use:|How to Use:)$/.test(item))
+        if (precedingHeading === 'Key Benefits:') {
+          const benefits = text.split('\n').map((item) => item.replace(/^•\s*/, '').trim()).filter(Boolean)
+          return <ul key={index} className="list-disc space-y-1 pl-5 marker:text-brand-blue">{benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul>
+        }
+        return <p key={index} className="whitespace-pre-line">{text}</p>
+      })}
+    </div>
+  )
+}
+
 function ProductDetail() {
   const { id } = useParams()
   const [product, setProduct] = useState(null)
@@ -119,7 +148,7 @@ function ProductDetail() {
           <p className="eyebrow mb-3">Ayusydah wellness</p><h1 className="section-title mb-3">{product.name}</h1>
           <div className="mb-4 flex items-center gap-1"><Star size={16} className="fill-brand-gold text-brand-gold" /><span className="text-sm text-gray-600">{product.rating} ({product.reviews} reviews)</span></div>
           <div className="mb-6 flex items-center gap-3"><span className="text-2xl font-bold text-brand-blue">RM {price.toFixed(2)}</span>{originalPrice > price && <span className="text-lg text-gray-400 line-through">RM {originalPrice.toFixed(2)}</span>}</div>
-          <p className="mb-8 text-sm leading-7 text-stone-600">{product.description}</p>
+          <ProductDescription description={product.description} />
 
           {variants.length > 0 && (
             <fieldset className="mb-6">

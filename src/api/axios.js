@@ -13,6 +13,18 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.dispatchEvent(new Event('ayusydah-auth-expired'))
+    }
+    return Promise.reject(error)
+  },
+)
+
 const wait = (delay, signal) => new Promise((resolve, reject) => {
   const timeout = window.setTimeout(resolve, delay)
   signal?.addEventListener('abort', () => {
