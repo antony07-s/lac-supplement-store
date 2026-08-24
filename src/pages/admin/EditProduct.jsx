@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import api from '../../api/axios.js'
 import AdminLayout from '../../components/admin/AdminLayout.jsx'
+import ProductContentFields from '../../components/admin/ProductContentFields.jsx'
 
 const categories = [
   'Health Concerns',
@@ -17,13 +18,14 @@ function EditProduct() {
   const navigate = useNavigate()
   const [form, setForm] = useState(null)
   const [imageFile, setImageFile] = useState(null)
+  const [videoFile, setVideoFile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [variants, setVariants] = useState([])
 
   useEffect(() => {
     api.get(`/products/${id}`)
-      .then((res) => { setForm(res.data); setVariants(res.data.variants || []) })
+      .then((res) => { setForm({ ...res.data, keyBenefitsText: (res.data.keyBenefits || []).join('\n') }); setVariants(res.data.variants || []) })
       .catch(() => toast.error('Failed to load product'))
       .finally(() => setLoading(false))
   }, [id])
@@ -51,6 +53,13 @@ function EditProduct() {
         })
         imageUrl = uploadRes.data.imageUrl
       }
+      let videoUrl = form.videoUrl || ''
+      if (videoFile) {
+        const uploadData = new FormData()
+        uploadData.append('video', videoFile)
+        const uploadRes = await api.post('/products/upload-video', uploadData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        videoUrl = uploadRes.data.videoUrl
+      }
 
       await api.put(`/products/${id}`, {
         name: form.name,
@@ -58,6 +67,13 @@ function EditProduct() {
         originalPrice: cleanedVariants[0]?.originalPrice ?? Number(form.originalPrice),
         category: form.category,
         description: form.description,
+        botanicalName: form.botanicalName,
+        keyBenefits: String(form.keyBenefitsText || '').split('\n').map((item) => item.trim()).filter(Boolean),
+        whyChoose: form.whyChoose,
+        suitableFor: form.suitableFor,
+        suggestedUse: form.suggestedUse,
+        disclaimer: form.disclaimer,
+        videoUrl,
         image: imageUrl,
         variants: cleanedVariants,
       })
@@ -87,8 +103,8 @@ function EditProduct() {
     )
   }
 
-  return (
-    <AdminLayout title="Edit Product" subtitle={form.name}>
+   return (
+    <AdminLayout title="Edit Product" subtitle={form.name} backTo="/admin/products">
       <div className="max-w-2xl bg-white border border-gray-200 rounded-2xl p-6 md:p-8">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
@@ -102,6 +118,9 @@ function EditProduct() {
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
           </div>
+
+          <ProductContentFields form={form} onChange={handleChange} />
+          <div><label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Upload Product Video <span className="normal-case font-normal">(optional, replaces URL)</span></label><input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={(event) => setVideoFile(event.target.files[0] || null)} className="w-full text-sm border border-dashed border-gray-300 rounded-lg px-4 py-3" /></div>
 
           <section className="rounded-xl border border-stone-200 p-4">
             <div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-sm font-bold text-stone-800">Product variants</h2><button type="button" onClick={() => setVariants((current) => [...current, { packSize: '', price: '', originalPrice: '', sku: '', stock: 0, image: '', isAvailable: true }])} className="rounded-full border border-brand-blue px-3 py-1.5 text-xs font-semibold text-brand-blue">Add variant</button></div>

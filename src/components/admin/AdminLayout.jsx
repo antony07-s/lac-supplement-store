@@ -50,7 +50,7 @@ function SidebarContent({ location, onNavigate }) {
   )
 }
 
-function AdminLayout({ children, title, subtitle }) {
+function AdminLayout({ children, title, subtitle, backTo }) {
   const location = useLocation()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const closeMobileNav = () => setMobileNavOpen(false)
@@ -81,6 +81,7 @@ function AdminLayout({ children, title, subtitle }) {
             <Menu size={22} />
           </button>
           <div className="min-w-0">
+            {backTo && <Link to={backTo} className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-stone-500 hover:text-brand-blue"><ArrowLeft size={14} /> Back</Link>}
             <h1 className="text-xl md:text-2xl font-bold text-gray-800 truncate">{title}</h1>
             {subtitle && <p className="text-sm text-gray-500 mt-1 truncate">{subtitle}</p>}
           </div>

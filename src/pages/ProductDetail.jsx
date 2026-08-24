@@ -13,33 +13,80 @@ import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 
 const localImages = { BP4: bp4 }
 
-const descriptionHeadings = /(?:Key Benefits:|Available Sizes:|Pack Size:|Suggested Use:|How to Use:)/g
+const parseDescription = (description) => {
+  const lines = String(description || '')
+    .replace(/\r/g, '')
+    .replace(/[□]/g, '•')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+  const blocks = []
 
-const formatDescription = (description) => String(description || '')
-  .replace(/[□·]\s*/g, '\n• ')
-  .replace(/\s*(Key Benefits:|Available Sizes:|Pack Size:|Suggested Use:|How to Use:)/g, '\n$1\n')
-  .trim()
+  for (let index = 0; index < lines.length;) {
+    const line = lines[index]
+    if (/^[•·-]\s*/.test(line)) {
+      const items = []
+      while (index < lines.length && /^[•·-]\s*/.test(lines[index])) {
+        items.push(lines[index].replace(/^[•·-]\s*/, '').trim())
+        index += 1
+      }
+      blocks.push({ type: 'list', items })
+      continue
+    }
+    const inlineHeading = line.match(/^(Key Benefits:|Available Sizes:|Pack Size:|Suggested Use:|How to Use:)\s*(.*)$/)
+    if (inlineHeading) {
+      blocks.push({ type: 'heading', text: inlineHeading[1] })
+      if (inlineHeading[2]) blocks.push({ type: 'paragraph', text: inlineHeading[2] })
+      index += 1
+      continue
+    }
+    blocks.push({ type: line.endsWith(':') ? 'heading' : 'paragraph', text: line.replace(/^\*\*|\*\*$/g, '') })
+    index += 1
+  }
+  return blocks
+}
+
+const renderInlineBold = (text) => {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    }
+    return part
+  })
+}
 
 function ProductDescription({ description }) {
-  const sections = formatDescription(description).split(descriptionHeadings).filter(Boolean)
+  const blocks = parseDescription(description)
 
   return (
     <div className="mb-8 space-y-3 text-sm leading-7 text-stone-600">
-      {sections.map((section, index) => {
-        const text = section.trim()
-        const isHeading = /^(Key Benefits:|Available Sizes:|Pack Size:|Suggested Use:|How to Use:)$/.test(text)
-        if (isHeading) {
-          return <h2 key={`${text}-${index}`} className="pt-1 text-sm font-bold text-stone-800">{text}</h2>
-        }
-        const precedingHeading = sections.slice(0, index).map((item) => item.trim()).reverse().find((item) => /^(Key Benefits:|Available Sizes:|Pack Size:|Suggested Use:|How to Use:)$/.test(item))
-        if (precedingHeading === 'Key Benefits:') {
-          const benefits = text.split('\n').map((item) => item.replace(/^•\s*/, '').trim()).filter(Boolean)
-          return <ul key={index} className="list-disc space-y-1 pl-5 marker:text-brand-blue">{benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul>
-        }
-        return <p key={index} className="whitespace-pre-line">{text}</p>
+      {blocks.map((block, index) => {
+        if (block.type === 'heading') return <p key={index} className="mb-1 mt-4 font-bold text-stone-800">{renderInlineBold(block.text)}</p>
+        if (block.type === 'list') return <ul key={index} className="list-disc space-y-1 pl-5 marker:text-brand-blue">{block.items.map((item) => <li key={item}>{renderInlineBold(item)}</li>)}</ul>
+        return <p key={index} className="text-stone-600">{renderInlineBold(block.text)}</p>
       })}
     </div>
   )
+}
+
+function StructuredProductContent({ product }) {
+  const benefits = Array.isArray(product.keyBenefits) ? product.keyBenefits.filter(Boolean) : []
+  const videoUrl = product.videoUrl || ''
+  const isEmbed = /(?:youtube\.com|youtu\.be|vimeo\.com)/i.test(videoUrl)
+  const embedUrl = videoUrl.includes('youtu.be/') ? `https://www.youtube.com/embed/${videoUrl.split('youtu.be/')[1].split(/[?&#]/)[0]}`
+    : videoUrl.includes('watch?v=') ? `https://www.youtube.com/embed/${videoUrl.split('watch?v=')[1].split('&')[0]}`
+      : videoUrl
+  if (!product.botanicalName && !benefits.length && !product.whyChoose && !product.suitableFor && !product.suggestedUse && !product.disclaimer && !videoUrl) return null
+  return <section className="mb-8 space-y-4 text-sm leading-7 text-stone-600">
+    {product.botanicalName && <p><strong className="text-stone-800">Botanical Name: </strong>{product.botanicalName}</p>}
+    {benefits.length > 0 && <div><h2 className="mb-1 mt-4 font-bold text-stone-800">Key Benefits:</h2><ul className="list-disc space-y-1 pl-5 marker:text-brand-blue">{benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul></div>}
+    {product.whyChoose && <div><h2 className="mb-1 mt-4 font-bold text-stone-800">Why Choose Ayusydah?</h2><p>{product.whyChoose}</p></div>}
+    {product.suitableFor && <p><strong className="text-stone-800">Suitable For: </strong>{product.suitableFor}</p>}
+    {product.suggestedUse && <div><h2 className="mb-1 mt-4 font-bold text-stone-800">Suggested Use:</h2><p>{product.suggestedUse}</p></div>}
+    {product.disclaimer && <p className="text-xs leading-6 text-stone-500">{product.disclaimer}</p>}
+    {videoUrl && <div className="pt-2"><h2 className="mb-3 font-bold text-stone-800">Product Video</h2>{isEmbed ? <iframe className="aspect-video w-full rounded-xl border border-stone-200" src={embedUrl} title={`${product.name} video`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> : <video className="aspect-video w-full rounded-xl bg-stone-900" controls preload="metadata"><source src={videoUrl} /></video>}</div>}
+  </section>
 }
 
 function ProductDetail() {
@@ -149,6 +196,7 @@ function ProductDetail() {
           <div className="mb-4 flex items-center gap-1"><Star size={16} className="fill-brand-gold text-brand-gold" /><span className="text-sm text-gray-600">{product.rating} ({product.reviews} reviews)</span></div>
           <div className="mb-6 flex items-center gap-3"><span className="text-2xl font-bold text-brand-blue">RM {price.toFixed(2)}</span>{originalPrice > price && <span className="text-lg text-gray-400 line-through">RM {originalPrice.toFixed(2)}</span>}</div>
           <ProductDescription description={product.description} />
+          <StructuredProductContent product={product} />
 
           {variants.length > 0 && (
             <fieldset className="mb-6">
