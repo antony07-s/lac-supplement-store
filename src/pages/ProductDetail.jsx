@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { Star, ShoppingCart, Heart, ChevronLeft, Minus, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -95,6 +95,7 @@ function ProductVideo({ product }) {
 
 function ProductDetail() {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -157,6 +158,8 @@ function ProductDetail() {
   }
 
   const imageSrc = localImages[product.image] || product.image
+  const requestedReturnTo = searchParams.get('returnTo')
+  const returnTo = requestedReturnTo?.startsWith('/') ? requestedReturnTo : `/category/${encodeURIComponent(product.category)}`
   const variants = Array.isArray(product.variants) ? product.variants : []
   const selectedVariant = variants.find((variant) => variant._id === selectedVariantId) || variants[0] || null
   const displayImage = localImages[selectedVariant?.image] || selectedVariant?.image || imageSrc
@@ -181,7 +184,7 @@ function ProductDetail() {
 
   return (
     <main className="page-shell section-space max-w-5xl">
-      <Link to={`/category/${encodeURIComponent(product.category)}`} className="mb-6 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-brand-blue">
+      <Link to={returnTo} className="mb-6 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-brand-blue">
         <ChevronLeft size={16} />
         Back to {product.category}
       </Link>

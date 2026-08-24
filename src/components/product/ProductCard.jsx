@@ -1,5 +1,5 @@
 import { Star, Heart, ShoppingBag } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useState } from 'react'
 import bp4 from '../../assets/BP4.png'
@@ -9,6 +9,7 @@ import { useWishlist } from '../../context/WishlistContext.jsx'
 const localImages = { BP4: bp4 }
 
 function ProductCard({ product }) {
+    const location = useLocation()
     const { addToCart } = useCart()
     const { toggleWishlist, isInWishlist } = useWishlist()
     const inWishlist = isInWishlist(product._id)
@@ -21,6 +22,7 @@ function ProductCard({ product }) {
         : null
 
     const [adding, setAdding] = useState(false)
+    const productUrl = `/product/${product._id}?returnTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`
 
     const add = () => {
         if (adding) return
@@ -46,7 +48,7 @@ function ProductCard({ product }) {
                 <Heart size={18} fill={inWishlist ? 'currentColor' : 'none'} />
             </button>
             {/* <Link to={`/product/${product._id}`} className="mt-1 line-clamp-2 text-sm font-bold leading-5 text-stone-800 hover:text-brand-blue"></Link> */}
-            <Link to={`/product/${product._id}`} className="aspect-square w-full overflow-hidden bg-white flex items-center justify-center p-6 border-b border-stone-100">
+            <Link to={productUrl} className="aspect-square w-full overflow-hidden bg-white flex items-center justify-center p-6 border-b border-stone-100">
                 <img
                     src={image}
                     alt={product.name}
@@ -62,7 +64,7 @@ function ProductCard({ product }) {
                     Ayusydah
                 </p>
 
-                <Link to={`/product/${product._id}`} className="mt-1 block h-10 overflow-hidden text-sm font-bold leading-5 text-stone-800 hover:text-brand-blue">
+                <Link to={productUrl} className="mt-1 block h-10 overflow-hidden text-sm font-bold leading-5 text-stone-800 hover:text-brand-blue">
                     {product.name}
                 </Link>
 
