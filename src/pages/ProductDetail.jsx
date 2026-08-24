@@ -12,6 +12,8 @@ import Reveal from '../components/Frame/Reveal.jsx'
 import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 
 const localImages = { BP4: bp4 }
+const sectionLabelPattern = /^(Product(?: Name)?|Botanical (?:Name|Source)|Description|Key Benefits|Suitable For|Suggested Use|Food Supplement Only|Available Sizes|Pack Size|How to Use)\s*:?[\s\u00a0]*(.*)$/i
+const whyChoosePattern = /^(Why Choose AYUSYDAH(?:\s+.+)?\??)\s*$/i
 
 const parseDescription = (description) => {
   const lines = String(description || '')
@@ -33,10 +35,23 @@ const parseDescription = (description) => {
       blocks.push({ type: 'list', items })
       continue
     }
-    const inlineHeading = line.match(/^(Key Benefits:|Available Sizes:|Pack Size:|Suggested Use:|How to Use:)\s*(.*)$/)
+    const whyChooseHeading = line.match(whyChoosePattern)
+    if (whyChooseHeading) {
+      blocks.push({ type: 'heading', text: whyChooseHeading[1] })
+      index += 1
+      continue
+    }
+    const inlineHeading = line.match(sectionLabelPattern)
     if (inlineHeading) {
       blocks.push({ type: 'heading', text: inlineHeading[1] })
       if (inlineHeading[2]) blocks.push({ type: 'paragraph', text: inlineHeading[2] })
+      index += 1
+      continue
+    }
+    const disclaimerLabel = line.match(/^(Food Supplement Only\.?)(\s+.*)?$/i)
+    if (disclaimerLabel) {
+      blocks.push({ type: 'heading', text: disclaimerLabel[1] })
+      if (disclaimerLabel[2]?.trim()) blocks.push({ type: 'paragraph', text: disclaimerLabel[2].trim() })
       index += 1
       continue
     }
@@ -70,23 +85,12 @@ function ProductDescription({ description }) {
   )
 }
 
-function StructuredProductContent({ product }) {
-  const benefits = Array.isArray(product.keyBenefits) ? product.keyBenefits.filter(Boolean) : []
+function ProductVideo({ product }) {
   const videoUrl = product.videoUrl || ''
+  if (!videoUrl) return null
   const isEmbed = /(?:youtube\.com|youtu\.be|vimeo\.com)/i.test(videoUrl)
-  const embedUrl = videoUrl.includes('youtu.be/') ? `https://www.youtube.com/embed/${videoUrl.split('youtu.be/')[1].split(/[?&#]/)[0]}`
-    : videoUrl.includes('watch?v=') ? `https://www.youtube.com/embed/${videoUrl.split('watch?v=')[1].split('&')[0]}`
-      : videoUrl
-  if (!product.botanicalName && !benefits.length && !product.whyChoose && !product.suitableFor && !product.suggestedUse && !product.disclaimer && !videoUrl) return null
-  return <section className="mb-8 space-y-4 text-sm leading-7 text-stone-600">
-    {product.botanicalName && <p><strong className="text-stone-800">Botanical Name: </strong>{product.botanicalName}</p>}
-    {benefits.length > 0 && <div><h2 className="mb-1 mt-4 font-bold text-stone-800">Key Benefits:</h2><ul className="list-disc space-y-1 pl-5 marker:text-brand-blue">{benefits.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul></div>}
-    {product.whyChoose && <div><h2 className="mb-1 mt-4 font-bold text-stone-800">Why Choose Ayusydah?</h2><p>{product.whyChoose}</p></div>}
-    {product.suitableFor && <p><strong className="text-stone-800">Suitable For: </strong>{product.suitableFor}</p>}
-    {product.suggestedUse && <div><h2 className="mb-1 mt-4 font-bold text-stone-800">Suggested Use:</h2><p>{product.suggestedUse}</p></div>}
-    {product.disclaimer && <p className="text-xs leading-6 text-stone-500">{product.disclaimer}</p>}
-    {videoUrl && <div className="pt-2"><h2 className="mb-3 font-bold text-stone-800">Product Video</h2>{isEmbed ? <iframe className="aspect-video w-full rounded-xl border border-stone-200" src={embedUrl} title={`${product.name} video`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> : <video className="aspect-video w-full rounded-xl bg-stone-900" controls preload="metadata"><source src={videoUrl} /></video>}</div>}
-  </section>
+  const embedUrl = videoUrl.includes('youtu.be/') ? `https://www.youtube.com/embed/${videoUrl.split('youtu.be/')[1].split(/[?&#]/)[0]}` : videoUrl.includes('watch?v=') ? `https://www.youtube.com/embed/${videoUrl.split('watch?v=')[1].split('&')[0]}` : videoUrl
+  return <section className="mb-8 pt-2"><h2 className="mb-3 text-sm font-bold text-stone-800">Product Video</h2>{isEmbed ? <iframe className="aspect-video w-full rounded-xl border border-stone-200" src={embedUrl} title={`${product.name} video`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> : <video className="aspect-video w-full rounded-xl bg-stone-900" controls preload="metadata"><source src={videoUrl} /></video>}</section>
 }
 
 function ProductDetail() {
@@ -196,7 +200,7 @@ function ProductDetail() {
           <div className="mb-4 flex items-center gap-1"><Star size={16} className="fill-brand-gold text-brand-gold" /><span className="text-sm text-gray-600">{product.rating} ({product.reviews} reviews)</span></div>
           <div className="mb-6 flex items-center gap-3"><span className="text-2xl font-bold text-brand-blue">RM {price.toFixed(2)}</span>{originalPrice > price && <span className="text-lg text-gray-400 line-through">RM {originalPrice.toFixed(2)}</span>}</div>
           <ProductDescription description={product.description} />
-          <StructuredProductContent product={product} />
+          <ProductVideo product={product} />
 
           {variants.length > 0 && (
             <fieldset className="mb-6">

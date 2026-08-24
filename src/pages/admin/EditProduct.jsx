@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import api from '../../api/axios.js'
 import AdminLayout from '../../components/admin/AdminLayout.jsx'
-import ProductContentFields from '../../components/admin/ProductContentFields.jsx'
 
 const categories = [
   'Health Concerns',
@@ -25,7 +24,7 @@ function EditProduct() {
 
   useEffect(() => {
     api.get(`/products/${id}`)
-      .then((res) => { setForm({ ...res.data, keyBenefitsText: (res.data.keyBenefits || []).join('\n') }); setVariants(res.data.variants || []) })
+      .then((res) => { setForm(res.data); setVariants(res.data.variants || []) })
       .catch(() => toast.error('Failed to load product'))
       .finally(() => setLoading(false))
   }, [id])
@@ -67,12 +66,6 @@ function EditProduct() {
         originalPrice: cleanedVariants[0]?.originalPrice ?? Number(form.originalPrice),
         category: form.category,
         description: form.description,
-        botanicalName: form.botanicalName,
-        keyBenefits: String(form.keyBenefitsText || '').split('\n').map((item) => item.trim()).filter(Boolean),
-        whyChoose: form.whyChoose,
-        suitableFor: form.suitableFor,
-        suggestedUse: form.suggestedUse,
-        disclaimer: form.disclaimer,
         videoUrl,
         image: imageUrl,
         variants: cleanedVariants,
@@ -119,7 +112,6 @@ function EditProduct() {
             />
           </div>
 
-          <ProductContentFields form={form} onChange={handleChange} />
           <div><label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Upload Product Video <span className="normal-case font-normal">(optional, replaces URL)</span></label><input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={(event) => setVideoFile(event.target.files[0] || null)} className="w-full text-sm border border-dashed border-gray-300 rounded-lg px-4 py-3" /></div>
 
           <section className="rounded-xl border border-stone-200 p-4">

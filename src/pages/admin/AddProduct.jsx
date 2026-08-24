@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import api from '../../api/axios.js'
 import AdminLayout from '../../components/admin/AdminLayout.jsx'
-import ProductContentFields from '../../components/admin/ProductContentFields.jsx'
 
 const categories = [
   'Health Concerns',
@@ -21,12 +20,6 @@ function AddProduct() {
     originalPrice: '',
     category: categories[0],
     description: '',
-    botanicalName: '',
-    keyBenefitsText: '',
-    whyChoose: '',
-    suitableFor: '',
-    suggestedUse: '',
-    disclaimer: '',
     videoUrl: '',
   })
   const [imageFile, setImageFile] = useState(null)
@@ -74,7 +67,6 @@ function AddProduct() {
         originalPrice: cleanedVariants[0].originalPrice,
         image: imageUrl,
         variants: cleanedVariants,
-        keyBenefits: form.keyBenefitsText.split('\n').map((item) => item.trim()).filter(Boolean),
         videoUrl,
       }
 
@@ -105,7 +97,6 @@ function AddProduct() {
             />
           </div>
 
-          <ProductContentFields form={form} onChange={handleChange} />
           <div><label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Upload Product Video <span className="normal-case font-normal">(optional, replaces URL)</span></label><input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={(event) => setVideoFile(event.target.files[0] || null)} className="w-full text-sm border border-dashed border-gray-300 rounded-lg px-4 py-3" /></div>
 
           <section className="rounded-xl border border-stone-200 p-4">

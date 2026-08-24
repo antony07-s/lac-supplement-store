@@ -7,15 +7,15 @@ function ProductListing() {
     const PRODUCTS_PER_PAGE = 10
     const { category } = useParams()
     const location = useLocation()
-    const [searchParams] = useSearchParams()
+    const [searchParams, setSearchParams] = useSearchParams()
     const [products, setProducts] = useState([])
     const [total, setTotal] = useState(0)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
-    const [currentPage, setCurrentPage] = useState(1)
     const headingRef = useRef(null)
 
     const searchTerm = searchParams.get('q')?.trim().slice(0, 100) || ''
+    const currentPage = Math.max(1, Number.parseInt(searchParams.get('page'), 10) || 1)
     const decodedCategory = category ? decodeURIComponent(category) : ''
     const showAllProducts = location.pathname === '/products'
 
@@ -46,14 +46,11 @@ function ProductListing() {
     const totalPages = Math.max(1, Math.ceil(total / PRODUCTS_PER_PAGE))
     const page = Math.min(currentPage, totalPages)
 
-    useEffect(() => {
-        // A new search/category always starts from the first results page.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setCurrentPage(1)
-    }, [searchTerm, decodedCategory, showAllProducts])
-
     const changePage = (nextPage) => {
-        setCurrentPage(nextPage)
+        const nextParams = new URLSearchParams(searchParams)
+        if (nextPage === 1) nextParams.delete('page')
+        else nextParams.set('page', String(nextPage))
+        setSearchParams(nextParams)
         headingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
 
