@@ -10,6 +10,7 @@ import toast from 'react-hot-toast'
 import ProductCard from '../components/product/ProductCard.jsx'
 import Reveal from '../components/Frame/Reveal.jsx'
 import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
+import ProductReviews from '../components/product/ProductReviews.jsx'
 
 const localImages = { BP4: bp4 }
 const sectionLabelPattern = /^(Product(?: Name)?|Botanical (?:Name|Source)|Description|Key Benefits|Suitable For|Suggested Use|Food Supplement Only|Available Sizes|Pack Size|How to Use)\s*:?[\s\u00a0]*(.*)$/i
@@ -135,6 +136,8 @@ function ProductDetail() {
   const [adding, setAdding] = useState(false)
   const { addToCart } = useCart()
   const { toggleWishlist, isInWishlist } = useWishlist()
+
+  const refreshProduct = () => getWithRetry(`/products/${id}`).then((res) => setProduct(res.data)).catch(() => {})
 
   useEffect(() => {
     let active = true
@@ -276,6 +279,8 @@ function ProductDetail() {
           </div>
         </Reveal>
       </div>
+
+      <ProductReviews productId={product._id} refreshProduct={refreshProduct} />
 
       {relatedProducts.length > 0 && (
         <section className="mt-16 border-t border-stone-200 pt-12">
