@@ -44,20 +44,20 @@ function ManageProducts() {
       {loading ? (
         <p className="text-gray-500">Loading products...</p>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <table className="min-w-[680px] w-full text-sm text-left">
+        <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white">
+          <table className="min-w-[680px] w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-500 uppercase text-xs tracking-wide">
               <tr>
                 <th className="px-5 py-4">Product</th>
                 <th className="px-5 py-4">Category</th>
                 <th className="px-5 py-4">Price</th>
-                <th className="px-5 py-4 text-right">Actions</th>
+                <th className="sticky right-0 bg-gray-50 px-5 py-4 text-right shadow-[-8px_0_12px_-12px_rgba(15,23,42,0.35)]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {products.map((product) => (
-                <tr key={product._id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-5 py-3">
+                <tr key={product._id} className="group transition-colors hover:bg-gray-50">
+                  <td className="sticky right-0 bg-white px-5 py-3 shadow-[-8px_0_12px_-12px_rgba(15,23,42,0.18)] transition-colors group-hover:bg-gray-50">
                     <div className="flex items-center gap-3">
                       <img src={product.image} alt={product.name} className="w-14 h-14 object-contain bg-gray-50 rounded-lg border border-gray-100" />
                       <span className="font-semibold text-gray-800">{product.name}</span>
@@ -73,12 +73,16 @@ function ManageProducts() {
                     <div className="flex items-center justify-end gap-2">
                       <Link
                         to={`/admin/products/edit/${product._id}`}
+                        aria-label={`Edit ${product.name}`}
+                        title={`Edit ${product.name}`}
                         className="p-2 text-gray-400 hover:text-brand-blue hover:bg-blue-50 rounded-lg transition-colors"
                       >
                         <Pencil size={16} />
                       </Link>
                       <button
                         onClick={() => handleDelete(product._id, product.name)}
+                        aria-label={`Delete ${product.name}`}
+                        title={`Delete ${product.name}`}
                         className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <Trash2 size={16} />

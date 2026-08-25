@@ -86,7 +86,7 @@ function AdminLayout({ children, title, subtitle, backTo }) {
             {subtitle && <p className="text-sm text-gray-500 mt-1 truncate">{subtitle}</p>}
           </div>
         </header>
-        <main className="p-4 md:p-10 overflow-x-auto">{children}</main>
+        <main className="min-w-0 overflow-x-hidden p-4 md:p-10">{children}</main>
       </div>
     </div>
   )

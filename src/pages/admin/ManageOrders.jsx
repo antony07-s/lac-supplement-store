@@ -83,6 +83,8 @@ function ManageOrders() {
                     <select
                       value={order.status}
                       onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                      aria-label={`Update status for order ${order._id.slice(-8).toUpperCase()}`}
+                      title="Update order status"
                       className={`text-xs font-semibold px-3 py-1.5 rounded-full border-none focus:outline-none focus:ring-2 focus:ring-brand-blue ${statusColors[order.status]}`}
                     >
                       {statusOptions.map((status) => (

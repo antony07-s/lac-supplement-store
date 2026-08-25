@@ -24,7 +24,7 @@ function AddProduct() {
   })
   const [imageFile, setImageFile] = useState(null)
   const [videoFile, setVideoFile] = useState(null)
-  const [variants, setVariants] = useState([{ packSize: '30 Capsules', price: '', originalPrice: '', sku: '', stock: '', image: '', isAvailable: true }])
+  const [variants, setVariants] = useState([])
   const [saving, setSaving] = useState(false)
 
   const handleChange = (e) => {
@@ -33,8 +33,14 @@ function AddProduct() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (Number(form.price) < 0 || Number(form.originalPrice) < 0) {
-      toast.error('Price cannot be negative')
+    const basePrice = Number(form.price)
+    if (form.price === '' || !Number.isFinite(basePrice) || basePrice < 0 || (form.originalPrice !== '' && Number(form.originalPrice) < 0)) {
+      toast.error('Enter a valid normal product price')
+      return
+    }
+    const cleanedVariants = variants.map((variant) => ({ ...variant, price: Number(variant.price), originalPrice: variant.originalPrice === '' ? Number(variant.price) : Number(variant.originalPrice), stock: Number(variant.stock) }))
+    if (cleanedVariants.some((variant) => !variant.packSize || !Number.isFinite(variant.price) || variant.price < 0 || !Number.isSafeInteger(variant.stock) || variant.stock < 0)) {
+      toast.error('Complete every variant with a pack size, price, and stock')
       return
     }
     setSaving(true)
@@ -49,25 +55,23 @@ function AddProduct() {
         imageUrl = uploadRes.data.imageUrl
       }
       let videoUrl = form.videoUrl || ''
+      let videoPublicId = ''
       if (videoFile) {
         const uploadData = new FormData()
         uploadData.append('video', videoFile)
         const uploadRes = await api.post('/products/upload-video', uploadData, { headers: { 'Content-Type': 'multipart/form-data' } })
         videoUrl = uploadRes.data.videoUrl
+        videoPublicId = uploadRes.data.videoPublicId || ''
       }
 
-      const cleanedVariants = variants.map((variant) => ({ ...variant, price: Number(variant.price), originalPrice: Number(variant.originalPrice) || Number(variant.price), stock: Number(variant.stock) }))
-      if (cleanedVariants.some((variant) => !variant.packSize || !Number.isFinite(variant.price) || variant.price < 0 || !Number.isSafeInteger(variant.stock) || variant.stock < 0)) {
-        toast.error('Complete every variant with a pack size, price, and stock')
-        return
-      }
       const productData = {
         ...form,
-        price: cleanedVariants[0].price,
-        originalPrice: cleanedVariants[0].originalPrice,
+        price: basePrice,
+        originalPrice: form.originalPrice === '' ? basePrice : Number(form.originalPrice),
         image: imageUrl,
         variants: cleanedVariants,
         videoUrl,
+        videoPublicId,
       }
 
       await api.post('/products', productData)
@@ -98,6 +102,7 @@ function AddProduct() {
           </div>
 
           <div><label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Upload Product Video <span className="normal-case font-normal">(optional, replaces URL)</span></label><input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={(event) => setVideoFile(event.target.files[0] || null)} className="w-full text-sm border border-dashed border-gray-300 rounded-lg px-4 py-3" /></div>
+          <div><label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Product Video URL <span className="normal-case font-normal">(optional)</span></label><input type="url" name="videoUrl" value={form.videoUrl} onChange={handleChange} placeholder="https://..." className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm" /></div>
 
           <section className="rounded-xl border border-stone-200 p-4">
             <div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-sm font-bold text-stone-800">Product variants</h2><button type="button" onClick={() => setVariants((current) => [...current, { packSize: '', price: '', originalPrice: '', sku: '', stock: '', image: '', isAvailable: true }])} className="rounded-full border border-brand-blue px-3 py-1.5 text-xs font-semibold text-brand-blue">Add variant</button></div>
@@ -120,6 +125,7 @@ function AddProduct() {
                 onChange={handleChange}
                 step="0.01"
                 min="0"
+                required
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
               />
             </div>

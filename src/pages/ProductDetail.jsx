@@ -1,5 +1,5 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Star, ShoppingCart, Heart, ChevronLeft, Minus, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import bp4 from '../assets/BP4.png'
@@ -85,12 +85,42 @@ function ProductDescription({ description }) {
   )
 }
 
+function AutoPlayProductVideo({ videoUrl }) {
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        video.play().catch(() => {})
+      } else {
+        video.pause()
+      }
+    }, { threshold: 0.6 })
+
+    observer.observe(video)
+    return () => {
+      observer.disconnect()
+      video.pause()
+    }
+  }, [videoUrl])
+
+  return (
+    <video ref={videoRef} className="aspect-video w-full rounded-xl bg-stone-900" controls muted playsInline preload="metadata">
+      <source src={videoUrl} />
+      Your browser does not support product videos.
+    </video>
+  )
+}
+
 function ProductVideo({ product }) {
   const videoUrl = product.videoUrl || ''
   if (!videoUrl) return null
   const isEmbed = /(?:youtube\.com|youtu\.be|vimeo\.com)/i.test(videoUrl)
   const embedUrl = videoUrl.includes('youtu.be/') ? `https://www.youtube.com/embed/${videoUrl.split('youtu.be/')[1].split(/[?&#]/)[0]}` : videoUrl.includes('watch?v=') ? `https://www.youtube.com/embed/${videoUrl.split('watch?v=')[1].split('&')[0]}` : videoUrl
-  return <section className="mb-8 pt-2"><h2 className="mb-3 text-sm font-bold text-stone-800">Product Video</h2>{isEmbed ? <iframe className="aspect-video w-full rounded-xl border border-stone-200" src={embedUrl} title={`${product.name} video`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> : <video className="aspect-video w-full rounded-xl bg-stone-900" controls preload="metadata"><source src={videoUrl} /></video>}</section>
+  return <section className="mb-8 pt-2"><h2 className="mb-3 text-sm font-bold text-stone-800">Product Video</h2>{isEmbed ? <iframe className="aspect-video w-full rounded-xl border border-stone-200" src={embedUrl} title={`${product.name} video`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> : <AutoPlayProductVideo videoUrl={videoUrl} />}</section>
 }
 
 function ProductDetail() {

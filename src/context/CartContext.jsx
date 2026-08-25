@@ -125,7 +125,7 @@ export function CartProvider({ children }) {
       const existingItem = previousItems.find((item) => item._id === cartProduct._id && item.variantId === cartProduct.variantId)
 
       if (existingItem) {
-        return previousItems.map((item) => item._id === product._id
+        return previousItems.map((item) => item._id === cartProduct._id && item.variantId === cartProduct.variantId
           ? {
               ...item,
               ...cartProduct,
