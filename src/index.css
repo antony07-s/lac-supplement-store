@@ -142,7 +142,7 @@ textarea {
 
 .hero-ticker-up,
 .hero-ticker-down {
-    animation-duration: 24s;
+    animation-duration: 40s;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
 }
@@ -166,10 +166,23 @@ textarea {
         transition-duration: .01ms !important;
     }
 
-    .hero-ticker-up,
+    /* .hero-ticker-up,
     .hero-ticker-down {
         animation-play-state: paused;
-    }
+    } */
+     .hero-ticker-up {
+    animation-name: hero-ticker-up;
+    animation-duration: 40s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+.hero-ticker-down {
+    animation-name: hero-ticker-down;
+    animation-duration: 45s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
 
 }
 
