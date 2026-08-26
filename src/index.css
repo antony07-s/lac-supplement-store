@@ -142,7 +142,7 @@ textarea {
 
 .hero-ticker-up,
 .hero-ticker-down {
-    animation-duration: 40s;
+    animation-duration: 60s;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
 }
@@ -172,14 +172,14 @@ textarea {
     } */
      .hero-ticker-up {
     animation-name: hero-ticker-up;
-    animation-duration: 40s;
+    animation-duration: 60s;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
 }
 
 .hero-ticker-down {
     animation-name: hero-ticker-down;
-    animation-duration: 45s;
+    animation-duration: 65s;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
 }
