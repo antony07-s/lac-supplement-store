@@ -27,6 +27,16 @@ const parseDescription = (description) => {
 
   for (let index = 0; index < lines.length;) {
     const line = lines[index]
+    // Admin product descriptions use the solid-circle character (●).
+    if (/^[\u25CF\u2022\u00B7]\s*/.test(line)) {
+      const items = []
+      while (index < lines.length && /^[\u25CF\u2022\u00B7]\s*/.test(lines[index])) {
+        items.push(lines[index].replace(/^[\u25CF\u2022\u00B7]\s*/, '').trim())
+        index += 1
+      }
+      blocks.push({ type: 'list', items })
+      continue
+    }
     if (/^[•·-]\s*/.test(line)) {
       const items = []
       while (index < lines.length && /^[•·-]\s*/.test(lines[index])) {
@@ -72,6 +82,14 @@ const renderInlineBold = (text) => {
   })
 }
 
+const renderBulletItem = (text) => {
+  // Product copy commonly uses “Heading – supporting text” in its bullet points.
+  // Keep the benefit heading prominent without making the whole sentence bold.
+  const match = text.match(/^(.+?\s*[–—-])\s+(.+)$/)
+  if (!match) return renderInlineBold(text)
+  return <><strong>{renderInlineBold(match[1])}</strong> {renderInlineBold(match[2])}</>
+}
+
 function ProductDescription({ description }) {
   const blocks = parseDescription(description)
 
@@ -79,7 +97,7 @@ function ProductDescription({ description }) {
     <div className="mb-8 space-y-3 text-sm leading-7 text-stone-600">
       {blocks.map((block, index) => {
         if (block.type === 'heading') return <p key={index} className="mb-1 mt-4 font-bold text-stone-800">{renderInlineBold(block.text)}</p>
-        if (block.type === 'list') return <ul key={index} className="list-disc space-y-1 pl-5 marker:text-brand-blue">{block.items.map((item) => <li key={item}>{renderInlineBold(item)}</li>)}</ul>
+        if (block.type === 'list') return <ul key={index} className="list-disc space-y-1 pl-5 marker:text-brand-blue">{block.items.map((item) => <li key={item}>{renderBulletItem(item)}</li>)}</ul>
         return <p key={index} className="text-stone-600">{renderInlineBold(block.text)}</p>
       })}
     </div>

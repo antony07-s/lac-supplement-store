@@ -22,6 +22,7 @@ function EditProduct() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [variants, setVariants] = useState([])
+  const [healthGoals, setHealthGoals] = useState([])
 
   useEffect(() => {
     api.get(`/products/${id}`)
@@ -29,6 +30,8 @@ function EditProduct() {
       .catch(() => toast.error('Failed to load product'))
       .finally(() => setLoading(false))
   }, [id])
+
+  useEffect(() => { api.get('/health-goals').then((res) => setHealthGoals(res.data)).catch(() => toast.error('Unable to load health goals')) }, [])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -73,6 +76,7 @@ function EditProduct() {
         price: basePrice,
         originalPrice: form.originalPrice === '' ? basePrice : Number(form.originalPrice),
         category: form.category,
+        healthGoals: form.healthGoals || [],
         description: form.description,
         videoUrl,
         videoPublicId,
@@ -157,6 +161,14 @@ function EditProduct() {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Health goals</label>
+            <div className="grid grid-cols-2 gap-2 rounded-lg border border-gray-200 p-3 sm:grid-cols-3">
+              {healthGoals.map((goal) => <label key={goal._id} className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={(form.healthGoals || []).includes(goal.name)} onChange={(event) => setForm((current) => ({ ...current, healthGoals: event.target.checked ? [...(current.healthGoals || []), goal.name] : (current.healthGoals || []).filter((name) => name !== goal.name) }))} />{goal.name}</label>)}
+            </div>
+            <p className="mt-1 text-xs text-gray-500">Select only goals directly supported by this product’s description.</p>
           </div>
 
           <div>

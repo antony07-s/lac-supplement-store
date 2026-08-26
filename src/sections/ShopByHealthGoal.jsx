@@ -24,7 +24,7 @@ function ShopByHealthGoal() {
         <StaggerGrid className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-5">
           {goals.map((goal) => (
             <StaggerItem key={goal._id}>
-              <CategoryCard category={goal} />
+              <CategoryCard category={goal} to={`/products?healthGoal=${encodeURIComponent(goal.name)}`} />
             </StaggerItem>
           ))}
         </StaggerGrid>

@@ -1,21 +1,28 @@
 import { User, Heart, ShoppingCart, Menu, X, Search, ChevronDown } from 'lucide-react'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { navDropdowns, navigationItems } from '../../data/navData.js'
 import { useCart } from '../../context/CartContext.jsx'
 import { useWishlist } from '../../context/WishlistContext.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { Link, useNavigate } from 'react-router-dom'
+import api from '../../api/axios.js'
 
 function Header() {
     const [openItem, setOpenItem] = useState(null)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [accountMenuOpen, setAccountMenuOpen] = useState(false)
     const [query, setQuery] = useState('')
+    const [healthGoals, setHealthGoals] = useState([])
     const navigate = useNavigate()
     const { cartCount } = useCart()
     const { wishlistItems } = useWishlist()
     const { user, logout } = useAuth()
     const closeTimer = useRef(null)
+    const dropdowns = { ...navDropdowns, 'HEALTH CONCERNS': { featured: healthGoals.slice(0, 4).map((name) => ({ label: name })), links: healthGoals } }
+
+    useEffect(() => {
+        api.get('/health-goals').then((res) => setHealthGoals(res.data.map((goal) => goal.name))).catch(() => setHealthGoals([]))
+    }, [])
 
     const handleMenuEnter = (item) => {
         clearTimeout(closeTimer.current)
@@ -147,22 +154,22 @@ function Header() {
                     {navigationItems.map((item) => (
                         <li
                             key={item.label}
-                            onMouseEnter={() => navDropdowns[item.label] && handleMenuEnter(item.label)}
+                            onMouseEnter={() => dropdowns[item.label] && handleMenuEnter(item.label)}
                             onMouseLeave={handleMenuLeave}
-                            onFocus={() => handleMenuEnter(item)}
+                            onFocus={() => handleMenuEnter(item.label)}
                             onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) handleMenuLeave() }}
                             className={`hover:text-brand-blue relative shrink-0 border-b-2 pb-2 transition-colors ${openItem === item.label ? 'border-brand-blue text-brand-blue' : 'border-transparent'
                                 }`}
                         >
                             <Link className="inline-flex items-center gap-1" to={item.to}>
                                 {item.label}
-                                {navDropdowns[item.label] && <ChevronDown aria-hidden="true" size={14} className={`transition-transform ${openItem === item.label ? 'rotate-180' : ''}`} />}
+                                {dropdowns[item.label] && <ChevronDown aria-hidden="true" size={14} className={`transition-transform ${openItem === item.label ? 'rotate-180' : ''}`} />}
                             </Link>
                         </li>
                     ))}
                 </ul>
 
-                {openItem && navDropdowns[openItem] && (
+                {openItem && dropdowns[openItem] && (
                     <div className="page-shell absolute left-0 right-0 top-full z-50 pt-3">
                         <div
                             onMouseEnter={() => handleMenuEnter(openItem)}
@@ -171,7 +178,7 @@ function Header() {
                             style={{ width: 'min(650px, calc(100vw - 2rem))' }}
                         >
                             <div className="mb-3 grid grid-cols-2 gap-4 border-b border-gray-200 pb-3 sm:grid-cols-4">
-                                {navDropdowns[openItem].featured.map((f) => (
+                                {dropdowns[openItem].featured.map((f) => (
                                     <div key={f.label} className="min-w-0 text-center text-xs font-semibold leading-4 text-gray-700">
                                         <span aria-hidden="true" className="mx-auto mb-2 grid h-14 w-14 place-items-center rounded-full bg-[#edf4ff] text-lg font-extrabold text-brand-blue">
                                             {f.label.charAt(0)}
@@ -181,9 +188,9 @@ function Header() {
                                 ))}
                             </div>
                             <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-brand-blue sm:grid-cols-3">
-                                {navDropdowns[openItem].links.map((link) => (
+                                {dropdowns[openItem].links.map((link) => (
                                     <li key={link}>
-                                        <Link to={navigationItems.find((item) => item.label === openItem)?.to || '/products'} className="rounded py-1 hover:underline">
+                                        <Link to={`/products?healthGoal=${encodeURIComponent(link)}`} className="rounded py-1 hover:underline">
                                             {link}
                                         </Link>
                                     </li>

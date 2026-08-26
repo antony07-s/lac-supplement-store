@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-function CategoryCard({ category }) {
+function CategoryCard({ category, to }) {
   return (
     <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.25, ease: 'easeOut' }}>
-      <Link to={`/category/${encodeURIComponent(category.name)}`} className="group block min-w-0 text-center">
+      <Link to={to || `/category/${encodeURIComponent(category.name)}`} className="group block min-w-0 text-center">
         <div className="overflow-hidden rounded-2xl bg-stone-100 shadow-sm transition duration-300 group-hover:shadow-lg">
           <img
             src={category.image}

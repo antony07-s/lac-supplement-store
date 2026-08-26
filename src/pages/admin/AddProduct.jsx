@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import api from '../../api/axios.js'
@@ -21,11 +21,15 @@ function AddProduct() {
     category: categories[0],
     description: '',
     videoUrl: '',
+    healthGoals: [],
   })
+  const [healthGoals, setHealthGoals] = useState([])
   const [imageFile, setImageFile] = useState(null)
   const [videoFile, setVideoFile] = useState(null)
   const [variants, setVariants] = useState([])
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => { api.get('/health-goals').then((res) => setHealthGoals(res.data)).catch(() => toast.error('Unable to load health goals')) }, [])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -142,6 +146,14 @@ function AddProduct() {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Health goals</label>
+            <div className="grid grid-cols-2 gap-2 rounded-lg border border-gray-200 p-3 sm:grid-cols-3">
+              {healthGoals.map((goal) => <label key={goal._id} className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={form.healthGoals.includes(goal.name)} onChange={(event) => setForm((current) => ({ ...current, healthGoals: event.target.checked ? [...current.healthGoals, goal.name] : current.healthGoals.filter((name) => name !== goal.name) }))} />{goal.name}</label>)}
+            </div>
+            <p className="mt-1 text-xs text-gray-500">Select only goals directly supported by this product’s description.</p>
           </div>
 
           <div>

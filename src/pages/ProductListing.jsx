@@ -15,6 +15,7 @@ function ProductListing() {
     const headingRef = useRef(null)
 
     const searchTerm = searchParams.get('q')?.trim().slice(0, 100) || ''
+    const healthGoal = searchParams.get('healthGoal')?.trim().slice(0, 100) || ''
     const currentPage = Math.max(1, Number.parseInt(searchParams.get('page'), 10) || 1)
     const decodedCategory = category ? decodeURIComponent(category) : ''
     const showAllProducts = location.pathname === '/products'
@@ -23,6 +24,7 @@ function ProductListing() {
         const controller = new AbortController()
         const params = { page: currentPage, limit: PRODUCTS_PER_PAGE }
         if (searchTerm) params.search = searchTerm
+        else if (healthGoal) params.healthGoal = healthGoal
         else if (!showAllProducts && decodedCategory) params.category = decodedCategory
 
         getWithRetry('/products', { params, signal: controller.signal })
@@ -40,9 +42,9 @@ function ProductListing() {
             })
             .finally(() => setLoading(false))
         return () => controller.abort()
-    }, [currentPage, decodedCategory, searchTerm, showAllProducts])
+    }, [currentPage, decodedCategory, healthGoal, searchTerm, showAllProducts])
 
-    const title = searchTerm ? `Search results for "${searchTerm}"` : showAllProducts ? 'All products' : decodedCategory
+    const title = searchTerm ? `Search results for "${searchTerm}"` : healthGoal ? healthGoal : showAllProducts ? 'All products' : decodedCategory
     const totalPages = Math.max(1, Math.ceil(total / PRODUCTS_PER_PAGE))
     const page = Math.min(currentPage, totalPages)
 
