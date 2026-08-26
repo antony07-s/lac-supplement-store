@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 // Real Ayusydah product photography, sourced from Cloudinary.
@@ -6,7 +7,7 @@ const heroImages = [
   'https://res.cloudinary.com/pggies6d/image/upload/v1787569813/ayusydah-products/pumpkinseed.jpg',
   'https://res.cloudinary.com/pggies6d/image/upload/v1787569777/ayusydah-products/prostate.jpg',
   'https://res.cloudinary.com/pggies6d/image/upload/v1787569737/ayusydah-products/probiotics.jpg',
-  ' https://res.cloudinary.com/pggies6d/image/upload/v1787569709/ayusydah-products/piles.jpg',
+  'https://res.cloudinary.com/pggies6d/image/upload/v1787569709/ayusydah-products/piles.jpg',
   'https://res.cloudinary.com/pggies6d/image/upload/v1787569676/ayusydah-products/mokkirattai.jpg',
   'https://res.cloudinary.com/pggies6d/image/upload/v1787569630/ayusydah-products/memorybooster.jpg',
   'https://res.cloudinary.com/pggies6d/image/upload/v1787569083/ayusydah-products/liver.jpg',
@@ -44,15 +45,36 @@ const heroImages = [
   'https://res.cloudinary.com/pggies6d/image/upload/v1785653667/ayusydah-products/grape-seed-extract.jpg'
 ]
 
-function ImageTicker({ direction = 'up' }) {
-  const images = [...heroImages, ...heroImages]
+const optimizedImage = (url, width) => url.trim().replace('/upload/', `/upload/f_auto,q_auto,dpr_auto,c_fill,w_${width}/`)
+
+function HeroImage({ image, priority = false }) {
+  const src = optimizedImage(image, 520)
+  return <img
+    src={src}
+    srcSet={`${optimizedImage(image, 320)} 320w, ${optimizedImage(image, 520)} 520w, ${optimizedImage(image, 720)} 720w`}
+    sizes="(max-width: 1023px) 0px, 250px"
+    alt=""
+    loading={priority ? 'eager' : 'lazy'}
+    fetchPriority={priority ? 'high' : 'auto'}
+    decoding="async"
+    className="aspect-[4/5] w-full object-cover"
+  />
+}
+
+function ImageTicker({ direction = 'up', startIndex = 0 }) {
+  // Keep only the currently visible product image and its next two neighbours
+  // in the DOM. The old implementation created 160 images on first render.
+  const imageWindow = useMemo(() => Array.from({ length: 3 }, (_, offset) => heroImages[(startIndex + offset) % heroImages.length]), [startIndex])
+  // The repeated nodes make the CSS loop seamless; they reuse the same URLs,
+  // so there are still only three unique image downloads per column.
+  const images = [...imageWindow, ...imageWindow]
 
   return (
     <div className="min-w-0 overflow-hidden">
-      <div className={direction === 'up' ? 'hero-ticker-up space-y-3' : 'hero-ticker-down space-y-3'}>
+      <div key={startIndex} className={direction === 'up' ? 'hero-ticker-up space-y-3' : 'hero-ticker-down space-y-3'}>
         {images.map((image, index) => (
           <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl bg-blue-100 shadow-lg shadow-blue-950/10">
-            <img src={image} alt="" loading="lazy" className="aspect-[4/5] w-full object-cover" />
+            <HeroImage image={image} priority={index === 0} />
           </div>
         ))}
       </div>
@@ -61,6 +83,15 @@ function ImageTicker({ direction = 'up' }) {
 }
 
 function HeroSlider() {
+  const [startIndex, setStartIndex] = useState(0)
+
+  useEffect(() => {
+    // Advance the small image window only after its animation loop. This avoids
+    // downloading the full catalog while retaining the moving product display.
+    const timer = window.setInterval(() => setStartIndex((current) => (current + 3) % heroImages.length), 32000)
+    return () => window.clearInterval(timer)
+  }, [])
+
   return (
     <section aria-label="Ayusydah wellness collection" className="relative isolate overflow-hidden bg-[#102a62]">
       <div className="page-shell grid min-h-[320px] items-center gap-8 py-10 sm:min-h-[500px] lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.86fr)] lg:py-0">
@@ -74,8 +105,8 @@ function HeroSlider() {
 
         <div className="relative hidden h-[590px] gap-3 overflow-hidden rounded-3xl border border-white/10 bg-blue-950/20 p-3 shadow-2xl shadow-blue-950/30 lg:grid lg:grid-cols-2">
           <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-[#102a62] to-transparent" />
-          <ImageTicker direction="up" />
-          <ImageTicker direction="down" />
+          <ImageTicker direction="up" startIndex={startIndex} />
+          <ImageTicker direction="down" startIndex={(startIndex + 3) % heroImages.length} />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-[#102a62] to-transparent" />
         </div>
       </div>

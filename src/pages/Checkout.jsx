@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useCart } from '../context/CartContext.jsx'
@@ -10,6 +10,8 @@ function Checkout() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [placing, setPlacing] = useState(false)
+  const placingRef = useRef(false)
+  const idempotencyKeyRef = useRef(null)
   const [form, setForm] = useState({
     fullName: user?.name || '',
     phone: '',
@@ -19,6 +21,8 @@ function Checkout() {
     state: '',
     postcode: '',
   })
+
+  if (!user) return <Navigate to="/login?returnTo=/checkout" replace />
 
   if (cartItems.length === 0) {
     return <Navigate to="/cart" replace />
@@ -30,9 +34,11 @@ function Checkout() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (placingRef.current) return
+    placingRef.current = true
     setPlacing(true)
     try {
-      const idempotencyKey = crypto.randomUUID()
+      idempotencyKeyRef.current ||= window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`
       const response = await api.post('/orders', {
         items: cartItems.map((item) => ({
           product: item._id,
@@ -40,13 +46,15 @@ function Checkout() {
           quantity: item.quantity,
         })),
         shippingAddress: form,
-      }, { headers: { 'Idempotency-Key': idempotencyKey } })
+      }, { headers: { 'Idempotency-Key': idempotencyKeyRef.current } })
       clearCart()
+      idempotencyKeyRef.current = null
       toast.success('Order placed successfully!')
       navigate(`/orders/${response.data._id}`)
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to place order')
     } finally {
+      placingRef.current = false
       setPlacing(false)
     }
   }

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { showCartToast } from '../utils/cartToast.js'
 import { useWishlist } from '../context/WishlistContext.jsx'
 import { useCart } from '../context/CartContext.jsx'
 import bp4 from '../assets/BP4.png'
@@ -16,7 +16,7 @@ function Wishlist() {
         if (addingId === item._id) return
         setAddingId(item._id)
         addToCart(item)
-        toast.success(`${item.name} added to bag`, { id: `add-${item._id}` })
+        showCartToast(`${item.name} added to bag`)
         setTimeout(() => setAddingId(null), 700)
     }
 

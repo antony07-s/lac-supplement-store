@@ -1,10 +1,10 @@
 import { Star, Heart, ShoppingBag } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import toast from 'react-hot-toast'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import bp4 from '../../assets/BP4.png'
 import { useCart } from '../../context/CartContext.jsx'
 import { useWishlist } from '../../context/WishlistContext.jsx'
+import { showCartToast } from '../../utils/cartToast.js'
 
 const localImages = { BP4: bp4 }
 
@@ -22,14 +22,16 @@ function ProductCard({ product }) {
         : null
 
     const [adding, setAdding] = useState(false)
+    const addingRef = useRef(false)
     const productUrl = `/product/${product._id}?returnTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`
 
     const add = () => {
-        if (adding) return
+        if (addingRef.current) return
+        addingRef.current = true
         setAdding(true)
         addToCart(product, 1, defaultVariant)
-        toast.success(`${product.name}${defaultVariant ? ` — ${defaultVariant.packSize}` : ''} added to bag`, { id: `add-${product._id}-${defaultVariant?._id || 'default'}` })
-        setTimeout(() => setAdding(false), 700)
+        showCartToast(`${product.name}${defaultVariant ? ` — ${defaultVariant.packSize}` : ''} added to bag`)
+        setTimeout(() => { addingRef.current = false; setAdding(false) }, 700)
     }
 
     return (

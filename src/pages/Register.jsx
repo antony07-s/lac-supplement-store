@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff, Loader2, ShieldCheck, Truck, Leaf } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../api/axios.js'
@@ -10,6 +10,7 @@ function Register() {
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
     const { login } = useAuth()
 
     const handleChange = (e) => {
@@ -43,7 +44,8 @@ function Register() {
             const res = await api.post('/auth/register', { name, email, password: form.password })
             login(res.data.user, res.data.token)
             toast.success(`Welcome, ${res.data.user.name}!`)
-            navigate('/')
+            const returnTo = searchParams.get('returnTo')
+            navigate(returnTo?.startsWith('/') ? returnTo : '/')
         } catch (err) {
             toast.error(err.response?.data?.message || 'Registration failed', { id: 'register-error' })
         } finally {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff, Loader2, ShieldCheck, Truck, Leaf } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../api/axios.js'
@@ -10,6 +10,7 @@ function Login() {
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
     const { login } = useAuth()
 
     const handleChange = (e) => {
@@ -29,7 +30,8 @@ function Login() {
             const res = await api.post('/auth/login', { email, password: form.password })
             login(res.data.user, res.data.token)
             toast.success(`Welcome back, ${res.data.user.name}!`)
-            navigate('/')
+            const returnTo = searchParams.get('returnTo')
+            navigate(returnTo?.startsWith('/') ? returnTo : '/')
         } catch (err) {
             toast.error(err.response?.data?.message || 'Login failed', { id: 'login-error' })
         } finally {
@@ -104,7 +106,7 @@ function Login() {
                         <div>
                             <div className="flex items-center justify-between mb-1.5">
                                 <label className="block text-sm font-medium text-gray-700">Password <span className="text-red-500">*</span></label>
-                                <Link to="/coming-soon" className="text-xs text-brand-blue hover:underline">
+                                <Link to="/forgot-password" className="text-xs text-brand-blue hover:underline">
                                     Forgot password?
                                 </Link>
                             </div>

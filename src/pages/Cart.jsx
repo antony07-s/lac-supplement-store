@@ -15,7 +15,7 @@ function Cart() {
   const handleCheckout = () => {
     if (!user) {
       toast.error('Please login to place an order')
-      navigate('/login')
+      navigate('/login?returnTo=%2Fcheckout')
       return
     }
     navigate('/checkout')

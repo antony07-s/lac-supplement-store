@@ -6,7 +6,7 @@ import bp4 from '../assets/BP4.png'
 import { useCart } from '../context/CartContext.jsx'
 import { useWishlist } from '../context/WishlistContext.jsx'
 import { getWithRetry } from '../api/axios.js'
-import toast from 'react-hot-toast'
+import { showCartToast } from '../utils/cartToast.js'
 import ProductCard from '../components/product/ProductCard.jsx'
 import Reveal from '../components/Frame/Reveal.jsx'
 import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
@@ -152,6 +152,7 @@ function ProductDetail() {
   const [selectedVariantId, setSelectedVariantId] = useState('')
   const [relatedProducts, setRelatedProducts] = useState([])
   const [adding, setAdding] = useState(false)
+  const addingRef = useRef(false)
   const { addToCart } = useCart()
   const { toggleWishlist, isInWishlist } = useWishlist()
 
@@ -226,11 +227,12 @@ function ProductDetail() {
   const originalPrice = Number(sellable.originalPrice) || 0
 
   const handleAddToCart = () => {
-    if (adding) return
+    if (addingRef.current) return
+    addingRef.current = true
     setAdding(true)
     addToCart(product, quantity, selectedVariant)
-    toast.success(`${quantity} ${product.name}${selectedVariant ? ` — ${selectedVariant.packSize}` : ''} added to bag`, { id: `add-${product._id}-${selectedVariant?._id || 'default'}` })
-    setTimeout(() => setAdding(false), 700)
+    showCartToast(`${quantity} ${product.name}${selectedVariant ? ` — ${selectedVariant.packSize}` : ''} added to bag`)
+    setTimeout(() => { addingRef.current = false; setAdding(false) }, 700)
   }
 
   return (
