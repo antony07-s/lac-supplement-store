@@ -97,7 +97,7 @@ function HeroSlider() {
       <div className="page-shell grid min-h-[320px] items-center gap-8 py-10 sm:min-h-[500px] lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.86fr)] lg:py-0">
         <div className="relative z-10 py-6 text-white lg:py-14">
           <p className="eyebrow !text-[#f7e7c2]">Everyday wellness</p>
-          <h1 className="mt-4 max-w-xl text-4xl font-bold tracking-[-.055em] sm:text-5xl lg:text-6xl">Small rituals. Stronger you.</h1>
+          <h1 className="mt-4 max-w-xl text-4xl font-bold tracking-[-.055em] sm:text-5xl lg:text-6xl">Wellness begins with you.</h1>
           <p className="mt-6 max-w-md text-base leading-7 text-white/85 sm:text-lg">Discover considered supplements and everyday essentials that make wellness feel simple.</p>
           <Link to="/category/Health%20Concerns" className="mt-8 inline-flex min-h-11 items-center rounded-full bg-white px-6 text-sm font-bold text-brand-blue transition hover:bg-brand-gold hover:text-white">Shop essentials</Link>
           <p className="mt-8 text-xs font-semibold uppercase tracking-[.16em] text-white/55">Wellness, thoughtfully selected</p>

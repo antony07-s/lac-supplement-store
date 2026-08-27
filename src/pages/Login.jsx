@@ -51,7 +51,7 @@ function Login() {
 
                 <div className="relative z-10 max-w-md">
                     <h2 className="text-3xl font-bold leading-tight mb-4">
-                        Small rituals. Stronger you.
+                        Wellness begins with you.
                     </h2>
                     <p className="text-white/80 text-sm leading-relaxed">
                         Sign in to track your orders, save your favourites, and enjoy faster checkout on every visit.
