@@ -142,7 +142,7 @@ textarea {
 
 .hero-ticker-up,
 .hero-ticker-down {
-    animation-duration: 32s;
+    animation-duration: 12s;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
 }
