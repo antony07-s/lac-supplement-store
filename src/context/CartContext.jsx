@@ -34,6 +34,8 @@ const getSafePrice = (price) => {
   return Number.isFinite(parsedPrice) ? parsedPrice : 0
 }
 
+const getImageUrl = (image) => typeof image === 'string' ? image.trim() : ''
+
 const mergeCarts = (localItems, serverItems) => {
   const merged = [...serverItems]
   localItems.forEach((localItem) => {
@@ -115,12 +117,12 @@ export function CartProvider({ children }) {
         variantId: selectedVariant._id,
         packSize: selectedVariant.packSize,
         sku: selectedVariant.sku,
-        image: selectedVariant.image || product.image,
+        image: getImageUrl(selectedVariant.image) || getImageUrl(product.image),
         price: selectedVariant.price,
         originalPrice: selectedVariant.originalPrice ?? selectedVariant.price,
         stock: selectedVariant.stock,
         isAvailable: selectedVariant.isAvailable,
-      } : product
+      } : { ...product, image: getImageUrl(product.image) }
       const stockLimit = getStockLimit(cartProduct)
       const existingItem = previousItems.find((item) => item._id === cartProduct._id && item.variantId === cartProduct.variantId)
 

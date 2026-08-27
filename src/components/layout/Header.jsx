@@ -18,10 +18,21 @@ function Header() {
     const { wishlistItems } = useWishlist()
     const { user, logout } = useAuth()
     const closeTimer = useRef(null)
+    const accountMenuRef = useRef(null)
     const dropdowns = { ...navDropdowns, 'HEALTH CONCERNS': { featured: healthGoals.slice(0, 4).map((name) => ({ label: name })), links: healthGoals } }
 
     useEffect(() => {
         api.get('/health-goals').then((res) => setHealthGoals(res.data.map((goal) => goal.name))).catch(() => setHealthGoals([]))
+    }, [])
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (accountMenuRef.current && !accountMenuRef.current.contains(event.target)) {
+                setAccountMenuOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
     const handleMenuEnter = (item) => {
@@ -65,7 +76,7 @@ function Header() {
                 </div>
 
                 <div className="flex items-center gap-3 md:gap-6">
-                    <div className="relative hidden lg:block">
+                    <div className="relative hidden lg:block" ref={accountMenuRef}>
                         <button
                             onClick={() => setAccountMenuOpen(!accountMenuOpen)}
                             className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-700 hover:text-brand-blue"

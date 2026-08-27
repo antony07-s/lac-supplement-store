@@ -43,11 +43,15 @@ function ContactUs() {
                 <div className="space-y-4 text-sm text-gray-600">
                     <p className="flex items-center gap-3">
                         <Mail size={18} className="text-brand-blue" />
-                        support@ayusydah.com
+                        <a href="mailto:lsmu@hotmail.com" className="hover:text-brand-blue hover:underline">
+                            lsmu@hotmail.com
+                        </a>
                     </p>
                     <p className="flex items-center gap-3">
                         <Phone size={18} className="text-brand-blue" />
-                        +60 3-1234 5678
+                        <a href="tel:+601172232047" className="hover:text-brand-blue hover:underline">
+                            +6011 7223 2047
+                        </a>
                     </p>
                     <p className="flex items-center gap-3">
                         <MapPin size={18} className="text-brand-blue" />

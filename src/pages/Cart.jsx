@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import { getLineId, useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -6,6 +7,17 @@ import toast from 'react-hot-toast'
 import bp4 from '../assets/BP4.png'
 
 const localImages = { BP4: bp4 }
+
+function CartProductImage({ image, name }) {
+  const [failed, setFailed] = useState(false)
+  const imageSrc = localImages[image] || String(image || '').trim()
+
+  if (!imageSrc || failed) {
+    return <span className="px-2 text-center text-xs font-medium text-stone-500">Product image unavailable</span>
+  }
+
+  return <img src={imageSrc} alt={name} loading="lazy" decoding="async" onError={() => setFailed(true)} className="h-full w-full object-contain" />
+}
 
 function Cart() {
   const { cartItems, removeFromCart, updateCartQuantity, subtotal, total } = useCart()
@@ -34,13 +46,12 @@ function Cart() {
           const stock = Number(item.stock)
           const stockLimit = item.stock !== undefined && item.stock !== null && item.stock !== '' && Number.isFinite(stock) ? Math.max(0, Math.floor(stock)) : null
           const itemPrice = Number(item.price) || 0
-          const imageSrc = localImages[item.image] || item.image
           const canIncrease = stockLimit === null || item.quantity < stockLimit
 
           return (
             <div key={lineId} className="flex items-center gap-3 border-b border-gray-200 pb-4 sm:gap-4">
               <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f2f6ff] p-2">
-                {imageSrc ? <img src={imageSrc} alt={item.name} onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain" /> : <span className="text-xs text-stone-500">No image</span>}
+                <CartProductImage image={item.image} name={item.name} />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-gray-800">{item.name}{item.packSize ? ` — ${item.packSize}` : ''}</p>
