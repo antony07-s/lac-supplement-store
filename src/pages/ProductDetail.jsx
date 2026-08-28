@@ -255,8 +255,8 @@ function ProductDetail() {
           <p className="eyebrow mb-3">Ayusydah wellness</p><h1 className="section-title mb-3">{product.name}</h1>
           <div className="mb-4 flex items-center gap-1"><Star size={16} className="fill-brand-gold text-brand-gold" /><span className="text-sm text-gray-600">{product.rating} ({product.reviews} reviews)</span></div>
           <div className="mb-6 flex items-center gap-3"><span className="text-2xl font-bold text-brand-blue">RM {price.toFixed(2)}</span>{originalPrice > price && <span className="text-lg text-gray-400 line-through">RM {originalPrice.toFixed(2)}</span>}</div>
-          <ProductDescription description={product.description} />
           <ProductVideo product={product} />
+          <ProductDescription description={product.description} />
 
           {variants.length > 0 && (
             <fieldset className="mb-6">
@@ -300,7 +300,7 @@ function ProductDetail() {
         </Reveal>
       </div>
 
-      <ProductReviews productId={product._id} refreshProduct={refreshProduct} />
+      <ProductReviews productId={product._id} averageRating={product.rating} totalRatings={product.reviews} refreshProduct={refreshProduct} />
 
       {relatedProducts.length > 0 && (
         <section className="mt-16 border-t border-stone-200 pt-12">

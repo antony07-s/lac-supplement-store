@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff, Loader2, ShieldCheck, Truck, Leaf } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../api/axios.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import GoogleSignInButton from '../components/auth/GoogleSignInButton.jsx'
 
 function Login() {
     const [form, setForm] = useState({ email: '', password: '' })
@@ -38,6 +39,20 @@ function Login() {
             setLoading(false)
         }
     }
+
+    const handleGoogleCredential = useCallback(async ({ credential }) => {
+        if (!credential || loading) return
+        setLoading(true)
+        try {
+            const res = await api.post('/auth/google', { credential })
+            login(res.data.user, res.data.token)
+            toast.success(`Welcome, ${res.data.user.name}!`)
+            const returnTo = searchParams.get('returnTo')
+            navigate(returnTo?.startsWith('/') ? returnTo : '/')
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Google sign-in failed. Please try again.', { id: 'google-login-error' })
+        } finally { setLoading(false) }
+    }, [loading, login, navigate, searchParams])
 
     return (
         <div className="min-h-screen grid lg:grid-cols-2">
@@ -140,6 +155,9 @@ function Login() {
                             {loading ? 'Signing in...' : 'Sign in'}
                         </button>
                     </form>
+
+                    <div className="my-6 flex items-center gap-3 text-xs text-gray-400"><span className="h-px flex-1 bg-gray-200" />or<span className="h-px flex-1 bg-gray-200" /></div>
+                    <GoogleSignInButton onCredential={handleGoogleCredential} disabled={loading} />
 
                     <p className="text-center text-sm text-gray-500 mt-8">
                         Don't have an account?{' '}
