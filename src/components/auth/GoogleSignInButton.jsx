@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, ShieldCheck } from 'lucide-react'
 
 const scriptId = 'google-identity-services'
 
@@ -40,9 +40,10 @@ function GoogleSignInButton({ onCredential, disabled = false }) {
   }, [clientId, onCredential])
 
   if (!clientId) return null
-  return <div className={disabled ? 'pointer-events-none opacity-60' : ''}>
-    {loading && <div className="flex h-11 items-center justify-center rounded-lg border border-gray-300 text-sm text-gray-500"><Loader2 size={16} className="mr-2 animate-spin" />Loading Google…</div>}
+  return <div className={`rounded-xl border border-stone-200 bg-stone-50 p-2 shadow-sm ${disabled ? 'pointer-events-none opacity-60' : ''}`}>
+    {loading && <div className="flex h-11 items-center justify-center rounded-lg border border-gray-300 bg-white text-sm text-gray-500"><Loader2 size={16} className="mr-2 animate-spin" />Loading Google…</div>}
     <div ref={containerRef} className={loading ? 'hidden' : 'w-full [&>div]:!w-full [&>div>div]:!w-full'} />
+    {!loading && <p className="flex items-center justify-center gap-1.5 pt-2 text-[11px] text-stone-500"><ShieldCheck size={13} className="text-brand-blue" />Secure sign-in powered by Google</p>}
   </div>
 }
 

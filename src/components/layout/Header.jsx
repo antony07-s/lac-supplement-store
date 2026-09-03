@@ -134,8 +134,9 @@ function Header() {
                         )}
                     </div>
 
-                    <Link to={user ? '/my-orders' : '/login'} aria-label={user ? 'My account' : 'Login or register'} className="flex cursor-pointer items-center text-gray-700 hover:text-brand-blue lg:hidden">
+                    <Link to={user ? '/my-orders' : '/login'} aria-label={user ? `My account: ${user.name}` : 'Login or register'} className="flex max-w-32 cursor-pointer items-center gap-1.5 text-gray-700 hover:text-brand-blue lg:hidden">
                         <User size={22} />
+                        {user && <span className="max-w-20 truncate text-xs font-semibold text-gray-700 sm:max-w-28 sm:text-sm">{user.name}</span>}
                     </Link>
 
                     <Link to="/wishlist" aria-label="Wishlist" className="flex items-center relative text-gray-700 hover:text-brand-blue">
@@ -226,6 +227,7 @@ function Header() {
                         value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search products" className="mb-3 w-full rounded-full border border-gray-300 py-2 pl-4 pr-11 text-sm focus:border-brand-blue focus:outline-none"
                     /></form>
                     <ul className="flex flex-col gap-1 text-sm font-semibold text-gray-800">
+                        {user && <li className="mb-2 rounded-xl bg-blue-50 px-4 py-3 text-brand-blue"><p className="text-xs font-medium uppercase tracking-wide text-blue-500">Signed in as</p><p className="mt-1 truncate">{user.name}</p></li>}
                         {navigationItems.map((item) => (
                             <li key={item.label} className="border-b border-gray-100">
                                 <Link onClick={() => setMobileMenuOpen(false)} to={item.to} className="block py-3">

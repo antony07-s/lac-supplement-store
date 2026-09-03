@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Pencil, Trash2, PlusCircle } from 'lucide-react'
+import { AlertTriangle, Pencil, Trash2, PlusCircle } from 'lucide-react'
 import api from '../../api/axios.js'
 import toast from 'react-hot-toast'
 import AdminLayout from '../../components/admin/AdminLayout.jsx'
@@ -8,6 +8,8 @@ import AdminLayout from '../../components/admin/AdminLayout.jsx'
 function ManageProducts() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [productToDelete, setProductToDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -18,15 +20,17 @@ function ManageProducts() {
     return () => { active = false }
   }, [])
 
-  const handleDelete = async (id, name) => {
-    if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return
+  const handleDelete = async () => {
+    if (!productToDelete) return
+    setDeleting(true)
     try {
-      await api.delete(`/products/${id}`)
+      await api.delete(`/products/${productToDelete._id}`)
       toast.success('Product deleted')
-      setProducts((prev) => prev.filter((p) => p._id !== id))
+      setProducts((prev) => prev.filter((product) => product._id !== productToDelete._id))
+      setProductToDelete(null)
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to delete')
-    }
+    } finally { setDeleting(false) }
   }
 
   return (
@@ -80,7 +84,7 @@ function ManageProducts() {
                         <Pencil size={16} />
                       </Link>
                       <button
-                        onClick={() => handleDelete(product._id, product.name)}
+                        onClick={() => setProductToDelete(product)}
                         aria-label={`Delete ${product.name}`}
                         title={`Delete ${product.name}`}
                         className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -95,6 +99,7 @@ function ManageProducts() {
           </table>
         </div>
       )}
+      {productToDelete && <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-product-title"><div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"><AlertTriangle className="mb-4 text-rose-600" size={28} /><h2 id="delete-product-title" className="text-lg font-bold text-gray-900">Delete this product?</h2><p className="mt-2 text-sm leading-6 text-gray-600">Are you sure you want to delete <strong>{productToDelete.name}</strong>? This cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button type="button" disabled={deleting} onClick={() => setProductToDelete(null)} className="rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">Cancel</button><button type="button" disabled={deleting} onClick={handleDelete} className="rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{deleting ? 'Deleting…' : 'Delete product'}</button></div></div></div>}
     </AdminLayout>
   )
 }
