@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { CheckCircle2, PackageCheck, Truck } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../../api/axios.js'
 import AdminLayout from '../../components/admin/AdminLayout.jsx'
@@ -15,6 +16,7 @@ const statusOptions = ['pending', 'paid', 'shipped', 'delivered']
 function ManageOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [updatingOrderId, setUpdatingOrderId] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -26,15 +28,17 @@ function ManageOrders() {
   }, [])
 
   const handleStatusChange = async (orderId, newStatus) => {
+    if (updatingOrderId) return
+    setUpdatingOrderId(orderId)
     try {
       await api.put(`/orders/${orderId}/status`, { status: newStatus })
       setOrders((prev) =>
         prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o))
       )
-      toast.success('Order status updated')
+      toast.success('Order status updated', { id: 'order-status-updated' })
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update status')
-    }
+      toast.error(err.response?.data?.message || 'Failed to update status', { id: 'order-status-updated' })
+    } finally { setUpdatingOrderId(null) }
   }
 
   return (
@@ -54,6 +58,7 @@ function ManageOrders() {
                 <th className="px-5 py-4">Total</th>
                 <th className="px-5 py-4">Date</th>
                 <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -82,6 +87,7 @@ function ManageOrders() {
                   <td className="px-5 py-3">
                     <select
                       value={order.status}
+                      disabled={updatingOrderId === order._id}
                       onChange={(e) => handleStatusChange(order._id, e.target.value)}
                       aria-label={`Update status for order ${order._id.slice(-8).toUpperCase()}`}
                       title="Update order status"
@@ -93,6 +99,12 @@ function ManageOrders() {
                         </option>
                       ))}
                     </select>
+                  </td>
+                  <td className="px-5 py-3 text-right">
+                    {order.status === 'paid' && <button disabled={updatingOrderId === order._id} onClick={() => handleStatusChange(order._id, 'shipped')} className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3 py-2 text-xs font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60"><Truck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark shipped'}</button>}
+                    {order.status === 'shipped' && <button disabled={updatingOrderId === order._id} onClick={() => handleStatusChange(order._id, 'delivered')} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"><PackageCheck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark delivered'}</button>}
+                    {order.status === 'delivered' && <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700"><CheckCircle2 size={15} />Complete</span>}
+                    {order.status === 'pending' && <span className="text-xs text-gray-400">Awaiting payment</span>}
                   </td>
                 </tr>
               ))}

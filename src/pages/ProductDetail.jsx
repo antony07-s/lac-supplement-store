@@ -227,7 +227,7 @@ function ProductDetail() {
   const originalPrice = Number(sellable.originalPrice) || 0
 
   const handleAddToCart = () => {
-    if (addingRef.current) return
+    if (addingRef.current || isOutOfStock) return
     addingRef.current = true
     setAdding(true)
     addToCart(product, quantity, selectedVariant)
@@ -274,7 +274,7 @@ function ProductDetail() {
           )}
 
           {isOutOfStock ? (
-            <p className="mb-4 text-sm font-semibold text-rose-600">Currently unavailable</p>
+            <p className="mb-4 text-sm font-semibold text-rose-600">Out of Stock</p>
           ) : (
             <div className="mb-4 flex flex-wrap items-center gap-3">
               <span className="text-sm font-semibold text-stone-700">Quantity</span>
@@ -289,7 +289,7 @@ function ProductDetail() {
 
           <div className="flex gap-3">
             <motion.button whileTap={{ scale: 0.96 }} onClick={handleAddToCart} disabled={isOutOfStock || adding} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60">
-              <ShoppingCart size={18} /> {adding ? 'Adding...' : 'Add to Cart'}
+              <ShoppingCart size={18} /> {isOutOfStock ? 'Out of Stock' : adding ? 'Adding...' : 'Add to Bag'}
             </motion.button>
             <motion.button whileTap={{ scale: 0.9 }} onClick={() => toggleWishlist(selectedVariant ? { ...product, variantId: selectedVariant._id, packSize: selectedVariant.packSize, price, image: selectedVariant.image || product.image } : product)} aria-label={`${inWishlist ? 'Remove' : 'Add'} ${product.name} ${inWishlist ? 'from' : 'to'} wishlist`} className={`rounded-full border px-5 ${inWishlist ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-500 hover:text-brand-blue'}`}>
               <motion.span animate={inWishlist ? { scale: [1, 1.3, 1] } : { scale: 1 }} transition={{ duration: 0.3 }} className="inline-flex">

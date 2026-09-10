@@ -14,9 +14,11 @@ function Wishlist() {
 
     const handleAddToCart = (item) => {
         if (addingId === item._id) return
+        const variant = item.variantId ? item.variants?.find((entry) => entry._id === item.variantId) : null
+        const sellable = variant || item
+        if ((variant && !variant.isAvailable) || Number(sellable.stock) === 0) return
         setAddingId(item._id)
-        addToCart(item)
-        showCartToast(`${item.name} added to bag`)
+        if (addToCart(item, 1, variant)) showCartToast(`${item.name} added to bag`)
         setTimeout(() => setAddingId(null), 700)
     }
 
@@ -40,6 +42,8 @@ function Wishlist() {
                 {wishlistItems.map((item) => {
                     const imageSrc = localImages[item.image] || item.image
                     const isAdding = addingId === item._id
+                    const variant = item.variantId ? item.variants?.find((entry) => entry._id === item.variantId) : null
+                    const outOfStock = (variant && !variant.isAvailable) || Number((variant || item).stock) === 0
                     return (
                         <div key={item._id} className="flex items-center gap-4 border-b border-gray-200 pb-4">
                             <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f2f6ff] p-2">
@@ -51,10 +55,10 @@ function Wishlist() {
                             </div>
                             <button
                                 onClick={() => handleAddToCart(item)}
-                                disabled={isAdding}
+                                disabled={isAdding || outOfStock}
                                 className="cursor-pointer text-xs bg-brand-blue text-white font-semibold px-4 py-2 rounded-full hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {isAdding ? 'Adding...' : 'Add to Cart'}
+                                {outOfStock ? 'Out of Stock' : isAdding ? 'Adding...' : 'Add to Cart'}
                             </button>
                             <button
                                 onClick={() => toggleWishlist(item)}

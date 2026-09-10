@@ -14,6 +14,7 @@ function ProductCard({ product }) {
     const { toggleWishlist, isInWishlist } = useWishlist()
     const inWishlist = isInWishlist(product._id)
     const defaultVariant = Array.isArray(product.variants) ? product.variants.find((variant) => variant.isAvailable && Number(variant.stock) !== 0) || product.variants[0] : null
+    const outOfStock = defaultVariant ? (!defaultVariant.isAvailable || Number(defaultVariant.stock) === 0) : Number(product.stock) === 0
     const image = localImages[defaultVariant?.image] || defaultVariant?.image || localImages[product.image] || product.image
     const price = Number(defaultVariant?.price ?? product.price) || 0
     const originalPrice = Number(defaultVariant?.originalPrice ?? product.originalPrice) || 0
@@ -88,11 +89,11 @@ function ProductCard({ product }) {
 
                 <button
                     onClick={add}
-                    disabled={adding}
+                    disabled={adding || outOfStock}
                     className="mt-auto flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-blue px-3 text-xs font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"
                 >
                     <ShoppingBag size={16} />
-                    {adding ? 'Adding...' : 'Add to bag'}
+                    {outOfStock ? 'Out of Stock' : adding ? 'Adding...' : 'Add to bag'}
                 </button>
             </div>
         </article>

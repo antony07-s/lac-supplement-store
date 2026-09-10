@@ -110,6 +110,11 @@ export function CartProvider({ children }) {
   }, [cartItems, user])
 
   const addToCart = (product, quantity = 1, selectedVariant = null) => {
+    const sellable = selectedVariant || product
+    const stockLimit = getStockLimit(sellable)
+    const lineId = getLineId({ _id: product._id, variantId: selectedVariant?._id })
+    const existingItem = cartItems.find((item) => getLineId(item) === lineId)
+    if ((selectedVariant && selectedVariant.isAvailable === false) || stockLimit === 0 || (stockLimit !== null && existingItem && existingItem.quantity >= stockLimit)) return false
     setCartItems((previousItems) => {
       const requestedQuantity = getSafeQuantity(quantity)
       const cartProduct = selectedVariant ? {
@@ -144,6 +149,7 @@ export function CartProvider({ children }) {
         quantity: stockLimit === null ? requestedQuantity : Math.min(requestedQuantity, stockLimit),
       }]
     })
+    return true
   }
 
   const updateCartQuantity = (lineId, quantity) => {
