@@ -63,7 +63,7 @@ function AddProduct() {
       if (videoFile) {
         const uploadData = new FormData()
         uploadData.append('video', videoFile)
-        const uploadRes = await api.post('/products/upload-video', uploadData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        const uploadRes = await api.post('/products/upload-video', uploadData, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 })
         videoUrl = uploadRes.data.videoUrl
         videoPublicId = uploadRes.data.videoPublicId || ''
       }
