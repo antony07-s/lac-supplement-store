@@ -4,7 +4,7 @@ import { CheckCircle, PackageCheck, XCircle } from 'lucide-react'
 import api from '../api/axios.js'
 import { useAuth } from '../context/AuthContext.jsx'
 
-const statusColors = { pending: 'bg-yellow-100 text-yellow-800', paid: 'bg-green-100 text-green-800', shipped: 'bg-blue-100 text-blue-800', delivered: 'bg-gray-200 text-gray-800' }
+const statusColors = { pending: 'bg-yellow-100 text-yellow-800', paid: 'bg-green-100 text-green-800', cancelled: 'bg-rose-100 text-rose-800', shipped: 'bg-blue-100 text-blue-800', delivered: 'bg-gray-200 text-gray-800' }
 
 function OrderDetails() {
   const { id } = useParams(); const [searchParams] = useSearchParams(); const { user } = useAuth()

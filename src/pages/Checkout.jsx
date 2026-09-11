@@ -1,70 +1,60 @@
-import { useRef, useState } from 'react'
-import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
-import { useNavigate } from 'react-router-dom'
-import { Navigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'
 import { LockKeyhole } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import api from '../api/axios.js'
 
+const PENDING_KEY = 'ayusydah-pending-checkout'
+const states = ['Selangor', 'Kuala Lumpur', 'Penang', 'Johor', 'Perak', 'Sabah', 'Sarawak', 'Melaka', 'Negeri Sembilan', 'Kedah', 'Kelantan', 'Pahang', 'Perlis', 'Terengganu', 'Putrajaya', 'Labuan']
+const blank = (name = '') => ({ fullName: name, phone: '', addressLine1: '', addressLine2: '', city: '', state: '', postcode: '' })
+const rm = (value) => `RM ${Number(value || 0).toFixed(2)}`
+const readPending = () => { try { return JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null') } catch { return null } }
+
 function Checkout() {
-  const { cartItems, clearCart, subtotal, total } = useCart()
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const [placing, setPlacing] = useState(false)
-  const placingRef = useRef(false)
-  const idempotencyKeyRef = useRef(null)
-  const [form, setForm] = useState({ fullName: user?.name || '', phone: '', addressLine1: '', addressLine2: '', city: '', state: '', postcode: '' })
-  const [pendingOrder, setPendingOrder] = useState(null)
-
+  const { cartItems, clearCart } = useCart(); const { user } = useAuth(); const navigate = useNavigate()
+  const [form, setForm] = useState(() => readPending()?.form || blank(user?.name))
+  const [order, setOrder] = useState(() => readPending()?.order || null)
+  const [quote, setQuote] = useState(() => readPending()?.order || null)
+  const [placing, setPlacing] = useState(false); const [paying, setPaying] = useState(false)
+  const placingRef = useRef(false); const idempotencyKey = useRef(null)
+  const set = (name, value) => setForm((current) => ({ ...current, [name]: value }))
+  const requestItems = () => cartItems.map((item) => ({ product: item._id, variantId: item.variantId, quantity: item.quantity }))
+  const totals = order || quote; const items = order?.items || cartItems
+  useEffect(() => {
+    if (order || !form.state || !/^\d{5}$/.test(form.postcode) || !cartItems.length) return
+    const quoteItems = cartItems.map((item) => ({ product: item._id, variantId: item.variantId, quantity: item.quantity }))
+    const timer = setTimeout(() => api.post('/orders/quote', { items: quoteItems, shippingAddress: form }).then((r) => setQuote(r.data)).catch(() => setQuote(null)), 350)
+    return () => clearTimeout(timer)
+  }, [cartItems, form, order]) // Quote is informational; creation always recalculates server-side.
   if (!user) return <Navigate to="/login?returnTo=/checkout" replace />
-  if (cartItems.length === 0 && !pendingOrder) return <Navigate to="/cart" replace />
-
-  const handleChange = (e) => { setForm({ ...form, [e.target.name]: e.target.value }) }
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (placingRef.current) return
-    placingRef.current = true
-    setPlacing(true)
+  if (!cartItems.length && !order) return <Navigate to="/cart" replace />
+  const persist = (nextOrder) => sessionStorage.setItem(PENDING_KEY, JSON.stringify({ order: nextOrder, form }))
+  const submit = async (event) => {
+    event.preventDefault(); if (placingRef.current) return
+    placingRef.current = true; setPlacing(true)
     try {
-      idempotencyKeyRef.current ||= window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`
-      const orderResponse = await api.post('/orders', { items: cartItems.map((item) => ({ product: item._id, variantId: item.variantId, quantity: item.quantity })), shippingAddress: form }, { headers: { 'Idempotency-Key': idempotencyKeyRef.current } })
-      setPendingOrder(orderResponse.data)
-      clearCart()
-      idempotencyKeyRef.current = null
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to place order')
-      placingRef.current = false
-      setPlacing(false)
-    }
+      idempotencyKey.current ||= crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`
+      const response = await api.post('/orders', { items: requestItems(), shippingAddress: form }, { headers: { 'Idempotency-Key': idempotencyKey.current } })
+      setOrder(response.data); setQuote(response.data); persist(response.data); clearCart()
+    } catch (error) { toast.error(error.response?.data?.message || 'Unable to start checkout.'); placingRef.current = false; setPlacing(false) }
   }
-
-  const handlePayPalApprove = async (data) => {
+  const cancel = async () => {
+    if (!order) return
+    try { await api.post(`/orders/${order._id}/cancel-payment`) } catch { toast.error('Could not cancel automatically; check your order status.') }
+    sessionStorage.removeItem(PENDING_KEY); navigate(`/orders/${order._id}?payment=cancelled`)
+  }
+  const approve = async (data) => {
+    if (paying) return; setPaying(true)
     try {
-      const res = await api.post(`/orders/${pendingOrder._id}/paypal-capture`, { paypalOrderId: data.orderID })
-      if (res.data.status === 'paid') {
-        navigate(`/orders/${pendingOrder._id}?payment=success`)
-      } else {
-        toast.error('Payment could not be confirmed. Please contact support.')
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Payment failed')
-    }
+      const response = await api.post(`/orders/${order._id}/paypal-capture`, { paypalOrderId: data.orderID })
+      if (response.data.status !== 'paid') throw new Error('Payment could not be confirmed')
+      sessionStorage.removeItem(PENDING_KEY); navigate(`/orders/${order._id}?payment=success`)
+    } catch (error) { toast.error(error.response?.data?.message || error.message || 'Payment failed.'); setPaying(false) }
   }
-
-  const inputClass = 'mt-1.5 w-full rounded-lg border border-gray-300 px-4 py-3 text-sm transition focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/15'
-
-  return <main className="page-shell section-space max-w-6xl">
-    <div className="mb-8 overflow-x-auto"><ol className="flex min-w-max items-center gap-3 text-sm font-semibold"><li className="flex items-center gap-2 text-brand-blue"><span className="grid h-7 w-7 place-items-center rounded-full bg-brand-blue text-xs text-white">1</span>Shipping</li><span className="text-stone-300">→</span><li className="flex items-center gap-2 text-stone-400"><span className="grid h-7 w-7 place-items-center rounded-full border border-stone-300 text-xs">2</span>Payment</li><span className="text-stone-300">→</span><li className="flex items-center gap-2 text-stone-400"><span className="grid h-7 w-7 place-items-center rounded-full border border-stone-300 text-xs">3</span>Confirmation</li></ol></div>
-    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-7"><h1 className="text-2xl font-bold text-gray-900">Shipping details</h1><p className="mt-1 text-sm text-stone-500">Where should we deliver your order?</p>
-        {!pendingOrder && <form onSubmit={handleSubmit} className="mt-7 space-y-5"><label className="block text-sm font-medium text-gray-700">Full name <span className="text-red-500">*</span><input type="text" name="fullName" value={form.fullName} onChange={handleChange} required className={inputClass} /></label><label className="block text-sm font-medium text-gray-700">Phone number <span className="text-red-500">*</span><input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="012-3456789" required className={inputClass} /></label><label className="block text-sm font-medium text-gray-700">Address line 1 <span className="text-red-500">*</span><input type="text" name="addressLine1" value={form.addressLine1} onChange={handleChange} placeholder="Street address, house number" required className={inputClass} /></label><label className="block text-sm font-medium text-gray-700">Address line 2 <span className="font-normal text-stone-400">(optional)</span><input type="text" name="addressLine2" value={form.addressLine2} onChange={handleChange} placeholder="Apartment, unit, floor" className={inputClass} /></label><div className="grid gap-5 sm:grid-cols-2"><label className="block text-sm font-medium text-gray-700">City <span className="text-red-500">*</span><input type="text" name="city" value={form.city} onChange={handleChange} required className={inputClass} /></label><label className="block text-sm font-medium text-gray-700">Postcode <span className="text-red-500">*</span><input type="text" name="postcode" value={form.postcode} onChange={handleChange} required className={inputClass} /></label></div><label className="block text-sm font-medium text-gray-700">State <span className="text-red-500">*</span><select name="state" value={form.state} onChange={handleChange} required className={inputClass}><option value="">Select state</option>{['Selangor', 'Kuala Lumpur', 'Penang', 'Johor', 'Perak', 'Sabah', 'Sarawak', 'Melaka', 'Negeri Sembilan', 'Kedah', 'Kelantan', 'Pahang', 'Perlis', 'Terengganu', 'Putrajaya', 'Labuan'].map((state) => <option key={state} value={state}>{state}</option>)}</select></label><button type="submit" disabled={placing} className="w-full cursor-pointer rounded-full bg-brand-blue py-3.5 font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60">{placing ? 'Placing order…' : 'Continue to payment'}</button><p className="flex items-center justify-center gap-2 text-xs text-stone-500"><LockKeyhole size={14} className="text-brand-blue" />Secure checkout</p></form>}
-        {pendingOrder && <div className="mt-7"><p className="mb-4 text-sm text-stone-600">Order placed — complete your payment below to confirm it.</p><PayPalScriptProvider options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: 'MYR' }}><PayPalButtons style={{ layout: 'vertical' }} createOrder={async () => { const res = await api.post(`/orders/${pendingOrder._id}/paypal-order`); return res.data.orderId }} onApprove={handlePayPalApprove} onError={() => toast.error('PayPal payment failed. Please try again.')} /></PayPalScriptProvider></div>}
-      </section>
-      <aside className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm lg:sticky lg:top-28"><h2 className="text-lg font-bold text-gray-900">Order summary</h2><div className="mt-5 max-h-80 space-y-4 overflow-y-auto pr-1">{(pendingOrder?.items ?? cartItems).map((item) => <div key={`${item._id ?? item.product}-${item.variantId ?? item.variant ?? 'default'}`} className="flex gap-3"><div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-stone-100 bg-stone-50"><img src={item.image} alt={item.name} className="h-full w-full object-contain" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-stone-800">{item.name}</p>{item.packSize && <p className="mt-0.5 text-xs text-stone-500">{item.packSize}</p>}<p className="mt-1 text-xs text-stone-500">Qty: {item.quantity}</p></div><p className="shrink-0 text-sm font-semibold text-stone-800">RM {(Number(item.price) * item.quantity).toFixed(2)}</p></div>)}</div><div className="mt-5 space-y-3 border-t border-stone-200 pt-4 text-sm"><div className="flex justify-between text-stone-600"><span>Subtotal</span><span>RM {(pendingOrder?.totalAmount ?? subtotal).toFixed(2)}</span></div><div className="flex justify-between text-lg font-bold text-gray-900"><span>Total</span><span className="text-brand-blue">RM {(pendingOrder?.totalAmount ?? total).toFixed(2)}</span></div></div></aside>
-    </div>
-  </main>
+  const input = 'mt-1.5 w-full min-w-0 rounded-lg border border-gray-300 px-3 py-3 text-sm focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/15'
+  return <main className="page-shell section-space max-w-6xl overflow-x-hidden"><ol className="mb-6 flex flex-wrap gap-x-2 gap-y-1 text-xs font-semibold sm:text-sm"><li className="text-brand-blue">1. Shipping</li><li className="text-stone-400">→ 2. Payment</li><li className="text-stone-400">→ 3. Confirmation</li></ol><div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]"><section className="min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-7"><h1 className="text-2xl font-bold">{order ? 'Secure payment' : 'Shipping details'}</h1>{!order ? <form onSubmit={submit} className="mt-6 space-y-4"><label className="block text-sm font-medium">Full name *<input required value={form.fullName} onChange={(e) => set('fullName', e.target.value)} className={input} /></label><label className="block text-sm font-medium">Phone number *<input required type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} className={input} /></label><label className="block text-sm font-medium">Address line 1 *<input required value={form.addressLine1} onChange={(e) => set('addressLine1', e.target.value)} className={input} /></label><label className="block text-sm font-medium">Address line 2 <span className="font-normal text-stone-400">(optional)</span><input value={form.addressLine2} onChange={(e) => set('addressLine2', e.target.value)} className={input} /></label><div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-medium">City *<input required value={form.city} onChange={(e) => set('city', e.target.value)} className={input} /></label><label className="block text-sm font-medium">Postcode *<input required inputMode="numeric" pattern="[0-9]{5}" value={form.postcode} onChange={(e) => set('postcode', e.target.value.replace(/\D/g, '').slice(0, 5))} className={input} /></label></div><label className="block text-sm font-medium">State *<select required value={form.state} onChange={(e) => set('state', e.target.value)} className={input}><option value="">Select state</option>{states.map((state) => <option key={state}>{state}</option>)}</select></label><button disabled={placing} className="w-full rounded-full bg-brand-blue py-3.5 font-semibold text-white disabled:opacity-60">{placing ? 'Calculating secure total…' : 'Continue to PayPal'}</button><p className="flex justify-center gap-2 text-xs text-stone-500"><LockKeyhole size={14} />Final amounts are verified on our server.</p></form> : <div className="mt-6"><p className="mb-4 text-sm text-stone-600">Review your final total, then pay securely with PayPal.</p>{!import.meta.env.VITE_PAYPAL_CLIENT_ID ? <p className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">PayPal is unavailable. Please contact support.</p> : <PayPalScriptProvider options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: 'MYR', intent: 'capture' }}><PayPalButtons disabled={paying} style={{ layout: 'vertical', label: 'pay' }} createOrder={async () => (await api.post(`/orders/${order._id}/paypal-order`)).data.orderId} onApprove={approve} onCancel={cancel} onError={() => { setPaying(false); toast.error('PayPal could not be reached. Check your connection and try again.') }} /></PayPalScriptProvider>}{paying && <p className="mt-3 text-sm font-medium text-brand-blue">Confirming your payment securely…</p>}<button type="button" onClick={cancel} disabled={paying} className="mt-4 text-sm font-semibold text-stone-600 underline disabled:opacity-50">Cancel payment</button></div>}</section><aside className="min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5 lg:sticky lg:top-28"><h2 className="text-lg font-bold">Order summary</h2><div className="mt-4 max-h-72 space-y-3 overflow-y-auto">{items.map((item) => <div key={`${item._id || item.product}-${item.variantId || item.variant || ''}`} className="flex min-w-0 gap-3"><img src={item.image} alt="" className="h-14 w-14 shrink-0 rounded-lg border object-contain" /><div className="min-w-0 flex-1"><p className="break-words text-sm font-semibold">{item.name}</p><p className="text-xs text-stone-500">Qty: {item.quantity}</p></div><span className="shrink-0 text-sm font-semibold">{rm(Number(item.price) * item.quantity)}</span></div>)}</div><div className="mt-5 space-y-2 border-t pt-4 text-sm"><div className="flex justify-between"><span>Subtotal</span><span>{rm(totals?.subtotal)}</span></div>{totals && <><div className="flex justify-between text-emerald-700"><span>Discount {totals.discount ? '(orders over RM1,000)' : ''}</span><span>−{rm(totals.discount)}</span></div><div className="flex justify-between"><span>Shipping <small>({totals.shippingRegion === 'east-malaysia' ? 'East' : 'West'} Malaysia)</small></span><span>{rm(totals.shipping)}</span></div></>}<div className="flex justify-between border-t pt-3 text-lg font-bold"><span>Final total</span><span className="text-brand-blue">{rm(totals?.totalAmount)}</span></div>{totals && <p className="text-xs text-stone-500">Weight: {totals.totalWeightKg} kg</p>}</div></aside></div></main>
 }
-
 export default Checkout

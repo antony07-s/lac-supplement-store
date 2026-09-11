@@ -7,11 +7,10 @@ import AdminLayout from '../../components/admin/AdminLayout.jsx'
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-700',
   paid: 'bg-green-100 text-green-700',
+  cancelled: 'bg-rose-100 text-rose-700',
   shipped: 'bg-blue-100 text-blue-700',
   delivered: 'bg-gray-100 text-gray-700',
 }
-
-const statusOptions = ['pending', 'paid', 'shipped', 'delivered']
 
 function ManageOrders() {
   const [orders, setOrders] = useState([])
@@ -85,26 +84,14 @@ function ManageOrders() {
                     {new Date(order.createdAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </td>
                   <td className="px-5 py-3">
-                    <select
-                      value={order.status}
-                      disabled={updatingOrderId === order._id}
-                      onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                      aria-label={`Update status for order ${order._id.slice(-8).toUpperCase()}`}
-                      title="Update order status"
-                      className={`text-xs font-semibold px-3 py-1.5 rounded-full border-none focus:outline-none focus:ring-2 focus:ring-brand-blue ${statusColors[order.status]}`}
-                    >
-                      {statusOptions.map((status) => (
-                        <option key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </option>
-                      ))}
-                    </select>
+                    <span className={`inline-block rounded-full px-3 py-1.5 text-xs font-semibold ${statusColors[order.status] || statusColors.pending}`}>{order.status}</span>
                   </td>
                   <td className="px-5 py-3 text-right">
                     {order.status === 'paid' && <button disabled={updatingOrderId === order._id} onClick={() => handleStatusChange(order._id, 'shipped')} className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3 py-2 text-xs font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60"><Truck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark shipped'}</button>}
                     {order.status === 'shipped' && <button disabled={updatingOrderId === order._id} onClick={() => handleStatusChange(order._id, 'delivered')} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"><PackageCheck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark delivered'}</button>}
                     {order.status === 'delivered' && <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700"><CheckCircle2 size={15} />Complete</span>}
                     {order.status === 'pending' && <span className="text-xs text-gray-400">Awaiting payment</span>}
+                    {order.status === 'cancelled' && <span className="text-xs text-rose-600">Payment cancelled</span>}
                   </td>
                 </tr>
               ))}
