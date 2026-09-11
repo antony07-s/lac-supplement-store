@@ -22,7 +22,9 @@ function Checkout() {
   const placingRef = useRef(false); const idempotencyKey = useRef(null)
   const set = (name, value) => setForm((current) => ({ ...current, [name]: value }))
   const requestItems = () => cartItems.map((item) => ({ product: item._id, variantId: item.variantId, quantity: item.quantity }))
-  const totals = order || quote; const items = order?.items || cartItems
+  const items = order?.items || cartItems
+  const cartSubtotal = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0)
+  const totals = order || quote || { subtotal: cartSubtotal, totalAmount: cartSubtotal }
   useEffect(() => {
     if (order || !form.state || !/^\d{5}$/.test(form.postcode) || !cartItems.length) return
     const quoteItems = cartItems.map((item) => ({ product: item._id, variantId: item.variantId, quantity: item.quantity }))
