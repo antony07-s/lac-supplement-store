@@ -37,6 +37,7 @@ import ManageReviews from './pages/admin/ManageReviews.jsx'
 import Checkout from './pages/Checkout.jsx'
 import ForgotPassword from './pages/ForgotPassword.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
+import WhatsAppButton from './components/ui/WhatsAppButton.jsx'
 
 function App() {
   const location = useLocation()
@@ -44,6 +45,7 @@ function App() {
   const isAuthPage =
     location.pathname === '/login' ||
     location.pathname === '/register'
+  const isAdminPage = location.pathname.startsWith('/admin')
 
   return (
     <>
@@ -112,6 +114,7 @@ function App() {
           <CookieBanner />
         </>
       )}
+      {!isAuthPage && !isAdminPage && <WhatsAppButton />}
     </>
   )
 }

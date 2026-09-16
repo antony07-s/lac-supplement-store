@@ -6,6 +6,7 @@ import { useWishlist } from '../../context/WishlistContext.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../../api/axios.js'
+import ayusydahLogo from '../../assets/ayusydah-logo.jpeg'
 
 function Header() {
     const [openItem, setOpenItem] = useState(null)
@@ -65,7 +66,9 @@ function Header() {
                     {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
 
-                <Link to="/" aria-label="Ayusydah home" className="flex shrink-0 items-center gap-2 text-xl font-extrabold tracking-[-.06em] text-brand-blue sm:text-2xl">AYUSYDAH<span className="text-brand-gold">.</span></Link>
+                <Link to="/" aria-label="AYUSYDAH Official Store home" className="flex shrink-0 items-center" onClick={() => setMobileMenuOpen(false)}>
+                    <img src={ayusydahLogo} alt="AYUSYDAH Official Store" className="h-12 w-12 rounded-full object-contain sm:h-14 sm:w-14" />
+                </Link>
 
                 <div className="hidden lg:block flex-1 max-w-2xl">
                     <form onSubmit={submitSearch} className="relative block"><button type="submit" aria-label="Submit search" className="absolute left-2 top-1/2 z-10 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-stone-400 hover:bg-stone-100 hover:text-brand-blue"><Search size={17} /></button><input
