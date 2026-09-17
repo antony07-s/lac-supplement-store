@@ -9,6 +9,7 @@ const categories = [
   'Ayurveda',
   'Beauty & Hair',
   'Food & Nutrition',
+  'Nutrition & Juices',
   'Brands',
 ]
 

@@ -3,14 +3,25 @@ import { getWithRetry } from '../api/axios.js'
 import CategoryCard from '../components/category/CategoryCard.jsx'
 import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 
+const nutritionAndJuices = {
+  _id: 'nutrition-and-juices',
+  name: 'Nutrition & Juices',
+  image: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=900&q=85',
+}
+
 function FeaturedCategories() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     getWithRetry('/categories')
-      .then((res) => setCategories(res.data))
-      .catch(() => setCategories([]))
+      .then((res) => {
+        const received = Array.isArray(res.data) ? res.data : []
+        setCategories(received.some((category) => category.name === nutritionAndJuices.name)
+          ? received
+          : [...received, nutritionAndJuices])
+      })
+      .catch(() => setCategories([nutritionAndJuices]))
       .finally(() => setLoading(false))
   }, [])
 

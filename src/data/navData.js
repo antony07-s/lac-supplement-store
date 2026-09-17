@@ -5,6 +5,7 @@ export const navigationItems = [
   { label: 'AYURVEDA', to: '/category/Ayurveda' },
   { label: 'BEAUTY & HAIR', to: '/category/Beauty%20%26%20Hair' },
   { label: 'FOOD & NUTRITION', to: '/category/Food%20%26%20Nutrition' },
+  { label: 'NUTRITION & JUICES', to: '/category/Nutrition%20%26%20Juices' },
   { label: 'BRANDS', to: '/category/Brands' },
 ]
 
