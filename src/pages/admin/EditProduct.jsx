@@ -45,9 +45,14 @@ function EditProduct() {
       toast.error('Enter a valid normal product price')
       return
     }
-    const cleanedVariants = variants.map((variant) => ({ ...variant, price: Number(variant.price), originalPrice: variant.originalPrice === '' ? Number(variant.price) : Number(variant.originalPrice), stock: Number(variant.stock) }))
-    if (cleanedVariants.some((variant) => !variant.packSize?.trim() || !Number.isFinite(variant.price) || variant.price < 0 || !Number.isSafeInteger(variant.stock) || variant.stock < 0)) {
-      toast.error('Each variant needs a pack size, price, and stock quantity.')
+    const shippingWeightKg = Number(form.shippingWeightKg)
+    if (!Number.isFinite(shippingWeightKg) || shippingWeightKg <= 0) {
+      toast.error('Enter a valid shipping weight')
+      return
+    }
+    const cleanedVariants = variants.map((variant) => ({ ...variant, price: Number(variant.price), originalPrice: variant.originalPrice === '' ? Number(variant.price) : Number(variant.originalPrice), stock: Number(variant.stock), shippingWeightKg: Number(variant.shippingWeightKg) }))
+    if (cleanedVariants.some((variant) => !variant.packSize?.trim() || !Number.isFinite(variant.price) || variant.price < 0 || !Number.isSafeInteger(variant.stock) || variant.stock < 0 || !Number.isFinite(variant.shippingWeightKg) || variant.shippingWeightKg <= 0)) {
+      toast.error('Each variant needs a pack size, price, stock, and shipping weight.')
       return
     }
     setSaving(true)
@@ -76,6 +81,7 @@ function EditProduct() {
         name: form.name,
         price: basePrice,
         originalPrice: form.originalPrice === '' ? basePrice : Number(form.originalPrice),
+        shippingWeightKg,
         category: form.category,
         healthGoals: form.healthGoals || [],
         description: form.description,
@@ -130,9 +136,9 @@ function EditProduct() {
           <div><label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Product Video URL <span className="normal-case font-normal">(optional)</span></label><input type="url" name="videoUrl" value={form.videoUrl || ''} onChange={handleChange} placeholder="https://..." className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm" />{form.videoUrl && <><video className="mt-3 aspect-video w-full rounded-lg bg-stone-900" controls muted playsInline preload="metadata" src={form.videoUrl} /><label className="mt-2 flex items-center gap-2 text-sm text-rose-600"><input type="checkbox" checked={removeVideo} onChange={(event) => setRemoveVideo(event.target.checked)} /> Remove current video</label></>}</div>
 
           <section className="rounded-xl border border-stone-200 p-4">
-            <div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-sm font-bold text-stone-800">Product variants</h2><button type="button" onClick={() => setVariants((current) => [...current, { packSize: '', price: '', originalPrice: '', sku: '', stock: 0, image: '', isAvailable: true }])} className="rounded-full border border-brand-blue px-3 py-1.5 text-xs font-semibold text-brand-blue">Add variant</button></div>
+            <div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-sm font-bold text-stone-800">Product variants</h2><button type="button" onClick={() => setVariants((current) => [...current, { packSize: '', price: '', originalPrice: '', sku: '', stock: 0, shippingWeightKg: '', image: '', isAvailable: true }])} className="rounded-full border border-brand-blue px-3 py-1.5 text-xs font-semibold text-brand-blue">Add variant</button></div>
             {variants.length === 0 ? <p className="text-sm text-stone-500">No variants yet. This product uses its legacy product-level price and stock.</p> : <div className="space-y-3">{variants.map((variant, index) => <div key={variant._id || index} className="grid gap-2 rounded-lg bg-stone-50 p-3 sm:grid-cols-2">
-              {['packSize', 'price', 'originalPrice', 'sku', 'stock', 'image'].map((field) => <label key={field} className="text-xs font-medium text-stone-600">{{ packSize: 'Pack size', price: 'Price (RM)', originalPrice: 'Compare-at price (RM)', sku: 'SKU', stock: 'Stock quantity', image: 'Variant image URL (optional)' }[field]}<input type={['price', 'originalPrice', 'stock'].includes(field) ? 'number' : 'text'} min={['price', 'originalPrice', 'stock'].includes(field) ? '0' : undefined} placeholder={field === 'packSize' ? 'e.g. 30 Capsules' : field === 'image' ? 'https://...' : ''} value={variant[field] ?? ''} onChange={(event) => setVariants((current) => current.map((entry, entryIndex) => entryIndex === index ? { ...entry, [field]: event.target.value } : entry))} className="mt-1 w-full rounded border border-stone-300 px-3 py-2 text-sm" /></label>)}
+              {['packSize', 'price', 'originalPrice', 'sku', 'stock', 'shippingWeightKg', 'image'].map((field) => <label key={field} className="text-xs font-medium text-stone-600">{{ packSize: 'Pack size', price: 'Price (RM)', originalPrice: 'Compare-at price (RM)', sku: 'SKU', stock: 'Stock quantity', shippingWeightKg: 'Shipping Weight (kg)', image: 'Variant image URL (optional)' }[field]}<input type={['price', 'originalPrice', 'stock', 'shippingWeightKg'].includes(field) ? 'number' : 'text'} min={field === 'shippingWeightKg' ? '0.01' : ['price', 'originalPrice', 'stock'].includes(field) ? '0' : undefined} step={field === 'shippingWeightKg' ? '0.01' : undefined} required={field === 'shippingWeightKg'} placeholder={field === 'packSize' ? 'e.g. 30 Capsules' : field === 'image' ? 'https://...' : ''} value={variant[field] ?? ''} onChange={(event) => setVariants((current) => current.map((entry, entryIndex) => entryIndex === index ? { ...entry, [field]: event.target.value } : entry))} className="mt-1 w-full rounded border border-stone-300 px-3 py-2 text-sm" /></label>)}
               <label className="flex items-center gap-2 text-sm text-stone-700"><input type="checkbox" checked={variant.isAvailable !== false} onChange={(event) => setVariants((current) => current.map((entry, entryIndex) => entryIndex === index ? { ...entry, isAvailable: event.target.checked } : entry))} /> Available</label>
               <button type="button" onClick={() => setVariants((current) => current.filter((_, entryIndex) => entryIndex !== index))} className="text-left text-sm font-semibold text-rose-600">Remove variant</button>
             </div>)}</div>}
@@ -161,6 +167,10 @@ function EditProduct() {
                 step="0.01"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
               />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Shipping Weight (kg) <span className="text-red-500">*</span></label>
+              <input type="number" name="shippingWeightKg" value={form.shippingWeightKg ?? ''} onChange={handleChange} step="0.01" min="0.01" required className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue" />
             </div>
           </div>
 
