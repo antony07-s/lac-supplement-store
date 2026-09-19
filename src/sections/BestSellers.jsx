@@ -44,7 +44,7 @@ function BestSellers() {
   return (
     <section id="best-sellers" className="bg-white">
       <div className="page-shell section-space">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-4 sm:mb-2">
           <div>
             <p className="eyebrow">Customer favourites</p>
             <h2 className="section-title mt-2">Shop By Best Sellers</h2>
