@@ -12,9 +12,18 @@ const linkRoutes = {
   'My Wishlist': '/wishlist',
   'My Orders': '/my-orders',
   'Track My Orders': '/track-order',
+  'Herbal Supplements': '/category/Herbal%20Supplements',
+  'Ayurvedic Wellness': '/category/Ayurvedic%20Wellness',
+  Juices: '/category/Juices',
+  'Skin & Hair Care': '/category/Skin%20%26%20Hair%20Care',
+  Brands: '/category/Brands',
 };
 
 const footerColumns = [
+  {
+    title: 'Shop',
+    links: ['Herbal Supplements', 'Ayurvedic Wellness', 'Juices', 'Skin & Hair Care', 'Brands'],
+  },
   {
     title: 'Company',
     links: [

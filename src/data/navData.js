@@ -1,14 +1,7 @@
 export const navigationItems = [
-  { label: 'HOME', to: '/' },
-  { label: 'SHOP', to: '/products' },
-  { label: 'HEALTH CONCERNS', to: '/category/Health%20Concerns' },
-  { label: 'AYURVEDA', to: '/category/Ayurveda' },
-  { label: 'BEAUTY & HAIR', to: '/category/Beauty%20%26%20Hair' },
-  { label: 'FOOD & NUTRITION', to: '/category/Food%20%26%20Nutrition' },
-  { label: 'NUTRITION & JUICES', to: '/category/Nutrition%20%26%20Juices' },
+  { label: 'HERBAL SUPPLEMENTS', to: '/category/Herbal%20Supplements' },
+  { label: 'AYURVEDIC WELLNESS', to: '/category/Ayurvedic%20Wellness' },
+  { label: 'JUICES', to: '/category/Juices' },
+  { label: 'SKIN & HAIR CARE', to: '/category/Skin%20%26%20Hair%20Care' },
   { label: 'BRANDS', to: '/category/Brands' },
 ]
-
-export const navDropdowns = {
-  'HEALTH CONCERNS': { featured: [], links: [] },
-}

@@ -1,30 +1,21 @@
-import { User, Heart, ShoppingCart, Menu, X, Search, ChevronDown } from 'lucide-react'
+import { User, Heart, ShoppingCart, Menu, X, Search } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
-import { navDropdowns, navigationItems } from '../../data/navData.js'
+import { navigationItems } from '../../data/navData.js'
 import { useCart } from '../../context/CartContext.jsx'
 import { useWishlist } from '../../context/WishlistContext.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { Link, useNavigate } from 'react-router-dom'
-import api from '../../api/axios.js'
 import ayusydahLogo from '../../assets/ayusydah-logo.jpeg'
 
 function Header() {
-    const [openItem, setOpenItem] = useState(null)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [accountMenuOpen, setAccountMenuOpen] = useState(false)
     const [query, setQuery] = useState('')
-    const [healthGoals, setHealthGoals] = useState([])
     const navigate = useNavigate()
     const { cartCount } = useCart()
     const { wishlistItems } = useWishlist()
     const { user, logout } = useAuth()
-    const closeTimer = useRef(null)
     const accountMenuRef = useRef(null)
-    const dropdowns = { ...navDropdowns, 'HEALTH CONCERNS': { featured: healthGoals.slice(0, 4).map((name) => ({ label: name })), links: healthGoals } }
-
-    useEffect(() => {
-        api.get('/health-goals').then((res) => setHealthGoals(res.data.map((goal) => goal.name))).catch(() => setHealthGoals([]))
-    }, [])
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -35,15 +26,6 @@ function Header() {
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
-
-    const handleMenuEnter = (item) => {
-        clearTimeout(closeTimer.current)
-        setOpenItem(item)
-    }
-
-    const handleMenuLeave = () => {
-        closeTimer.current = setTimeout(() => setOpenItem(null), 150)
-    }
 
     const handleLogout = () => {
         logout()
@@ -163,62 +145,20 @@ function Header() {
                 </div>
             </div>
 
-            {/* Desktop nav row */}
+            {/* Desktop category navigation: intentionally limited to the five customer-facing collections. */}
             <nav className="hidden border-t border-stone-100 bg-[#f7f8f4] lg:block relative">
                 <ul className="page-shell flex items-center justify-between gap-2 py-3 text-[11px] font-bold text-gray-800 whitespace-nowrap lg:gap-3 lg:text-sm">
                     {navigationItems.map((item) => (
                         <li
                             key={item.label}
-                            onMouseEnter={() => dropdowns[item.label] && handleMenuEnter(item.label)}
-                            onMouseLeave={handleMenuLeave}
-                            onFocus={() => handleMenuEnter(item.label)}
-                            onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) handleMenuLeave() }}
-                            className={`hover:text-brand-blue relative shrink-0 border-b-2 pb-2 transition-colors ${openItem === item.label ? 'border-brand-blue text-brand-blue' : 'border-transparent'
-                                }`}
+                            className="relative shrink-0 border-b-2 border-transparent pb-2 transition-colors hover:border-brand-blue hover:text-brand-blue"
                         >
-                            <Link className="inline-flex items-center gap-1" to={item.to}>
+                            <Link className="inline-flex items-center" to={item.to}>
                                 {item.label}
-                                {dropdowns[item.label] && <ChevronDown aria-hidden="true" size={14} className={`transition-transform ${openItem === item.label ? 'rotate-180' : ''}`} />}
                             </Link>
                         </li>
                     ))}
                 </ul>
-
-                {openItem && dropdowns[openItem] && (
-                    <div className="page-shell absolute left-0 right-0 top-full z-50 pt-3">
-                        <div
-                            onMouseEnter={() => handleMenuEnter(openItem)}
-                            onMouseLeave={handleMenuLeave}
-                            className="animate-[menu-in_160ms_ease-out] rounded-2xl border border-stone-200 bg-white p-4 shadow-2xl shadow-blue-950/15 lg:p-6"
-                            style={{ width: 'min(650px, calc(100vw - 2rem))' }}
-                        >
-                            <div className="mb-3 grid grid-cols-2 gap-4 border-b border-gray-200 pb-3 sm:grid-cols-4">
-                                {dropdowns[openItem].featured.map((f) => (
-                                    <div key={f.label} className="min-w-0 text-center text-xs font-semibold leading-4 text-gray-700">
-                                        <span aria-hidden="true" className="mx-auto mb-2 grid h-14 w-14 place-items-center rounded-full bg-[#edf4ff] text-lg font-extrabold text-brand-blue">
-                                            {f.label.charAt(0)}
-                                        </span>
-                                        {f.label}
-                                    </div>
-                                ))}
-                            </div>
-                            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-brand-blue sm:grid-cols-3">
-                                {dropdowns[openItem].links.map((link) => (
-                                    <li key={link}>
-                                        <Link to={`/products?healthGoal=${encodeURIComponent(link)}`} className="rounded py-1 hover:underline">
-                                            {link}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                            <div className="mt-4 pt-3 border-t border-gray-200 text-center">
-                                <Link to={navigationItems.find((item) => item.label === openItem)?.to || '/products'} className="text-sm text-brand-blue font-semibold hover:underline cursor-pointer">
-                                    View All
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </nav>
 
             {/* Mobile menu */}

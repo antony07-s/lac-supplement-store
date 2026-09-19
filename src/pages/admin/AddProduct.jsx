@@ -5,11 +5,10 @@ import api from '../../api/axios.js'
 import AdminLayout from '../../components/admin/AdminLayout.jsx'
 
 const categories = [
-  'Health Concerns',
-  'Ayurveda',
-  'Beauty & Hair',
-  'Food & Nutrition',
-  'Nutrition & Juices',
+  'Herbal Supplements',
+  'Ayurvedic Wellness',
+  'Juices',
+  'Skin & Hair Care',
   'Brands',
 ]
 
