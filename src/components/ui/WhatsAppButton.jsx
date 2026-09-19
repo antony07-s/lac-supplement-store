@@ -1,5 +1,6 @@
 const WHATSAPP_NUMBER = '601172232047'
 const MESSAGE = 'Hi AYUSYDAH, I would like some help with your supplements.'
+export const WHATSAPP_HREF = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(MESSAGE)}`
 
 function WhatsAppLogo({ className = '' }) {
   return (
@@ -11,11 +12,9 @@ function WhatsAppLogo({ className = '' }) {
 }
 
 function WhatsAppButton() {
-  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(MESSAGE)}`
-
   return (
     <a
-      href={href}
+      href={WHATSAPP_HREF}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with AYUSYDAH on WhatsApp"

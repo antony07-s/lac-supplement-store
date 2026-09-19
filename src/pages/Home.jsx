@@ -1,14 +1,12 @@
 import HeroSlider from '../sections/HeroSlider.jsx'
-import FeaturedCategories from '../sections/FeaturedCategories.jsx'
 import BestSellers from '../sections/BestSellers.jsx'
-import PromoBanner from '../components/ui/PromoBanner.jsx'
-import ShopByHealthGoal from '../sections/ShopByHealthGoal.jsx'
-import BrandsCarousel from '../sections/BrandsCarousel.jsx'
-import Testimonials from '../sections/Testimonials.jsx'
+import FeaturedCategories from '../sections/FeaturedCategories.jsx'
 import Newsletter from '../sections/Newsletter.jsx'
+import TrustBar from '../sections/TrustBar.jsx'
+import WellnessNeeds from '../sections/WellnessNeeds.jsx'
+import WhyChoose from '../sections/WhyChoose.jsx'
 import { useEffect, useState } from 'react'
 import { GridSkeleton, HeroSkeleton } from '../components/ui/Shimmer.jsx'
-import Reveal from '../components/Frame/Reveal.jsx'
 
 function Home() {
     const [loading, setLoading] = useState(true)
@@ -17,18 +15,12 @@ function Home() {
     return (
         <div>
             <HeroSlider />
-            <FeaturedCategories />
+            <TrustBar />
             <BestSellers />
-            <Reveal direction="fade">
-                <PromoBanner
-                    title="VIP Club Members Get Extra 10% Off"
-                    subtitle="Join Ayusydah rewards and unlock exclusive pricing on every order"
-                    ctaText="Join Now"
-                />
-            </Reveal>
-            <ShopByHealthGoal />
-            <BrandsCarousel />
-            <Testimonials />
+            <WellnessNeeds />
+            <FeaturedCategories />
+            <WhyChoose />
+            {/* Customer reviews are intentionally hidden until approved real customer feedback is available. */}
             <Newsletter />
         </div>
     )

@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom'
 import { getWithRetry } from '../api/axios.js'
 import ProductCard from '../components/product/ProductCard.jsx'
 import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
-import Reveal from '../components/Frame/Reveal.jsx'
+import { ArrowRight } from 'lucide-react'
+
+// These are the five confirmed products for the homepage Best Sellers collection.
+const BEST_SELLER_MATCHES = ['diacare', 'prediacare', 'kidney guard', 'cholesterol', 'beetroot juice']
 
 function BestSellers() {
   const [products, setProducts] = useState([])
@@ -14,8 +17,12 @@ function BestSellers() {
     setLoading(true)
     setError('')
     try {
-      const res = await getWithRetry('/products', { params: { limit: 10 }, signal })
-      setProducts(Array.isArray(res.data) ? res.data : (res.data.products || []))
+      // Fetch the full small catalogue: a paginated first page cannot reliably
+      // contain every curated product after new items are added.
+      const res = await getWithRetry('/products', { params: { limit: 50 }, signal })
+      const catalog = Array.isArray(res.data) ? res.data : (res.data.products || [])
+      const selected = BEST_SELLER_MATCHES.map((needle) => catalog.find((product) => product.name.toLowerCase().includes(needle))).filter(Boolean)
+      setProducts(selected)
     } catch (err) {
       if (err.code !== 'ERR_CANCELED') {
         setProducts([])
@@ -35,13 +42,19 @@ function BestSellers() {
   }, [loadProducts])
 
   return (
-    <section className="bg-[#f4f7fc]">
+    <section id="best-sellers" className="bg-white">
       <div className="page-shell section-space">
-        <p className="eyebrow">Our range</p>
-        <h2 className="section-title mt-2 mb-8">Explore our products</h2>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="eyebrow">Customer favourites</p>
+            <h2 className="section-title mt-2">Shop By Best Sellers</h2>
+          <p className="mt-3 mb-3 text-sm text-stone-600">Customer favourites for everyday wellness.</p>
+          </div>
+          <Link to="/products" className="inline-flex items-center gap-1.5 rounded-full border-2 border-brand-blue-dark px-5 py-2.5 text-sm font-bold text-brand-blue-dark transition hover:bg-brand-blue-dark hover:text-white">View All Products <ArrowRight size={15} /></Link>
+        </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5" aria-label="Loading products">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5 lg:gap-5" aria-label="Loading products">
             {Array.from({ length: 5 }, (_, index) => <div key={index} className="shimmer aspect-[3/4] rounded-2xl" />)}
           </div>
         ) : error ? (
@@ -52,20 +65,13 @@ function BestSellers() {
         ) : products.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-8 text-center text-stone-600">No products are available yet.</div>
         ) : (
-          <StaggerGrid className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
-            {products.slice(0, 10).map((product) => (
+          <StaggerGrid className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5 lg:gap-5">
+            {products.map((product) => (
               <StaggerItem key={product._id} direction="up">
                 <ProductCard product={product} />
               </StaggerItem>
             ))}
           </StaggerGrid>
-        )}
-        {!loading && products.length > 0 && (
-          <Reveal direction="fade" className="mt-8 text-center">
-            <Link to="/products" className="inline-flex min-h-11 items-center justify-center rounded-full border border-brand-blue px-6 text-sm font-bold text-brand-blue transition hover:bg-brand-blue hover:text-white">
-              View All Products
-            </Link>
-          </Reveal>
         )}
       </div>
     </section>

@@ -18,7 +18,7 @@ function Testimonials() {
 
   if (loading) {
     return (
-      <section className="px-8 py-12 text-center max-w-2xl mx-auto">
+      <section className="page-shell px-4 py-12 text-center">
         <p className="text-gray-500">Loading testimonials...</p>
       </section>
     )
@@ -42,12 +42,12 @@ function Testimonials() {
   }
 
   return (
-    <section className="px-8 py-12 text-center max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        What Our Customers Say
-      </h2>
+    <section className="page-shell py-14 text-center">
+      <p className="eyebrow">Real customer reviews</p>
+      <h2 className="section-title mt-2 mb-2">What Our Customers Say</h2>
+      <p className="mb-7 text-sm text-stone-600">Wellness journeys shared by our community.</p>
 
-      <div className="flex items-center justify-center gap-4">
+      <div className="mx-auto flex max-w-3xl items-center justify-center gap-4 rounded-2xl border border-emerald-100 bg-[#f7faf5] p-6 sm:p-9">
         <button onClick={goPrev} className="text-gray-400 hover:text-brand-blue">
           <ChevronLeft size={22} />
         </button>
