@@ -5,7 +5,7 @@ import ProductCard from '../components/product/ProductCard.jsx'
 import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 import { ArrowRight } from 'lucide-react'
 
-// These are the five confirmed products for the homepage Best Sellers collection.
+// These are the five confirmed products for the homepage Best Seller collection.
 const BEST_SELLER_MATCHES = ['diacare', 'prediacare', 'kidney guard', 'cholesterol', 'beetroot juice']
 
 function BestSellers() {
@@ -47,7 +47,7 @@ function BestSellers() {
         <div className="mb-3 flex flex-wrap items-center justify-between gap-4 sm:mb-2">
           <div>
             <p className="eyebrow">Customer favourites</p>
-            <h2 className="section-title mt-2">Shop By Best Sellers</h2>
+            <h2 className="section-title mt-2">Shop By Best Seller</h2>
           <p className="mt-3 mb-3 text-sm text-stone-600">Customer favourites for everyday wellness.</p>
           </div>
           <Link to="/products" className="inline-flex items-center gap-1.5 rounded-full border-2 border-brand-blue-dark px-5 py-2.5 text-sm font-bold text-brand-blue-dark transition hover:bg-brand-blue-dark hover:text-white">View All Products <ArrowRight size={15} /></Link>

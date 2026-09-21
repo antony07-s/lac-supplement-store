@@ -187,7 +187,7 @@ function HeroSlider() {
               focus-visible:outline-[#123b53]
             "
           >
-            Shop Best Sellers
+            Shop Best Seller
           </Link>
         </div>
 
