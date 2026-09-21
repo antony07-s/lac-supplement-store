@@ -10,7 +10,7 @@ const promises = [
 // Upload hero-banner-clean.jpg to Cloudinary as  ayusydah-home/hero-banner-clean
 // (it is the approved banner with the text/buttons removed; all copy below stays live HTML)
 const heroImage = (width) =>
-  `https://res.cloudinary.com/pggies6d/image/upload/f_auto,q_auto,w_${width}/v1789817334/hero-banner-clean.jpg.png`
+  `https://res.cloudinary.com/pggies6d/image/upload/f_auto,q_auto,w_${width}/v1789990514/hero-banner-clean.jpg.png`
 
 // Sizes are measured from the 2172px-wide banner: px ÷ 21.72 = vw, so the text scales
 // exactly like the picture. Each value is capped at a 1800px viewport and has a mobile minimum.
