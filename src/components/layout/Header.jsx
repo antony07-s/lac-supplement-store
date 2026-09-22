@@ -6,6 +6,7 @@ import { useWishlist } from '../../context/WishlistContext.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { Link, useNavigate } from 'react-router-dom'
 import ayusydahLogo from '../../assets/ayusydah-logo.jpeg'
+import { trackEvent } from '../../utils/telemetry.js'
 
 function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -27,6 +28,14 @@ function Header() {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
+    useEffect(() => {
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') { setMobileMenuOpen(false); setAccountMenuOpen(false) }
+        }
+        document.addEventListener('keydown', handleEscape)
+        return () => document.removeEventListener('keydown', handleEscape)
+    }, [])
+
     const handleLogout = () => {
         logout()
         setAccountMenuOpen(false)
@@ -35,7 +44,7 @@ function Header() {
     const submitSearch = (event) => {
         event.preventDefault()
         const term = query.trim()
-        if (term) { navigate(`/search?q=${encodeURIComponent(term)}`); setMobileMenuOpen(false) }
+        if (term) { trackEvent('search', { search_term: term }); navigate(`/search?q=${encodeURIComponent(term)}`); setMobileMenuOpen(false) }
     }
 
     return (
@@ -146,7 +155,7 @@ function Header() {
             </div>
 
             {/* Desktop category navigation: intentionally limited to the five customer-facing collections. */}
-            <nav className="hidden border-t border-stone-100 bg-[#f7f8f4] lg:block relative">
+            <nav aria-label="Product categories" className="hidden border-t border-stone-100 bg-[#f7f8f4] lg:block relative">
                 <ul className="page-shell flex items-center justify-between gap-2 py-3 text-[11px] font-bold text-gray-800 whitespace-nowrap lg:gap-3 lg:text-sm">
                     {navigationItems.map((item) => (
                         <li
@@ -163,7 +172,7 @@ function Header() {
 
             {/* Mobile menu */}
             {mobileMenuOpen && (
-                <nav className="lg:hidden bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
+                <nav aria-label="Mobile navigation" className="lg:hidden bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
                     <form onSubmit={submitSearch} className="relative"><button type="submit" aria-label="Submit search" className="absolute right-2 top-1/2 z-10 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full text-stone-500"><Search size={16} /></button><input
                         type="text"
                         placeholder="Search..."

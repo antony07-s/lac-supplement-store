@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import api from '../api/axios.js'
+import { trackEvent } from '../utils/telemetry.js'
 
 const PENDING_KEY = 'ayusydah-pending-checkout'
 const states = ['Selangor', 'Kuala Lumpur', 'Penang', 'Johor', 'Perak', 'Sabah', 'Sarawak', 'Melaka', 'Negeri Sembilan', 'Kedah', 'Kelantan', 'Pahang', 'Perlis', 'Terengganu', 'Putrajaya', 'Labuan']
@@ -41,7 +42,7 @@ function Checkout() {
     try {
       idempotencyKey.current ||= crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`
       const response = await api.post('/orders', { items: requestItems(), shippingAddress: form }, { headers: { 'Idempotency-Key': idempotencyKey.current } })
-      setOrder(response.data); setQuote(response.data); persist(response.data); clearCart()
+      setOrder(response.data); setQuote(response.data); persist(response.data); clearCart(); trackEvent('begin_checkout', { value: response.data.totalAmount, currency: 'MYR', items: response.data.items?.length || 0 })
     } catch (error) { toast.error(error.response?.data?.message || 'Unable to start checkout.'); placingRef.current = false; setPlacing(false) }
   }
   const cancel = async () => {
@@ -54,7 +55,7 @@ function Checkout() {
     try {
       const response = await api.post(`/orders/${order._id}/paypal-capture`, { paypalOrderId: data.orderID })
       if (response.data.status !== 'paid') throw new Error('Payment could not be confirmed')
-      sessionStorage.removeItem(PENDING_KEY); navigate(`/orders/${order._id}?payment=success`)
+      sessionStorage.removeItem(PENDING_KEY); trackEvent('purchase', { transaction_id: order._id, value: response.data.totalAmount || order.totalAmount, currency: 'MYR' }); navigate(`/orders/${order._id}?payment=success`)
     } catch (error) { toast.error(error.response?.data?.message || error.message || 'Payment failed.'); setPaying(false) }
   }
   const input = 'mt-1.5 w-full min-w-0 rounded-lg border border-gray-300 px-3 py-3 text-sm focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/15'

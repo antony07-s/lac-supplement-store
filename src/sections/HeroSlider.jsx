@@ -224,10 +224,12 @@ function HeroSlider() {
         <img
           src={heroImage(2172)}
           srcSet={`${heroImage(1200)} 1200w, ${heroImage(1800)} 1800w, ${heroImage(2172)} 2172w`}
-          sizes="100vw"
+          sizes="(max-width: 1023px) 100vw, 2172px"
           width="2172"
           height="724"
           alt="AYUSYDAH herbal supplements, aloe vera juice, natural skin care cream and hair care oil with fresh botanicals. Goodness from Nature for Everyday Life."
+          fetchPriority="high"
+          decoding="async"
           className="h-[300px] w-full object-cover object-right sm:h-[380px] lg:h-full"
         />
 

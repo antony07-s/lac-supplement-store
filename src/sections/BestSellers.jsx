@@ -5,9 +5,6 @@ import ProductCard from '../components/product/ProductCard.jsx'
 import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 import { ArrowRight } from 'lucide-react'
 
-// These are the five confirmed products for the homepage Best Seller collection.
-const BEST_SELLER_MATCHES = ['diacare', 'prediacare', 'kidney guard', 'cholesterol', 'beetroot juice']
-
 function BestSellers() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -17,12 +14,9 @@ function BestSellers() {
     setLoading(true)
     setError('')
     try {
-      // Fetch the full small catalogue: a paginated first page cannot reliably
-      // contain every curated product after new items are added.
-      const res = await getWithRetry('/products', { params: { limit: 50 }, signal })
+      const res = await getWithRetry('/products', { params: { bestSeller: true, limit: 5 }, signal })
       const catalog = Array.isArray(res.data) ? res.data : (res.data.products || [])
-      const selected = BEST_SELLER_MATCHES.map((needle) => catalog.find((product) => product.name.toLowerCase().includes(needle))).filter(Boolean)
-      setProducts(selected)
+      setProducts(catalog)
     } catch (err) {
       if (err.code !== 'ERR_CANCELED') {
         setProducts([])
@@ -48,7 +42,7 @@ function BestSellers() {
           <div>
             <p className="eyebrow">Customer favourites</p>
             <h2 className="section-title mt-2">Shop By Best Seller</h2>
-          <p className="mt-3 mb-3 text-sm text-stone-600">Customer favourites for everyday wellness.</p>
+          <p className="mt-3 mb-3 text-sm text-stone-600">Products selected by our team for everyday wellness.</p>
           </div>
           <Link to="/products" className="inline-flex items-center gap-1.5 rounded-full border-2 border-brand-blue-dark px-5 py-2.5 text-sm font-bold text-brand-blue-dark transition hover:bg-brand-blue-dark hover:text-white">View All Products <ArrowRight size={15} /></Link>
         </div>
@@ -66,9 +60,9 @@ function BestSellers() {
           <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-8 text-center text-stone-600">No products are available yet.</div>
         ) : (
           <StaggerGrid className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5 lg:gap-5">
-            {products.map((product) => (
-              <StaggerItem key={product._id} direction="up">
-                <ProductCard product={product} />
+            {products.map((product, index) => (
+              <StaggerItem key={product._id} direction="up" className="min-w-0">
+                <ProductCard product={product} priority={index < 2} />
               </StaggerItem>
             ))}
           </StaggerGrid>

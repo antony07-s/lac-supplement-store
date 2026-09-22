@@ -41,7 +41,7 @@ export function StaggerGrid({ children, className = '' }) {
 
 export function StaggerItem({ children, direction = 'left', className = '' }) {
   return (
-    <motion.div variants={getItemVariant(direction)} className={className}>
+    <motion.div variants={getItemVariant(direction)} className={`h-full ${className}`}>
       {children}
     </motion.div>
   )

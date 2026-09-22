@@ -83,6 +83,7 @@ function EditProduct() {
         shippingWeightKg,
         category: form.category,
         healthGoals: form.healthGoals || [],
+        bestSeller: form.bestSeller === true,
         description: form.description,
         videoUrl,
         videoPublicId,
@@ -172,6 +173,8 @@ function EditProduct() {
               <input type="number" name="shippingWeightKg" value={form.shippingWeightKg ?? ''} onChange={handleChange} step="0.01" min="0.01" required className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue" />
             </div>
           </div>
+
+          <label className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-stone-700"><input type="checkbox" checked={form.bestSeller === true} onChange={(event) => setForm((current) => ({ ...current, bestSeller: event.target.checked }))} /> Show in homepage Best Sellers</label>
 
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Health goals</label>

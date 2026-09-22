@@ -1,21 +1,27 @@
-import { Star, Heart, ShoppingBag } from 'lucide-react'
+import { Star, Heart, ShoppingBag, PackageCheck } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { useRef, useState } from 'react'
 import bp4 from '../../assets/BP4.png'
 import { useCart } from '../../context/CartContext.jsx'
 import { useWishlist } from '../../context/WishlistContext.jsx'
 import { showCartToast } from '../../utils/cartToast.js'
+import { trackEvent } from '../../utils/telemetry.js'
+import { cloudinaryImage, cloudinarySrcSet } from '../../utils/cloudinaryImage.js'
 
 const localImages = { BP4: bp4 }
 
-function ProductCard({ product }) {
+function ProductCard({ product, priority = false }) {
     const location = useLocation()
     const { addToCart } = useCart()
     const { toggleWishlist, isInWishlist } = useWishlist()
     const inWishlist = isInWishlist(product._id)
     const defaultVariant = Array.isArray(product.variants) ? product.variants.find((variant) => variant.isAvailable && Number(variant.stock) !== 0) || product.variants[0] : null
     const outOfStock = defaultVariant ? (!defaultVariant.isAvailable || Number(defaultVariant.stock) === 0) : Number(product.stock) === 0
+    const lowStock = !outOfStock && Number(defaultVariant?.stock ?? product.stock) > 0 && Number(defaultVariant?.stock ?? product.stock) <= 5
+    const hasVariants = Array.isArray(product.variants) && product.variants.length > 1
     const image = localImages[defaultVariant?.image] || defaultVariant?.image || localImages[product.image] || product.image
+    const optimizedImage = cloudinaryImage(image, { width: 480, height: 480 })
+    const imageSrcSet = cloudinarySrcSet(image, [240, 360, 480], { height: 480 })
     const price = Number(defaultVariant?.price ?? product.price) || 0
     const originalPrice = Number(defaultVariant?.originalPrice ?? product.originalPrice) || 0
     const discount = originalPrice > price
@@ -31,6 +37,7 @@ function ProductCard({ product }) {
         addingRef.current = true
         setAdding(true)
         addToCart(product, 1, defaultVariant)
+        trackEvent('add_to_cart', { item_id: product._id, item_name: product.name, value: price, currency: 'MYR' })
         showCartToast(`${product.name}${defaultVariant ? ` — ${defaultVariant.packSize}` : ''} added to bag`)
         setTimeout(() => { addingRef.current = false; setAdding(false) }, 700)
     }
@@ -51,11 +58,14 @@ function ProductCard({ product }) {
                 <Heart size={14} fill={inWishlist ? 'currentColor' : 'none'} />
             </button>
 
-            <Link to={productUrl} className="aspect-square w-full overflow-hidden bg-white flex items-center justify-center p-3 border-b border-stone-100">
+            <Link to={productUrl} onClick={() => trackEvent('view_item', { item_id: product._id, item_name: product.name, value: price, currency: 'MYR' })} className="aspect-square w-full overflow-hidden bg-white flex items-center justify-center p-3 border-b border-stone-100">
                 <img
-                    src={image}
+                    src={optimizedImage}
+                    srcSet={imageSrcSet}
+                    sizes="(max-width: 639px) 50vw, (max-width: 1023px) 25vw, 240px"
                     alt={product.name}
-                    loading="lazy"
+                    loading={priority ? 'eager' : 'lazy'}
+                    fetchPriority={priority ? 'high' : 'auto'}
                     decoding="async"
                     onError={(event) => { event.currentTarget.style.display = 'none' }}
                     className="h-full w-full object-contain"
@@ -70,6 +80,8 @@ function ProductCard({ product }) {
                 <Link to={productUrl} className="mt-1 block h-9 overflow-hidden text-xs font-bold leading-4 text-stone-800 hover:text-brand-blue sm:text-sm sm:leading-5">
                     {product.name}
                 </Link>
+
+                <p className="mt-1 min-h-4 text-[10px] font-medium text-stone-500">{hasVariants ? `${product.variants.length} sizes available` : ''}</p>
 
                 <div className="mt-1.5 flex items-center gap-1 text-[11px] text-stone-500">
                     <Star size={12} className="fill-brand-gold text-brand-gold" />
@@ -87,14 +99,9 @@ function ProductCard({ product }) {
                     )}
                 </div>
 
-                <button
-                    onClick={add}
-                    disabled={adding || outOfStock}
-                    className="mt-2.5 flex min-h-9 w-full items-center justify-center gap-1.5 rounded-full bg-brand-blue px-2 text-[11px] font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"
-                >
-                    <ShoppingBag size={14} />
-                    {outOfStock ? 'Out of Stock' : adding ? 'Adding...' : 'Add to bag'}
-                </button>
+                <p className="mt-1.5 flex min-h-4 items-center gap-1 text-[10px] font-semibold text-amber-700">{lowStock && <><PackageCheck size={12} /> Only {defaultVariant?.stock ?? product.stock} left</>}</p>
+
+                <button onClick={add} disabled={adding || outOfStock} className="mt-auto flex min-h-9 w-full items-center justify-center gap-1.5 rounded-full bg-brand-blue px-2 text-[11px] font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"><ShoppingBag size={14} />{outOfStock ? 'Out of Stock' : adding ? 'Adding...' : 'Add to bag'}</button>
             </div>
         </article>
     )

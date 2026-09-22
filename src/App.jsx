@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { AnimatePresence, motion } from 'framer-motion'
 
@@ -15,37 +16,53 @@ import Cart from './pages/Cart.jsx'
 import Wishlist from './pages/Wishlist.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
-import AboutUs from './pages/AboutUs.jsx'
-import Terms from './pages/Terms.jsx'
-import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
-import FAQ from './pages/FAQ.jsx'
-import Careers from './pages/Careers.jsx'
-import SiteMap from './pages/SiteMap.jsx'
-import ContactUs from './pages/ContactUs.jsx'
 import ScrollToTop from './components/ScrollToTop.jsx'
 import Seo from './components/Seo.jsx'
 import MyOrders from './pages/MyOrders.jsx'
 import OrderDetails from './pages/OrderDetails.jsx'
 import TrackOrder from './pages/TrackOrder.jsx'
 import AdminRoute from './components/admin/AdminRoute.jsx'
-import AdminDashboard from './pages/admin/AdminDashboard.jsx'
-import ManageProducts from './pages/admin/ManageProducts.jsx'
-import AddProduct from './pages/admin/AddProduct.jsx'
-import EditProduct from './pages/admin/EditProduct.jsx'
-import ManageOrders from './pages/admin/ManageOrders.jsx'
-import ManageReviews from './pages/admin/ManageReviews.jsx'
-import Checkout from './pages/Checkout.jsx'
 import ForgotPassword from './pages/ForgotPassword.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
 import WhatsAppButton from './components/ui/WhatsAppButton.jsx'
+import { reportError } from './utils/telemetry.js'
+
+const AboutUs = lazy(() => import('./pages/AboutUs.jsx'))
+const Terms = lazy(() => import('./pages/Terms.jsx'))
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy.jsx'))
+const FAQ = lazy(() => import('./pages/FAQ.jsx'))
+const Careers = lazy(() => import('./pages/Careers.jsx'))
+const SiteMap = lazy(() => import('./pages/SiteMap.jsx'))
+const ContactUs = lazy(() => import('./pages/ContactUs.jsx'))
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard.jsx'))
+const ManageProducts = lazy(() => import('./pages/admin/ManageProducts.jsx'))
+const AddProduct = lazy(() => import('./pages/admin/AddProduct.jsx'))
+const EditProduct = lazy(() => import('./pages/admin/EditProduct.jsx'))
+const ManageOrders = lazy(() => import('./pages/admin/ManageOrders.jsx'))
+const ManageReviews = lazy(() => import('./pages/admin/ManageReviews.jsx'))
+const Checkout = lazy(() => import('./pages/Checkout.jsx'))
+
+function RouteLoading() {
+  return <main className="page-shell section-space grid min-h-64 place-items-center" aria-label="Loading page"><span aria-hidden="true" className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" /></main>
+}
 
 function App() {
   const location = useLocation()
 
   const isAuthPage =
     location.pathname === '/login' ||
-    location.pathname === '/register'
+    location.pathname === '/register' ||
+    location.pathname === '/forgot-password' ||
+    location.pathname.startsWith('/reset-password/')
   const isAdminPage = location.pathname.startsWith('/admin')
+
+  useEffect(() => {
+    const handleError = (event) => reportError(event.error || event.message, { source: 'window' })
+    const handleRejection = (event) => reportError(event.reason, { source: 'unhandled-rejection' })
+    window.addEventListener('error', handleError)
+    window.addEventListener('unhandledrejection', handleRejection)
+    return () => { window.removeEventListener('error', handleError); window.removeEventListener('unhandledrejection', handleRejection) }
+  }, [])
 
   return (
     <>
@@ -71,6 +88,7 @@ function App() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
+          <Suspense fallback={<RouteLoading />}>
           <Routes location={location}>
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<ProductDetail />} />
@@ -104,6 +122,7 @@ function App() {
             <Route path="/admin/reviews" element={<AdminRoute><ManageReviews /></AdminRoute>} />
             <Route path="/checkout" element={<Checkout />} />
           </Routes>
+          </Suspense>
         </motion.div>
       </AnimatePresence>
 
