@@ -6,7 +6,7 @@ const columns = [
   ['Shop', [['Herbal Supplements', '/category/Herbal%20Supplements'], ['Ayurvedic Wellness', '/category/Ayurvedic%20Wellness'], ['Juices', '/category/Juices'], ['Skin & Hair Care', '/category/Skin%20%26%20Hair%20Care'], ['Brands', '/category/Brands']]],
   ['Customer Care', [['Contact Us', '/contact-us'], ['Track Order', '/track-order'], ['My Orders', '/my-orders'], ['FAQ', '/faq']]],
   ['About AYUSYDAH', [['Our Story', '/about-us'], ['Careers', '/careers'], ['Site Map', '/site-map']]],
-  ['Legal', [['Privacy Policy', '/privacy-policy'], ['Terms & Conditions', '/terms']]],
+  ['Legal', [['Privacy Policy', '/privacy-policy'], ['Terms & Conditions', '/terms'], ['Refund Policy', '/refund-policy'], ['Delivery & Shipping', '/shipping-policy']]],
 ]
 
 // Footer only exposes routes that are implemented in this storefront.

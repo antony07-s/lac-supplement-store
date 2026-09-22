@@ -30,6 +30,8 @@ import { reportError } from './utils/telemetry.js'
 const AboutUs = lazy(() => import('./pages/AboutUs.jsx'))
 const Terms = lazy(() => import('./pages/Terms.jsx'))
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy.jsx'))
+const RefundPolicy = lazy(() => import('./pages/RefundPolicy.jsx'))
+const ShippingPolicy = lazy(() => import('./pages/ShippingPolicy.jsx'))
 const FAQ = lazy(() => import('./pages/FAQ.jsx'))
 const Careers = lazy(() => import('./pages/Careers.jsx'))
 const SiteMap = lazy(() => import('./pages/SiteMap.jsx'))
@@ -110,6 +112,8 @@ function App() {
             <Route path="/about-us" element={<AboutUs />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/shipping-policy" element={<ShippingPolicy />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/careers" element={<Careers />} />
             <Route path="/site-map" element={<SiteMap />} />
