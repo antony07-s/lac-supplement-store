@@ -12,6 +12,9 @@ function AboutUs() {
             <p>
                 Our mission is to make natural wellness simple — no confusing ingredient lists, no empty promises. Just honest, effective supplements that support your everyday health goals.
             </p>
+            <p>
+                Ayusydah is owned and operated by Delta Superstar Services (SSM Registration No. 202203250952 (PG0533002-P)), a registered sole proprietorship based in Kluang, Johor, Malaysia.
+            </p>
         </StaticPageLayout>
     )
 }
