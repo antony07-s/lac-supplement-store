@@ -12,10 +12,15 @@ const statusColors = {
   delivered: 'bg-gray-100 text-gray-700',
 }
 
+const couriers = ['J&T Express', 'Ninja Van', 'Pos Laju', 'DHL eCommerce', 'LEX', 'Other']
+
 function ManageOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [updatingOrderId, setUpdatingOrderId] = useState(null)
+  const [shipModalOrder, setShipModalOrder] = useState(null)
+  const [courierName, setCourierName] = useState(couriers[0])
+  const [trackingNumber, setTrackingNumber] = useState('')
 
   useEffect(() => {
     let active = true
@@ -26,18 +31,36 @@ function ManageOrders() {
     return () => { active = false }
   }, [])
 
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = async (orderId, newStatus, extra = {}) => {
     if (updatingOrderId) return
     setUpdatingOrderId(orderId)
     try {
-      await api.put(`/orders/${orderId}/status`, { status: newStatus })
+      await api.put(`/orders/${orderId}/status`, { status: newStatus, ...extra })
       setOrders((prev) =>
-        prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o))
+        prev.map((o) => (o._id === orderId ? { ...o, status: newStatus, ...extra } : o))
       )
       toast.success('Order status updated', { id: 'order-status-updated' })
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update status', { id: 'order-status-updated' })
     } finally { setUpdatingOrderId(null) }
+  }
+
+  const openShipModal = (order) => {
+    setShipModalOrder(order)
+    setCourierName(couriers[0])
+    setTrackingNumber('')
+  }
+
+  const submitShip = async () => {
+    if (!trackingNumber.trim()) {
+      toast.error('Please enter a tracking number')
+      return
+    }
+    await handleStatusChange(shipModalOrder._id, 'shipped', {
+      courierName,
+      trackingNumber: trackingNumber.trim(),
+    })
+    setShipModalOrder(null)
   }
 
   return (
@@ -85,9 +108,12 @@ function ManageOrders() {
                   </td>
                   <td className="px-5 py-3">
                     <span className={`inline-block rounded-full px-3 py-1.5 text-xs font-semibold ${statusColors[order.status] || statusColors.pending}`}>{order.status}</span>
+                    {order.trackingNumber && (
+                      <p className="mt-1 text-[11px] text-gray-400">{order.courierName}: {order.trackingNumber}</p>
+                    )}
                   </td>
                   <td className="px-5 py-3 text-right">
-                    {order.status === 'paid' && <button disabled={updatingOrderId === order._id} onClick={() => handleStatusChange(order._id, 'shipped')} className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3 py-2 text-xs font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60"><Truck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark shipped'}</button>}
+                    {order.status === 'paid' && <button disabled={updatingOrderId === order._id} onClick={() => openShipModal(order)} className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3 py-2 text-xs font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60"><Truck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark shipped'}</button>}
                     {order.status === 'shipped' && <button disabled={updatingOrderId === order._id} onClick={() => handleStatusChange(order._id, 'delivered')} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"><PackageCheck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark delivered'}</button>}
                     {order.status === 'delivered' && <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700"><CheckCircle2 size={15} />Complete</span>}
                     {order.status === 'pending' && <span className="text-xs text-gray-400">Awaiting payment</span>}
@@ -97,6 +123,44 @@ function ManageOrders() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {shipModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-800">Mark order as shipped</h3>
+            <p className="mt-1 text-xs text-gray-500">Order #{shipModalOrder._id.slice(-8).toUpperCase()}</p>
+
+            <label className="mt-4 block text-xs font-semibold text-gray-600">Courier</label>
+            <select
+              value={courierName}
+              onChange={(e) => setCourierName(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue focus:outline-none"
+            >
+              {couriers.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+
+            <label className="mt-4 block text-xs font-semibold text-gray-600">Tracking number</label>
+            <input
+              type="text"
+              value={trackingNumber}
+              onChange={(e) => setTrackingNumber(e.target.value)}
+              placeholder="e.g. MY123456789"
+              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue focus:outline-none"
+            />
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button onClick={() => setShipModalOrder(null)} className="rounded-full px-4 py-2 text-xs font-semibold text-gray-500 hover:bg-gray-100">Cancel</button>
+              <button
+                onClick={submitShip}
+                disabled={updatingOrderId === shipModalOrder._id}
+                className="rounded-full bg-brand-blue px-4 py-2 text-xs font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60"
+              >
+                {updatingOrderId === shipModalOrder._id ? 'Saving…' : 'Confirm shipped'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </AdminLayout>
