@@ -16,19 +16,21 @@ function ProductListing() {
 
     const searchTerm = searchParams.get('q')?.trim().slice(0, 100) || ''
     const healthGoal = searchParams.get('healthGoal')?.trim().slice(0, 100) || ''
+    const sort = searchParams.get('sort') || 'newest'
     const currentPage = Math.max(1, Number.parseInt(searchParams.get('page'), 10) || 1)
     const decodedCategory = category ? decodeURIComponent(category) : ''
     const showAllProducts = location.pathname === '/products'
 
     useEffect(() => {
         const controller = new AbortController()
-        const params = { page: currentPage, limit: PRODUCTS_PER_PAGE }
+        const params = { page: currentPage, limit: PRODUCTS_PER_PAGE, sort }
         if (searchTerm) params.search = searchTerm
         else if (healthGoal) params.healthGoal = healthGoal
         else if (!showAllProducts && decodedCategory) params.category = decodedCategory
 
         getWithRetry('/products', { params, signal: controller.signal })
             .then((res) => {
+                setError('')
                 const returnedProducts = Array.isArray(res.data) ? res.data : (res.data.products || [])
                 const isLegacyResponse = Array.isArray(res.data)
                 setProducts(isLegacyResponse
@@ -42,7 +44,7 @@ function ProductListing() {
             })
             .finally(() => setLoading(false))
         return () => controller.abort()
-    }, [currentPage, decodedCategory, healthGoal, searchTerm, showAllProducts])
+    }, [currentPage, decodedCategory, healthGoal, searchTerm, showAllProducts, sort])
 
     const title = searchTerm ? `Search results for "${searchTerm}"` : healthGoal ? healthGoal : showAllProducts ? 'All products' : decodedCategory
     const totalPages = Math.max(1, Math.ceil(total / PRODUCTS_PER_PAGE))
@@ -56,6 +58,14 @@ function ProductListing() {
         headingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
 
+    const changeSort = (event) => {
+        const nextParams = new URLSearchParams(searchParams)
+        if (event.target.value === 'newest') nextParams.delete('sort')
+        else nextParams.set('sort', event.target.value)
+        nextParams.delete('page')
+        setSearchParams(nextParams)
+    }
+
     return (
         <main className="page-shell section-space">
             <p className="text-xs text-gray-400 mb-2">
@@ -63,7 +73,7 @@ function ProductListing() {
                 {' > '}
                 {title}
             </p>
-            <h1 ref={headingRef} className="section-title mb-8 scroll-mt-28">{title}</h1>
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-4"><h1 ref={headingRef} className="section-title scroll-mt-28">{title}</h1><label className="text-sm font-semibold text-stone-700">Sort by<select value={sort} onChange={changeSort} className="ml-2 min-h-11 rounded-lg border border-stone-300 bg-white px-3 text-sm font-medium focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/20"><option value="newest">Newest</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option><option value="name">Name: A–Z</option></select></label></div>
 
             {loading ? (
                 <p className="text-gray-500">Loading products...</p>

@@ -8,25 +8,25 @@ import UtilityBar from './components/layout/UtilityBar.jsx'
 import Header from './components/layout/Header.jsx'
 import Footer from './components/layout/Footer.jsx'
 
-import Home from './pages/Home.jsx'
-import ProductDetail from './pages/ProductDetail.jsx'
 import CookieBanner from './components/ui/CookieBanner.jsx'
-import ProductListing from './pages/ProductListing.jsx'
-import Cart from './pages/Cart.jsx'
-import Wishlist from './pages/Wishlist.jsx'
-import Login from './pages/Login.jsx'
-import Register from './pages/Register.jsx'
 import ScrollToTop from './components/ScrollToTop.jsx'
 import Seo from './components/Seo.jsx'
-import MyOrders from './pages/MyOrders.jsx'
-import OrderDetails from './pages/OrderDetails.jsx'
-import TrackOrder from './pages/TrackOrder.jsx'
 import AdminRoute from './components/admin/AdminRoute.jsx'
-import ForgotPassword from './pages/ForgotPassword.jsx'
-import ResetPassword from './pages/ResetPassword.jsx'
 import WhatsAppButton from './components/ui/WhatsAppButton.jsx'
 import { reportError } from './utils/telemetry.js'
 
+const Home = lazy(() => import('./pages/Home.jsx'))
+const ProductDetail = lazy(() => import('./pages/ProductDetail.jsx'))
+const ProductListing = lazy(() => import('./pages/ProductListing.jsx'))
+const Cart = lazy(() => import('./pages/Cart.jsx'))
+const Wishlist = lazy(() => import('./pages/Wishlist.jsx'))
+const Login = lazy(() => import('./pages/Login.jsx'))
+const Register = lazy(() => import('./pages/Register.jsx'))
+const MyOrders = lazy(() => import('./pages/MyOrders.jsx'))
+const OrderDetails = lazy(() => import('./pages/OrderDetails.jsx'))
+const TrackOrder = lazy(() => import('./pages/TrackOrder.jsx'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword.jsx'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'))
 const AboutUs = lazy(() => import('./pages/AboutUs.jsx'))
 const Terms = lazy(() => import('./pages/Terms.jsx'))
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy.jsx'))
@@ -43,6 +43,7 @@ const EditProduct = lazy(() => import('./pages/admin/EditProduct.jsx'))
 const ManageOrders = lazy(() => import('./pages/admin/ManageOrders.jsx'))
 const ManageReviews = lazy(() => import('./pages/admin/ManageReviews.jsx'))
 const Checkout = lazy(() => import('./pages/Checkout.jsx'))
+const NotFound = lazy(() => import('./pages/NotFound.jsx'))
 
 function RouteLoading() {
   return <main className="page-shell section-space grid min-h-64 place-items-center" aria-label="Loading page"><span aria-hidden="true" className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" /></main>
@@ -68,6 +69,7 @@ function App() {
 
   return (
     <>
+      <a href="#main-content" className="sr-only fixed left-4 top-4 z-[100] rounded-lg bg-brand-blue px-4 py-2 font-semibold text-white focus:not-sr-only">Skip to main content</a>
       <ScrollToTop />
       <Seo />
 
@@ -84,6 +86,8 @@ function App() {
 
       <AnimatePresence mode="wait">
         <motion.div
+          id="main-content"
+          tabIndex="-1"
           key={location.pathname}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -125,6 +129,7 @@ function App() {
             <Route path="/admin/orders" element={<AdminRoute><ManageOrders /></AdminRoute>} />
             <Route path="/admin/reviews" element={<AdminRoute><ManageReviews /></AdminRoute>} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
         </motion.div>

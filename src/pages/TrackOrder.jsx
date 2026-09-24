@@ -20,7 +20,7 @@ function TrackOrder() {
     api.get(`/orders/user/${user.id}`).then((res) => { if (!active) return; setOrders(res.data); if (!selectedId && res.data[0]) setParams({ order: res.data[0]._id }, { replace: true }) }).catch(() => { if (active) setOrders([]) }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [selectedId, setParams, user])
-  if (!user) return <main className="page-shell py-24 text-center"><h1 className="mb-3 text-2xl font-bold">Please login to track an order</h1><Link className="font-semibold text-brand-blue hover:underline" to="/login">Go to Login</Link></main>
+  if (!user) return <main className="page-shell py-24 text-center"><h1 className="mb-3 text-2xl font-bold">Please login to track an order</h1><Link className="font-semibold text-brand-blue hover:underline" to="/login?returnTo=/track-order">Go to Login</Link></main>
   if (loading) return <main className="page-shell py-24 text-center text-gray-500">Loading your orders...</main>
   if (!orders.length) return <main className="page-shell py-24 text-center"><h1 className="mb-3 text-2xl font-bold">No orders to track</h1><Link className="font-semibold text-brand-blue hover:underline" to="/products">Start shopping</Link></main>
   const currentStep = Math.max(0, steps.findIndex((step) => step.key === selectedOrder?.status))
