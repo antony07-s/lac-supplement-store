@@ -21,6 +21,7 @@ function ManageOrders() {
   const [shipModalOrder, setShipModalOrder] = useState(null)
   const [courierName, setCourierName] = useState(couriers[0])
   const [trackingNumber, setTrackingNumber] = useState('')
+  const [fulfilmentNote, setFulfilmentNote] = useState('')
 
   useEffect(() => {
     let active = true
@@ -49,6 +50,7 @@ function ManageOrders() {
     setShipModalOrder(order)
     setCourierName(couriers[0])
     setTrackingNumber('')
+    setFulfilmentNote('')
   }
 
   const submitShip = async () => {
@@ -59,8 +61,20 @@ function ManageOrders() {
     await handleStatusChange(shipModalOrder._id, 'shipped', {
       courierName,
       trackingNumber: trackingNumber.trim(),
+      fulfilmentNote: fulfilmentNote.trim(),
     })
     setShipModalOrder(null)
+  }
+
+  const retryShipmentEmail = async (orderId) => {
+    setUpdatingOrderId(orderId)
+    try {
+      const response = await api.post(`/orders/${orderId}/shipment-email/retry`)
+      setOrders((prev) => prev.map((order) => order._id === orderId ? { ...order, ...response.data } : order))
+      toast.success('Shipment email sent')
+    } catch (err) {
+      toast.error(err.response?.data?.detail || err.response?.data?.message || 'Shipment email could not be sent')
+    } finally { setUpdatingOrderId(null) }
   }
 
   return (
@@ -111,6 +125,7 @@ function ManageOrders() {
                     {order.trackingNumber && (
                       <p className="mt-1 text-[11px] text-gray-400">{order.courierName}: {order.trackingNumber}</p>
                     )}
+                    {order.shipmentEmailStatus === 'failed' && <p className="mt-1 text-[11px] font-semibold text-rose-600">Shipment email failed</p>}
                   </td>
                   <td className="px-5 py-3 text-right">
                     {order.status === 'paid' && <button disabled={updatingOrderId === order._id} onClick={() => openShipModal(order)} className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3 py-2 text-xs font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60"><Truck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark shipped'}</button>}
@@ -118,6 +133,7 @@ function ManageOrders() {
                     {order.status === 'delivered' && <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700"><CheckCircle2 size={15} />Complete</span>}
                     {order.status === 'pending' && <span className="text-xs text-gray-400">Awaiting payment</span>}
                     {order.status === 'cancelled' && <span className="text-xs text-rose-600">Payment cancelled</span>}
+                    {order.shipmentEmailStatus === 'failed' && <button type="button" disabled={updatingOrderId === order._id} onClick={() => retryShipmentEmail(order._id)} className="ml-2 text-xs font-semibold text-rose-700 underline disabled:opacity-50">Retry email</button>}
                   </td>
                 </tr>
               ))}
@@ -149,6 +165,9 @@ function ManageOrders() {
               placeholder="e.g. MY123456789"
               className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue focus:outline-none"
             />
+
+            <label className="mt-4 block text-xs font-semibold text-gray-600">Internal fulfilment note <span className="font-normal text-gray-400">(optional)</span></label>
+            <textarea value={fulfilmentNote} onChange={(e) => setFulfilmentNote(e.target.value)} maxLength="1000" rows="3" placeholder="Packing or delivery instructions for staff" className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue focus:outline-none" />
 
             <div className="mt-6 flex justify-end gap-2">
               <button onClick={() => setShipModalOrder(null)} className="rounded-full px-4 py-2 text-xs font-semibold text-gray-500 hover:bg-gray-100">Cancel</button>

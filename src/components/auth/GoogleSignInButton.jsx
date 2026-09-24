@@ -2,24 +2,32 @@ import { useEffect, useRef, useState } from 'react'
 import { Loader2, ShieldCheck } from 'lucide-react'
 
 const scriptId = 'google-identity-services'
+let scriptPromise
+let initializedClientId
+let activeCredentialHandler
 
 function loadGoogleScript() {
   if (window.google?.accounts?.id) return Promise.resolve()
+  if (scriptPromise) return scriptPromise
   const existing = document.getElementById(scriptId)
-  if (existing) return new Promise((resolve, reject) => {
-    existing.addEventListener('load', resolve, { once: true })
-    existing.addEventListener('error', reject, { once: true })
-  })
-  return new Promise((resolve, reject) => {
+  scriptPromise = new Promise((resolve, reject) => {
+    if (existing) { existing.addEventListener('load', resolve, { once: true }); existing.addEventListener('error', reject, { once: true }); return }
     const script = document.createElement('script')
     script.id = scriptId
     script.src = 'https://accounts.google.com/gsi/client'
     script.async = true
     script.defer = true
     script.onload = resolve
-    script.onerror = reject
+    script.onerror = () => { scriptPromise = undefined; reject(new Error('Google Identity Services failed to load')) }
     document.head.appendChild(script)
   })
+  return scriptPromise
+}
+
+function initializeGoogle(clientId) {
+  if (initializedClientId === clientId) return
+  window.google.accounts.id.initialize({ client_id: clientId, callback: (response) => activeCredentialHandler?.(response), auto_select: false })
+  initializedClientId = clientId
 }
 
 function GoogleSignInButton({ onCredential, disabled = false }) {
@@ -30,13 +38,15 @@ function GoogleSignInButton({ onCredential, disabled = false }) {
   useEffect(() => {
     if (!clientId || !containerRef.current) return undefined
     let active = true
+    activeCredentialHandler = onCredential
     loadGoogleScript().then(() => {
       if (!active || !window.google?.accounts?.id || !containerRef.current) return
-      window.google.accounts.id.initialize({ client_id: clientId, callback: onCredential, auto_select: false })
+      initializeGoogle(clientId)
+      containerRef.current.replaceChildren()
       window.google.accounts.id.renderButton(containerRef.current, { theme: 'outline', size: 'large', text: 'continue_with', shape: 'rect', width: 360, logo_alignment: 'left' })
       setLoading(false)
     }).catch(() => { if (active) setLoading(false) })
-    return () => { active = false }
+    return () => { active = false; if (activeCredentialHandler === onCredential) activeCredentialHandler = undefined }
   }, [clientId, onCredential])
 
   if (!clientId) return null

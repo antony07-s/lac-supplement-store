@@ -34,7 +34,7 @@ export default function Seo() {
       : pathname.startsWith('/category/') || pathname === '/search'
         ? ['Shop wellness products | AYUSYDAH', 'Find AYUSYDAH wellness products for your everyday routine.']
         : [`${siteName} | Everyday wellness`, fallbackDescription])
-    const baseUrl = import.meta.env.PROD ? (import.meta.env.VITE_SITE_URL || 'https://ayusydah.com').replace(/\/$/, '') : window.location.origin
+    const baseUrl = import.meta.env.PROD ? (import.meta.env.VITE_SITE_URL || 'https://www.ayusydah.com').replace(/\/$/, '') : window.location.origin
     const canonical = `${baseUrl}${pathname}`
     document.title = title
     let link = document.querySelector('link[rel="canonical"]')
@@ -46,6 +46,7 @@ export default function Seo() {
     ensureMeta('meta[property="og:type"]', 'property', isProduct ? 'product' : 'website')
     ensureMeta('meta[property="og:url"]', 'property', canonical)
     ensureMeta('meta[property="og:image"]', 'property', socialImage)
+    ensureMeta('meta[property="og:locale"]', 'property', 'en_MY')
     ensureMeta('meta[name="twitter:card"]', 'name', 'summary_large_image')
     ensureMeta('meta[name="robots"]', 'name', isPrivate ? 'noindex,nofollow' : 'index,follow')
     if (!isProduct) {
