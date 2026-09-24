@@ -223,8 +223,8 @@ function HeroSlider() {
       <div className="relative lg:absolute lg:inset-0 lg:-z-10">
         <img
           src={heroImage(2172)}
-          srcSet={`${heroImage(1200)} 1200w, ${heroImage(1800)} 1800w, ${heroImage(2172)} 2172w`}
-          sizes="(max-width: 1023px) 100vw, 2172px"
+          srcSet={`${heroImage(768)} 768w, ${heroImage(1200)} 1200w, ${heroImage(1800)} 1800w, ${heroImage(2172)} 2172w`}
+          sizes="100vw"
           width="2172"
           height="724"
           alt="AYUSYDAH herbal supplements, aloe vera juice, natural skin care cream and hair care oil with fresh botanicals. Goodness from Nature for Everyday Life."
