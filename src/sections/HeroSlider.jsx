@@ -233,7 +233,6 @@ function HeroSlider() {
           className="aspect-[2172/724] h-auto w-full object-cover object-right lg:aspect-auto lg:h-full"
         />
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-white to-transparent lg:hidden" />
       </div>
     </section>
   )
