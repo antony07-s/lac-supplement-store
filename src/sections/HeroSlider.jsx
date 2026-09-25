@@ -1,4 +1,4 @@
-import { ArrowRight, Heart, Leaf, UsersRound } from 'lucide-react'
+﻿import { ArrowRight, Heart, Leaf, UsersRound } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const promises = [
@@ -131,12 +131,12 @@ function HeroSlider() {
               gap-[.55em]
               whitespace-nowrap
               rounded-full
-              bg-[#b87932]
+              bg-[#d9ad42]
               font-bold
               uppercase
               tracking-wide
               text-white
-              shadow-[0_7px_20px_rgba(184,121,50,0.25)]
+              shadow-[0_7px_20px_rgba(217,173,66,0.28)]
               transition-all
               duration-300
               hover:-translate-y-1
@@ -230,7 +230,7 @@ function HeroSlider() {
           alt="AYUSYDAH herbal supplements, aloe vera juice, natural skin care cream and hair care oil with fresh botanicals. Goodness from Nature for Everyday Life."
           fetchPriority="high"
           decoding="async"
-          className="h-[300px] w-full object-cover object-right sm:h-[380px] lg:h-full"
+          className="aspect-[2172/724] h-auto w-full object-cover object-right lg:aspect-auto lg:h-full"
         />
 
         <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-white to-transparent lg:hidden" />

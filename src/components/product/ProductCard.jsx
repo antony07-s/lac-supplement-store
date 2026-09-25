@@ -73,22 +73,21 @@ function ProductCard({ product, priority = false }) {
             </Link>
 
             <div className="flex flex-1 flex-col px-1 pt-2.5">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-brand-blue/65">
+                <p className="min-h-4 truncate text-[9px] font-bold uppercase tracking-widest leading-4 text-brand-blue/65">
                     {product.category || 'Ayusydah'}
                 </p>
 
-                <Link to={productUrl} className="mt-1 block h-9 overflow-hidden text-xs font-bold leading-4 text-stone-800 hover:text-brand-blue sm:text-sm sm:leading-5">
+                                <Link to={productUrl} className="mt-1 min-h-[2.5rem] text-xs font-bold leading-4 text-stone-800 hover:text-brand-blue line-clamp-2 sm:min-h-[2.75rem] sm:text-sm sm:leading-5">
                     {product.name}
                 </Link>
-
                 <p className="mt-1 min-h-4 text-[10px] font-medium text-stone-500">{hasVariants ? `${product.variants.length} sizes available` : ''}</p>
 
-                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-stone-500">
+                <div className="mt-1.5 flex min-h-[1.125rem] items-center gap-1 text-[11px] text-stone-500">
                     <Star size={12} className="fill-brand-gold text-brand-gold" />
                     <span>{product.rating} <span className="text-stone-400">({product.reviews})</span></span>
                 </div>
 
-                <div className="mt-2 flex items-baseline gap-1.5">
+                <div className="mt-2 flex min-h-5 items-baseline gap-1.5 tabular-nums">
                     <span className="text-sm font-extrabold text-brand-blue sm:text-base">
                         RM {price.toFixed(2)}
                     </span>
