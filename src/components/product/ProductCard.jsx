@@ -73,16 +73,16 @@ function ProductCard({ product, priority = false }) {
             </Link>
 
             <div className="flex flex-1 flex-col px-1 pt-2.5">
-                <p className="min-h-4 truncate text-[9px] font-bold uppercase tracking-widest leading-4 text-brand-blue/65">
+                <p className="min-h-4 break-words text-[9px] font-bold uppercase tracking-widest leading-4 text-brand-blue/65">
                     {product.category || 'Ayusydah'}
                 </p>
 
-                                <Link to={productUrl} className="mt-1 min-h-[2.5rem] text-xs font-bold leading-4 text-stone-800 hover:text-brand-blue line-clamp-2 sm:min-h-[2.75rem] sm:text-sm sm:leading-5">
+                <Link to={productUrl} className="mt-1 min-w-0 break-words text-xs font-bold leading-4 text-stone-800 hover:text-brand-blue sm:text-sm sm:leading-5">
                     {product.name}
                 </Link>
                 <p className="mt-1 min-h-4 text-[10px] font-medium text-stone-500">{hasVariants ? `${product.variants.length} sizes available` : ''}</p>
 
-                <div className="mt-1.5 flex min-h-[1.125rem] items-center gap-1 text-[11px] text-stone-500">
+                <div className="mt-auto flex min-h-[1.125rem] items-center gap-1 pt-1.5 text-[11px] text-stone-500">
                     <Star size={12} className="fill-brand-gold text-brand-gold" />
                     <span>{product.rating} <span className="text-stone-400">({product.reviews})</span></span>
                 </div>
@@ -100,7 +100,7 @@ function ProductCard({ product, priority = false }) {
 
                 <p className="mt-1.5 flex min-h-4 items-center gap-1 text-[10px] font-semibold text-amber-700">{lowStock && <><PackageCheck size={12} /> Only {defaultVariant?.stock ?? product.stock} left</>}</p>
 
-                <button onClick={add} disabled={adding || outOfStock} className="mt-auto flex min-h-9 w-full items-center justify-center gap-1.5 rounded-full bg-brand-blue px-2 text-[11px] font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"><ShoppingBag size={14} />{outOfStock ? 'Out of Stock' : adding ? 'Adding...' : 'Add to bag'}</button>
+                <button onClick={add} disabled={adding || outOfStock} className="flex min-h-9 w-full items-center justify-center gap-1.5 rounded-full bg-brand-blue px-2 text-[11px] font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"><ShoppingBag size={14} />{outOfStock ? 'Out of Stock' : adding ? 'Adding...' : 'Add to bag'}</button>
             </div>
         </article>
     )
