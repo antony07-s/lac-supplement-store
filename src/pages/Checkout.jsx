@@ -10,9 +10,10 @@ import { trackEvent } from '../utils/telemetry.js'
 
 const PENDING_KEY = 'ayusydah-pending-checkout'
 const RAZORPAY_SCRIPT = 'https://checkout.razorpay.com/v1/checkout.js'
-const states = ['Selangor', 'Kuala Lumpur', 'Penang', 'Johor', 'Perak', 'Sabah', 'Sarawak', 'Melaka', 'Negeri Sembilan', 'Kedah', 'Kelantan', 'Pahang', 'Perlis', 'Terengganu', 'Putrajaya', 'Labuan']
-const blank = (name = '') => ({ fullName: name, phone: '', addressLine1: '', addressLine2: '', city: '', state: '', postcode: '' })
-const rm = (value) => `RM ${Number(value || 0).toFixed(2)}`
+const malaysiaStates = ['Selangor', 'Kuala Lumpur', 'Penang', 'Johor', 'Perak', 'Sabah', 'Sarawak', 'Melaka', 'Negeri Sembilan', 'Kedah', 'Kelantan', 'Pahang', 'Perlis', 'Terengganu', 'Putrajaya', 'Labuan']
+const indiaStates = ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry']
+const blank = (name = '') => ({ fullName: name, phone: '', addressLine1: '', addressLine2: '', city: '', state: '', postcode: '', country: 'Malaysia' })
+const formatRm = (value) => `RM ${Number(value || 0).toFixed(2)}`
 const readPending = () => { try { return JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null') } catch { return null } }
 
 let razorpayLoader
@@ -56,7 +57,8 @@ function Checkout() {
   const totals = realTotals || { subtotal: cartSubtotal, totalAmount: cartSubtotal }
 
   useEffect(() => {
-    if (order || !form.state || !/^\d{5}$/.test(form.postcode) || !cartItems.length) return
+    const validPostcode = form.country === 'India' ? /^\d{6}$/.test(form.postcode) : /^\d{5}$/.test(form.postcode)
+    if (order || !form.state || !validPostcode || !cartItems.length) return
     const quoteItems = cartItems.map((item) => ({ product: item._id, variantId: item.variantId, quantity: item.quantity }))
     const timer = setTimeout(() => api.post('/orders/quote', { items: quoteItems, shippingAddress: form }).then((r) => setQuote(r.data)).catch(() => setQuote(null)), 350)
     return () => clearTimeout(timer)
@@ -194,8 +196,9 @@ function Checkout() {
           <label className="block text-sm font-medium">Phone number *<input required type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} className={input} /></label>
           <label className="block text-sm font-medium">Address line 1 *<input required value={form.addressLine1} onChange={(e) => set('addressLine1', e.target.value)} className={input} /></label>
           <label className="block text-sm font-medium">Address line 2 <span className="font-normal text-stone-400">(optional)</span><input value={form.addressLine2} onChange={(e) => set('addressLine2', e.target.value)} className={input} /></label>
-          <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-medium">City *<input required value={form.city} onChange={(e) => set('city', e.target.value)} className={input} /></label><label className="block text-sm font-medium">Postcode *<input required inputMode="numeric" pattern="[0-9]{5}" value={form.postcode} onChange={(e) => set('postcode', e.target.value.replace(/\D/g, '').slice(0, 5))} className={input} /></label></div>
-          <label className="block text-sm font-medium">State *<select required value={form.state} onChange={(e) => set('state', e.target.value)} className={input}><option value="">Select state</option>{states.map((state) => <option key={state}>{state}</option>)}</select></label>
+          <label className="block text-sm font-medium">Country *<select required value={form.country} onChange={(e) => { set('country', e.target.value); set('state', ''); set('postcode', '') }} className={input}><option>Malaysia</option><option>India</option></select></label>
+          <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-medium">City *<input required value={form.city} onChange={(e) => set('city', e.target.value)} className={input} /></label><label className="block text-sm font-medium">Postcode *<input required inputMode="numeric" pattern={form.country === 'India' ? '[0-9]{6}' : '[0-9]{5}'} maxLength={form.country === 'India' ? 6 : 5} value={form.postcode} onChange={(e) => set('postcode', e.target.value.replace(/\D/g, '').slice(0, form.country === 'India' ? 6 : 5))} className={input} /></label></div>
+          <label className="block text-sm font-medium">State *<select required value={form.state} onChange={(e) => set('state', e.target.value)} className={input}><option value="">Select state</option>{(form.country === 'India' ? indiaStates : malaysiaStates).map((state) => <option key={state}>{state}</option>)}</select></label>
           <button disabled={placing} className="w-full rounded-full bg-brand-blue py-3.5 font-semibold text-white disabled:opacity-60">{placing ? 'Calculating secure total…' : 'Continue to payment'}</button>
           <p className="flex justify-center gap-2 text-xs text-stone-500"><LockKeyhole size={14} />Final amounts are verified on our server.</p>
         </form> : <div className="mt-6">
@@ -217,10 +220,9 @@ function Checkout() {
           </>}
         </div>}
       </section>
-      <aside className="min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5 lg:sticky lg:top-28"><h2 className="text-lg font-bold">Order summary</h2><div className="mt-4 max-h-72 space-y-3 overflow-y-auto">{items.map((item) => <div key={`${item._id || item.product}-${item.variantId || item.variant || ''}`} className="flex min-w-0 gap-3"><img src={item.image} alt="" className="h-14 w-14 shrink-0 rounded-lg border object-contain" /><div className="min-w-0 flex-1"><p className="break-words text-sm font-semibold">{item.name}</p><p className="text-xs text-stone-500">Qty: {item.quantity}</p></div><span className="shrink-0 text-sm font-semibold">{rm(Number(item.price) * item.quantity)}</span></div>)}</div><div className="mt-5 space-y-2 border-t pt-4 text-sm"><div className="flex justify-between"><span>Subtotal</span><span>{rm(totals?.subtotal)}</span></div>{realTotals ? <><div className="flex justify-between text-emerald-700"><span>Discount {realTotals.discount ? '(orders over RM1,000)' : ''}</span><span>−{rm(realTotals.discount)}</span></div><div className="flex justify-between"><span>Shipping <small>({realTotals.shippingRegion === 'east-malaysia' ? 'East' : 'West'} Malaysia)</small></span><span>{rm(realTotals.shipping)}</span></div></> : <p className="text-xs text-stone-500">Enter your state and postcode to see shipping cost.</p>}<div className="flex justify-between border-t pt-3 text-lg font-bold"><span>Final total</span><span className="text-brand-blue">{rm(totals?.totalAmount)}</span></div>{realTotals && <p className="text-xs text-stone-500">Weight: {realTotals.totalWeightKg} kg</p>}</div></aside>
+      <aside className="min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5 lg:sticky lg:top-28"><h2 className="text-lg font-bold">Order summary</h2><div className="mt-4 max-h-72 space-y-3 overflow-y-auto">{items.map((item) => <div key={`${item._id || item.product}-${item.variantId || item.variant || ''}`} className="flex min-w-0 gap-3"><img src={item.image} alt="" className="h-14 w-14 shrink-0 rounded-lg border object-contain" /><div className="min-w-0 flex-1"><p className="break-words text-sm font-semibold">{item.name}</p><p className="text-xs text-stone-500">Qty: {item.quantity}</p></div><span className="shrink-0 text-sm font-semibold">{formatRm(Number(item.price) * item.quantity)}</span></div>)}</div><div className="mt-5 space-y-2 border-t pt-4 text-sm"><div className="flex justify-between"><span>Subtotal</span><span>{formatRm(totals?.subtotal)}</span></div>{realTotals ? <><div className="flex justify-between text-emerald-700"><span>Discount {realTotals.discount ? '(orders over RM 1,000)' : ''}</span><span>−{formatRm(realTotals.discount)}</span></div><div className="flex justify-between"><span>Shipping <small>({realTotals.shippingRegion === 'east-malaysia' ? 'East' : 'West'} Malaysia)</small></span><span>{formatRm(realTotals.shipping)}</span></div></> : <p className="text-xs text-stone-500">Enter your state and postcode to see shipping cost.</p>}<div className="flex justify-between border-t pt-3 text-lg font-bold"><span>Final total</span><span className="text-brand-blue">{formatRm(totals?.totalAmount)}</span></div>{realTotals && <p className="text-xs text-stone-500">Weight: {realTotals.totalWeightKg} kg</p>}</div></aside>
     </div>
   </main>
 }
 
 export default Checkout
-

@@ -13,7 +13,7 @@ function AboutUs() {
                 Our mission is to make natural wellness simple — no confusing ingredient lists, no empty promises. Just honest, effective supplements that support your everyday health goals.
             </p>
             <p>
-                Ayusydah is owned and operated by Delta Superstar Services (SSM Registration No. 202203250952 (PG0533002-P)), a registered sole proprietorship based in Kluang, Johor, Malaysia.
+                Ayusydah is owned and operated by Sapphire Agro Foods (GST Registration No. 03DKUPS1343R1ZC), based in VPO Manakdheri, District Hoshiarpur, Punjab – 144203, India.
             </p>
         </StaticPageLayout>
     )

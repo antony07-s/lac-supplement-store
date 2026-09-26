@@ -43,12 +43,12 @@ function ContactUs() {
                 <div className="space-y-4 text-sm text-gray-600">
                     <h2 className="text-base font-bold text-gray-800">Business information</h2>
                     <dl className="space-y-4">
-                        <div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">Business Name</dt><dd className="mt-1">Delta Superstar Services (operating as Ayusydah)</dd></div>
-                        <div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">SSM Registration No.</dt><dd className="mt-1">202203250952 (PG0533002-P)</dd></div>
-                        <div className="flex gap-3"><MapPin size={18} className="mt-0.5 shrink-0 text-brand-blue" /><div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">Business Address</dt><dd className="mt-1">No. 22A, 1st Floor, Jalan Kampung Paya, Taman Kluang Baru, 86000 Kluang, Johor, Malaysia</dd></div></div>
-                        <div className="flex gap-3"><Phone size={18} className="mt-0.5 shrink-0 text-brand-blue" /><div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">Phone / WhatsApp</dt><dd className="mt-1"><a href="tel:+601172232047" className="hover:text-brand-blue hover:underline">+60 11-7223 2047</a></dd></div></div>
+                        <div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">Business Name</dt><dd className="mt-1">Sapphire Agro Foods (operating as Ayusydah)</dd></div>
+                        <div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">GST Registration No.</dt><dd className="mt-1">03DKUPS1343R1ZC</dd></div>
+                        <div className="flex gap-3"><MapPin size={18} className="mt-0.5 shrink-0 text-brand-blue" /><div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">Business Address</dt><dd className="mt-1">VPO Manakdheri, District Hoshiarpur, Punjab – 144203, India</dd></div></div>
+                        <div className="flex gap-3"><Phone size={18} className="mt-0.5 shrink-0 text-brand-blue" /><div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">Phone / WhatsApp</dt><dd className="mt-1">+91 7626 863977</dd></div></div>
                         <div className="flex gap-3"><Mail size={18} className="mt-0.5 shrink-0 text-brand-blue" /><div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">Email</dt><dd className="mt-1"><a href="mailto:lsmu@hotmail.com" className="hover:text-brand-blue hover:underline">lsmu@hotmail.com</a></dd></div></div>
-                        <div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">Business Hours</dt><dd className="mt-1">Monday – Saturday, 9:00 AM – 6:00 PM (Malaysia Time)</dd></div>
+                        <div><dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">Business Hours</dt><dd className="mt-1">Monday – Saturday, 9:00 AM – 6:00 PM </dd></div>
                     </dl>
                 </div>
             </div>

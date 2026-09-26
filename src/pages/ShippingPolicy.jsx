@@ -4,8 +4,9 @@ function ShippingPolicy() {
   return <StaticPageLayout title="Delivery & Shipping Policy">
     <p className="text-sm text-stone-500">Effective date: September 22, 2026</p>
     <p>This Delivery and Shipping Policy applies to purchases made through https://ayusydah.com/.</p>
-    <p>The website is operated by: <strong>DELTA SUPERSTAR SERVICES</strong><br />Registration No.: 202203250952 (PG0533002-P)<br />Business Address: No. 22A, 1st Floor, Jalan Kampung Paya, Taman Kluang Baru, 86000 Kluang, Johor, Malaysia.</p>
+    <p>The website is operated by: <strong>Sapphire Agro Foods</strong><br />GST Registration No.: 03DKUPS1343R1ZC<br />Business Address: VPO Manakdheri, District Hoshiarpur, Punjab – 144203, India.</p>
 
+    {/* // TODO: Needs India-specific delivery zones and courier list — pending client input, do not remove Malaysia content until replacement text is confirmed. */}
     <h3 className="font-semibold text-gray-800 pt-2">1. Delivery Coverage</h3>
     <p>We currently deliver to addresses within Malaysia, including Peninsular Malaysia, Sabah, Sarawak, and the Federal Territory of Labuan. Delivery to certain islands, remote locations, restricted areas or P.O. Box addresses may not be available or may require additional charges. International shipping is available only when specifically confirmed by us before payment.</p>
 
@@ -75,7 +76,7 @@ function ShippingPolicy() {
     <p>We are not responsible for delays caused by circumstances beyond our reasonable control, including floods or severe weather, natural disasters, epidemics or public-health restrictions, strikes, road closures, courier-system failures, customs inspections, government restrictions, or disruption to transportation or communication services. We will take reasonable steps to assist affected customers and provide available delivery updates.</p>
 
     <h3 className="font-semibold text-gray-800 pt-2">19. Contact Us</h3>
-    <p>For shipping enquiries, tracking assistance or delivery problems, contact:<br />AYUSYDAH Customer Service, operated by Delta Superstar Services<br />Registration No.: 202203250952 (PG0533002-P)<br />Email: lsmu@hotmail.com<br />WhatsApp/Telephone: +60 11-7223 2047<br />Customer-service hours: 9am to 5pm</p>
+    <p>For shipping enquiries, tracking assistance or delivery problems, contact:<br />AYUSYDAH Customer Service, operated by Sapphire Agro Foods<br />GST Registration No.: 03DKUPS1343R1ZC<br />Email: lsmu@hotmail.com<br />WhatsApp/Telephone: +91 7626 863977<br />Customer-service hours: 9am to 5pm</p>
     <p>Please provide your name, order number and tracking number when contacting us.</p>
   </StaticPageLayout>
 }
