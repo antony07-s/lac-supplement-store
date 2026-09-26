@@ -2,13 +2,13 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const siteName = 'AYUSYDAH'
-const fallbackDescription = 'Shop AYUSYDAH natural wellness products, including herbal supplements, Ayurvedic wellness, juices, and skin and hair care in Malaysia.'
+const fallbackDescription = 'Shop AYUSYDAH natural wellness products, including herbal supplements, Ayurvedic wellness, juices, and skin and hair care.'
 const socialImage = 'https://res.cloudinary.com/pggies6d/image/upload/f_auto,q_auto,w_1200/v1789990514/hero-banner-clean.jpg.png'
 const pageMeta = {
-  '/': ['Ayusydah | Natural wellness in Malaysia', fallbackDescription],
+  '/': ['Ayusydah | Natural wellness', fallbackDescription],
   '/products': ['Shop natural wellness products | Ayusydah', 'Browse AYUSYDAH herbal supplements, Ayurvedic wellness, juices, and skin and hair care.'],
   '/cart': ['Your cart | Ayusydah', 'Review your AYUSYDAH shopping bag before checkout.'],
-  '/about-us': ['About AYUSYDAH | Natural wellness in Malaysia', 'Learn about AYUSYDAH and our considered approach to natural wellness.'],
+  '/about-us': ['About AYUSYDAH | Natural wellness', 'Learn about AYUSYDAH and our considered approach to natural wellness.'],
   '/contact-us': ['Contact AYUSYDAH', 'Contact AYUSYDAH for product and order support.'],
   '/faq': ['Frequently asked questions | AYUSYDAH', 'Answers to common AYUSYDAH product, delivery, and order questions.'],
   '/shipping-policy': ['Delivery and shipping policy | AYUSYDAH', 'Read AYUSYDAH delivery times, shipping regions, and shipping information.'],
