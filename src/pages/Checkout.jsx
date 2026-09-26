@@ -91,6 +91,7 @@ function Checkout() {
       const response = await api.post('/orders', { items: requestItems(), shippingAddress: form }, { headers: { 'Idempotency-Key': idempotencyKey.current } })
       setOrder(response.data)
       setQuote(response.data)
+      requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }))
       setPaymentOptions({ loading: true, razorpay: false })
       persist(response.data)
       clearCart()
