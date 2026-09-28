@@ -57,9 +57,9 @@ function AdminLayout({ children, title, subtitle, backTo }) {
   const closeMobileNav = () => setMobileNavOpen(false)
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Desktop sidebar */}
-      <aside className="w-64 bg-gray-900 text-white flex-col shrink-0 hidden md:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden h-screen w-64 shrink-0 flex-col overflow-y-auto bg-gray-900 text-white md:flex">
         <SidebarContent location={location} onNavigate={closeMobileNav} />
       </aside>
 
@@ -67,14 +67,14 @@ function AdminLayout({ children, title, subtitle, backTo }) {
       {mobileNavOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileNavOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-gray-900 text-white flex flex-col">
+          <aside className="absolute bottom-0 left-0 top-0 flex w-64 flex-col overflow-y-auto bg-gray-900 text-white">
             <SidebarContent location={location} onNavigate={closeMobileNav} />
           </aside>
         </div>
       )}
 
-      <div className="flex-1 min-w-0">
-        <header className="bg-white border-b border-gray-200 px-4 md:px-10 py-5 flex items-center gap-3">
+      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden md:ml-64">
+        <header className="flex shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4 py-5 md:px-10">
           <button
             onClick={() => setMobileNavOpen(true)}
             className="md:hidden text-gray-600 shrink-0"
@@ -87,7 +87,7 @@ function AdminLayout({ children, title, subtitle, backTo }) {
             {subtitle && <p className="text-sm text-gray-500 mt-1 truncate">{subtitle}</p>}
           </div>
         </header>
-        <main className="min-w-0 overflow-x-hidden p-4 md:p-10">{children}</main>
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-10">{children}</main>
       </div>
     </div>
   )

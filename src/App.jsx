@@ -57,6 +57,7 @@ function App() {
     location.pathname === '/forgot-password' ||
     location.pathname.startsWith('/reset-password/')
   const isAdminPage = location.pathname.startsWith('/admin')
+  const showStoreChrome = !isAuthPage && !isAdminPage
 
   useEffect(() => {
     const handleError = (event) => reportError(event.error || event.message, { source: 'window' })
@@ -98,7 +99,7 @@ function App() {
       <Toaster position="top-center" />
 
       {/* Show website header only on normal pages */}
-      {!isAuthPage && (
+      {showStoreChrome && (
         <>
           <PromoBar />
           <UtilityBar />
@@ -152,13 +153,13 @@ function App() {
       </div>
 
       {/* Show footer only on normal pages */}
-      {!isAuthPage && (
+      {showStoreChrome && (
         <>
           <Footer />
           <CookieBanner />
         </>
       )}
-      {!isAuthPage && !isAdminPage && <WhatsAppButton />}
+      {showStoreChrome && <WhatsAppButton />}
     </>
   )
 }

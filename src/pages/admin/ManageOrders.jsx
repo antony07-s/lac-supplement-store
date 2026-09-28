@@ -96,9 +96,9 @@ function ManageOrders() {
       ) : orders.length === 0 ? (
         <p className="text-gray-500">No orders yet.</p>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden overflow-x-auto">
-          <table className="min-w-[780px] w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-500 uppercase text-xs tracking-wide">
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <table className="w-full text-left text-sm">
+            <thead className="hidden bg-gray-50 text-xs uppercase tracking-wide text-gray-500 md:table-header-group">
               <tr>
                 <th className="px-5 py-4">Order</th>
                 <th className="px-5 py-4">Customer</th>
@@ -111,44 +111,56 @@ function ManageOrders() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {orders.map((order) => (
-                <tr key={order._id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-5 py-3 font-mono text-xs text-gray-500">
+              <tr key={order._id} className="mb-3 grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm last:mb-0 md:mb-0 md:table-row md:rounded-none md:border-0 md:p-0 md:shadow-none md:transition-colors md:hover:bg-gray-50">
+                  <td className="block p-0 font-mono text-xs text-gray-500 md:table-cell md:px-5 md:py-4">
+                    <span className="mb-1 block font-sans text-[10px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Order</span>
                     #{order._id.slice(-8).toUpperCase()}
                   </td>
-                  <td className="px-5 py-3">
-                    <p className="font-semibold text-gray-800">{order.user?.name || 'Unknown'}</p>
-                    <p className="text-xs text-gray-400">{order.user?.email}</p>
+                  <td className="block p-0 text-right md:table-cell md:px-5 md:py-4 md:text-left">
+                    <span className="mb-1 block font-sans text-[10px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Date</span>
+                    <p className="font-medium text-gray-700">{new Date(order.createdAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                   </td>
-                  <td className="px-5 py-3 text-gray-600">
+                  <td className="col-span-2 block border-t border-gray-100 pt-3 md:table-cell md:border-0 md:px-5 md:py-4 md:pt-4">
+                    <span className="mb-1 block font-sans text-[10px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Customer</span>
+                    <p className="font-semibold text-gray-800">{order.user?.name || 'Unknown'}</p>
+                    {order.user?.email && <details className="mt-1 text-xs text-gray-500">
+                      <summary className="w-fit cursor-pointer rounded text-brand-blue hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue">Customer contact</summary>
+                      <a className="mt-1 inline-block break-all hover:underline" href={`mailto:${order.user.email}`}>{order.user.email}</a>
+                    </details>}
+                  </td>
+                  <td className="col-span-2 block p-0 text-gray-600 md:table-cell md:px-5 md:py-4">
+                    <span className="mb-1 block font-sans text-[10px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Items</span>
                     {order.items.map((item) => (
-                      <p key={item._id} className="text-xs">
+                      <p key={item._id} className="text-xs leading-5">
                         {item.name} × {item.quantity}
                       </p>
                     ))}
                   </td>
-                  <td className="px-5 py-3 font-semibold text-brand-blue">
+                  <td className="block p-0 font-bold text-brand-blue md:table-cell md:px-5 md:py-4">
+                    <span className="mb-1 block font-sans text-[10px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Total</span>
                     RM {order.totalAmount.toFixed(2)}
                   </td>
-                  <td className="px-5 py-3 text-xs text-gray-500">
-                    {new Date(order.createdAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </td>
-                  <td className="px-5 py-3">
-                    <span className={`inline-block rounded-full px-3 py-1.5 text-xs font-semibold ${statusColors[order.status] || statusColors.pending}`}>{order.status}</span>
+                  <td className="block p-0 md:table-cell md:px-5 md:py-4">
+                    <span className="mb-1 block font-sans text-[10px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Status</span>
+                    <span className={`inline-block rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${statusColors[order.status] || statusColors.pending}`}>{order.status}</span>
                     {order.trackingNumber && (
                       <p className="mt-1 text-[11px] text-gray-400">{order.courierName}: {order.trackingNumber}</p>
                     )}
                     {order.shipmentEmailStatus === 'failed' && <p className="mt-1 text-[11px] font-semibold text-rose-600">Shipment email failed</p>}
                   </td>
-                  <td className="px-5 py-3 text-right">
-                    {order.status === 'paid' && <button disabled={updatingOrderId === order._id} onClick={() => openShipModal(order)} className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3 py-2 text-xs font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60"><Truck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark shipped'}</button>}
-                    {order.status === 'shipped' && <button disabled={updatingOrderId === order._id} onClick={() => handleStatusChange(order._id, 'delivered')} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"><PackageCheck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark delivered'}</button>}
-                    {order.status === 'delivered' && <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700"><CheckCircle2 size={15} />Complete</span>}
+                  <td className="col-span-2 block border-t border-gray-100 pt-3 md:table-cell md:border-0 md:px-5 md:py-4 md:text-right md:pt-4">
+                    <span className="mb-2 block font-sans text-[10px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Actions</span>
+                    <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                    {order.status === 'paid' && <button disabled={updatingOrderId === order._id} onClick={() => openShipModal(order)} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-brand-blue px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-blue-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue disabled:opacity-60"><Truck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark shipped'}</button>}
+                    {order.status === 'shipped' && <button disabled={updatingOrderId === order._id} onClick={() => handleStatusChange(order._id, 'delivered')} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:opacity-60"><PackageCheck size={14} />{updatingOrderId === order._id ? 'Updating…' : 'Mark delivered'}</button>}
+                    {order.status === 'delivered' && <span className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700"><CheckCircle2 size={15} />Complete</span>}
                     {order.status === 'pending' && <span className="text-xs text-gray-400">Awaiting payment</span>}
                     {order.status === 'cancelled' && <span className="text-xs text-rose-600">Payment cancelled</span>}
                     {order.statusNote && <p className="mt-1 max-w-48 text-left text-[11px] text-gray-500">{order.statusNote}</p>}
-                    {['pending', 'paid'].includes(order.status) && <button type="button" disabled={updatingOrderId === order._id} onClick={() => requestStatusNote(order, 'cancelled')} className="mt-1 block text-xs font-semibold text-rose-700 underline disabled:opacity-50">Cancel order</button>}
-                    {['paid', 'shipped', 'delivered'].includes(order.status) && <button type="button" disabled={updatingOrderId === order._id} onClick={() => requestStatusNote(order, 'refunded')} className="mt-1 block text-xs font-semibold text-purple-700 underline disabled:opacity-50">Mark refunded</button>}
-                    {order.shipmentEmailStatus === 'failed' && <button type="button" disabled={updatingOrderId === order._id} onClick={() => retryShipmentEmail(order._id)} className="ml-2 text-xs font-semibold text-rose-700 underline disabled:opacity-50">Retry email</button>}
+                    {['pending', 'paid'].includes(order.status) && <button type="button" disabled={updatingOrderId === order._id} onClick={() => requestStatusNote(order, 'cancelled')} className="min-h-10 rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 disabled:opacity-50">Cancel order</button>}
+                    {['paid', 'shipped', 'delivered'].includes(order.status) && <button type="button" disabled={updatingOrderId === order._id} onClick={() => requestStatusNote(order, 'refunded')} className="min-h-10 rounded-lg border border-purple-200 bg-white px-3 py-2 text-xs font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 disabled:opacity-50">Mark refunded</button>}
+                    {order.shipmentEmailStatus === 'failed' && <button type="button" disabled={updatingOrderId === order._id} onClick={() => retryShipmentEmail(order._id)} className="min-h-10 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50">Retry email</button>}
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -19,7 +19,7 @@ function FeaturedCategories() {
         <h2 className="font-serif text-2xl font-bold uppercase tracking-[-.04em] text-brand-blue-dark sm:text-3xl">Shop by category</h2>
         <p className="mt-1 text-sm text-stone-500">Explore our wide range of natural wellness products.</p>
       </div>
-      <Link to="/shop" className="inline-flex items-center gap-1.5 rounded-full border-2 border-brand-blue-dark px-5 py-2.5 text-sm font-bold text-brand-blue-dark transition hover:bg-brand-blue-dark hover:text-white">View All Categories <ArrowRight size={15} /></Link>
+      <Link to="/products" className="inline-flex items-center gap-1.5 rounded-full border-2 border-brand-blue-dark px-5 py-2.5 text-sm font-bold text-brand-blue-dark transition hover:bg-brand-blue-dark hover:text-white">View All Categories <ArrowRight size={15} /></Link>
     </div>
     <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">{categories.map((category) => <CategoryTile key={category} category={category} image={categoryImages[category]} />)}</div>
     <div className="mt-5 grid gap-4 lg:grid-cols-2"><Campaign title="Pure Goodness in Every Bottle" body="Natural herbal juices for a healthier, happier you." cta="Shop Juices" category="Juices" image={categoryImages.Juices} /><Campaign title="Natural Care for Healthy Hair" body="Botanical solutions for stronger, healthier hair." cta="Shop Hair Care" category="Skin & Hair Care" image={categoryImages['Skin & Hair Care']} /></div>
