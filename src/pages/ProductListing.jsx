@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { getWithRetry } from '../api/axios.js'
 import ProductCard from '../components/product/ProductCard.jsx'
+import { updatePageMetadata } from '../utils/pageMetadata.js'
 
 const PRODUCTS_PER_PAGE = 10
 const sortOptions = [['newest', 'Newest'], ['price-asc', 'Price: low to high'], ['price-desc', 'Price: high to low'], ['name', 'Name: A–Z']]
@@ -43,6 +44,15 @@ function ProductListing() {
   }, [currentPage, decodedCategory, healthGoal, searchTerm, showAllProducts, sort, retryKey])
 
   const title = searchTerm ? `Search results for “${searchTerm}”` : healthGoal || (showAllProducts ? 'All products' : decodedCategory)
+  useEffect(() => {
+    if (!title) return
+    updatePageMetadata({
+      title: `${title} | AYUSYDAH`,
+      description: searchTerm
+        ? `Browse AYUSYDAH product results for ${searchTerm}.`
+        : `Browse AYUSYDAH products in ${title}.`,
+    })
+  }, [title, searchTerm])
   const totalPages = Math.max(1, Math.ceil(total / PRODUCTS_PER_PAGE))
   const page = Math.min(currentPage, totalPages)
   const updateParams = (nextPage = 1, nextSort = sort) => {
@@ -62,7 +72,7 @@ function ProductListing() {
     {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5" aria-label="Loading products">{Array.from({ length: PRODUCTS_PER_PAGE }, (_, index) => <div key={index} className="shimmer aspect-[3/4] rounded-2xl" />)}</div>
       : error ? <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-10 text-center text-stone-600"><p>{error}</p><button type="button" onClick={retry} className="mt-4 min-h-11 rounded-full border border-brand-blue px-5 text-sm font-semibold text-brand-blue hover:bg-brand-blue hover:text-white">Try again</button></div>
         : products.length === 0 ? <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-10 text-center text-stone-600">We’re curating this collection now. Explore our daily essentials while you wait.</div>
-          : <><div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">{products.map((product) => <ProductCard key={product._id} product={product} />)}</div>{totalPages > 1 && <nav aria-label="Product pagination" className="mt-10 flex flex-wrap items-center justify-center gap-2"><button type="button" onClick={() => updateParams(Math.max(1, page - 1))} disabled={page === 1} className="min-h-11 rounded-full border border-stone-300 px-4 text-sm font-semibold text-brand-blue hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40">Previous</button>{Array.from({ length: totalPages }, (_, index) => index + 1).map((number) => <button key={number} type="button" onClick={() => updateParams(number)} aria-current={number === page ? 'page' : undefined} className={`grid h-11 w-11 place-items-center rounded-full text-sm font-bold ${number === page ? 'bg-brand-blue text-white' : 'border border-stone-300 text-brand-blue hover:bg-stone-100'}`}>{number}</button>)}<button type="button" onClick={() => updateParams(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="min-h-11 rounded-full border border-stone-300 px-4 text-sm font-semibold text-brand-blue hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40">Next</button></nav>}</>}
+          : <><div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">{products.map((product, index) => <ProductCard key={product._id} product={product} priority={index < 5} />)}</div>{totalPages > 1 && <nav aria-label="Product pagination" className="mt-10 flex flex-wrap items-center justify-center gap-2"><button type="button" onClick={() => updateParams(Math.max(1, page - 1))} disabled={page === 1} className="min-h-11 rounded-full border border-stone-300 px-4 text-sm font-semibold text-brand-blue hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40">Previous</button>{Array.from({ length: totalPages }, (_, index) => index + 1).map((number) => <button key={number} type="button" onClick={() => updateParams(number)} aria-current={number === page ? 'page' : undefined} className={`grid h-11 w-11 place-items-center rounded-full text-sm font-bold ${number === page ? 'bg-brand-blue text-white' : 'border border-stone-300 text-brand-blue hover:bg-stone-100'}`}>{number}</button>)}<button type="button" onClick={() => updateParams(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="min-h-11 rounded-full border border-stone-300 px-4 text-sm font-semibold text-brand-blue hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40">Next</button></nav>}</>}
   </main>
 }
 

@@ -7,18 +7,20 @@ import AdminLayout from '../../components/admin/AdminLayout.jsx'
 
 function ManageProducts() {
   const [products, setProducts] = useState([])
+  const [totalProducts, setTotalProducts] = useState(0)
+  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [productToDelete, setProductToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     let active = true
-    api.get('/products', { params: { limit: 50 } })
-      .then((res) => { if (active) setProducts(Array.isArray(res.data) ? res.data : (res.data.products || [])) })
+    api.get('/products', { params: { page, limit: 50 } })
+      .then((res) => { if (active) { setProducts(Array.isArray(res.data) ? res.data : (res.data.products || [])); setTotalProducts(Array.isArray(res.data) ? res.data.length : (res.data.total || 0)) } })
       .catch(() => { if (active) toast.error('Failed to load products') })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [])
+  }, [page])
 
   const handleDelete = async () => {
     if (!productToDelete) return
@@ -27,6 +29,8 @@ function ManageProducts() {
       await api.delete(`/products/${productToDelete._id}`)
       toast.success('Product deleted')
       setProducts((prev) => prev.filter((product) => product._id !== productToDelete._id))
+      setTotalProducts((count) => Math.max(0, count - 1))
+      if (products.length === 1 && page > 1) setPage((current) => current - 1)
       setProductToDelete(null)
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to delete')
@@ -34,7 +38,7 @@ function ManageProducts() {
   }
 
   return (
-    <AdminLayout title="Products" subtitle={`${products.length} product${products.length !== 1 ? 's' : ''} in your catalog`}>
+    <AdminLayout title="Products" subtitle={`${totalProducts} product${totalProducts !== 1 ? 's' : ''} in your catalog`}>
       <div className="flex justify-end mb-5">
         <Link
           to="/admin/products/add"
@@ -99,6 +103,7 @@ function ManageProducts() {
           </table>
         </div>
       )}
+      {totalProducts > 50 && <nav aria-label="Admin product pages" className="mt-5 flex items-center justify-end gap-3"><button type="button" onClick={() => { setLoading(true); setPage((current) => Math.max(1, current - 1)) }} disabled={page === 1 || loading} className="min-h-10 rounded-full border px-4 text-sm font-semibold disabled:opacity-40">Previous</button><span className="text-sm text-gray-500">Page {page} of {Math.ceil(totalProducts / 50)}</span><button type="button" onClick={() => { setLoading(true); setPage((current) => Math.min(Math.ceil(totalProducts / 50), current + 1)) }} disabled={page >= Math.ceil(totalProducts / 50) || loading} className="min-h-10 rounded-full border px-4 text-sm font-semibold disabled:opacity-40">Next</button></nav>}
       {productToDelete && <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-product-title"><div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"><AlertTriangle className="mb-4 text-rose-600" size={28} /><h2 id="delete-product-title" className="text-lg font-bold text-gray-900">Delete this product?</h2><p className="mt-2 text-sm leading-6 text-gray-600">Are you sure you want to delete <strong>{productToDelete.name}</strong>? This cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button type="button" disabled={deleting} onClick={() => setProductToDelete(null)} className="rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">Cancel</button><button type="button" disabled={deleting} onClick={handleDelete} className="rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{deleting ? 'Deleting…' : 'Delete product'}</button></div></div></div>}
     </AdminLayout>
   )

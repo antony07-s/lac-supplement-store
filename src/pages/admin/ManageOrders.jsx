@@ -10,12 +10,15 @@ const statusColors = {
   cancelled: 'bg-rose-100 text-rose-700',
   shipped: 'bg-blue-100 text-blue-700',
   delivered: 'bg-gray-100 text-gray-700',
+  refunded: 'bg-purple-100 text-purple-700',
 }
 
 const couriers = ['J&T Express', 'Ninja Van', 'Pos Laju', 'DHL eCommerce', 'LEX', 'Other']
 
 function ManageOrders() {
   const [orders, setOrders] = useState([])
+  const [totalOrders, setTotalOrders] = useState(0)
+  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [updatingOrderId, setUpdatingOrderId] = useState(null)
   const [shipModalOrder, setShipModalOrder] = useState(null)
@@ -25,12 +28,14 @@ function ManageOrders() {
 
   useEffect(() => {
     let active = true
-    api.get('/orders')
-      .then((res) => { if (active) setOrders(res.data) })
+    api.get('/orders', { params: { page, limit: 50 } })
+      .then((res) => { if (active) { setOrders(res.data); setTotalOrders(Number(res.headers['x-total-count']) || res.data.length) } })
       .catch(() => { if (active) toast.error('Failed to load orders') })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [])
+  }, [page])
+
+  const totalPages = Math.max(1, Math.ceil(totalOrders / 50))
 
   const handleStatusChange = async (orderId, newStatus, extra = {}) => {
     if (updatingOrderId) return
@@ -77,8 +82,15 @@ function ManageOrders() {
     } finally { setUpdatingOrderId(null) }
   }
 
+  const requestStatusNote = async (order, status) => {
+    const label = status === 'refunded' ? 'refund' : 'cancellation'
+    const statusNote = window.prompt(`Add an admin note for this ${label}:`)
+    if (!statusNote?.trim()) return
+    await handleStatusChange(order._id, status, { statusNote: statusNote.trim() })
+  }
+
   return (
-    <AdminLayout title="Orders" subtitle={`${orders.length} order${orders.length !== 1 ? 's' : ''} total`}>
+    <AdminLayout title="Orders" subtitle={`${totalOrders} order${totalOrders !== 1 ? 's' : ''} total`}>
       {loading ? (
         <p className="text-gray-500">Loading orders...</p>
       ) : orders.length === 0 ? (
@@ -133,6 +145,9 @@ function ManageOrders() {
                     {order.status === 'delivered' && <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700"><CheckCircle2 size={15} />Complete</span>}
                     {order.status === 'pending' && <span className="text-xs text-gray-400">Awaiting payment</span>}
                     {order.status === 'cancelled' && <span className="text-xs text-rose-600">Payment cancelled</span>}
+                    {order.statusNote && <p className="mt-1 max-w-48 text-left text-[11px] text-gray-500">{order.statusNote}</p>}
+                    {['pending', 'paid'].includes(order.status) && <button type="button" disabled={updatingOrderId === order._id} onClick={() => requestStatusNote(order, 'cancelled')} className="mt-1 block text-xs font-semibold text-rose-700 underline disabled:opacity-50">Cancel order</button>}
+                    {['paid', 'shipped', 'delivered'].includes(order.status) && <button type="button" disabled={updatingOrderId === order._id} onClick={() => requestStatusNote(order, 'refunded')} className="mt-1 block text-xs font-semibold text-purple-700 underline disabled:opacity-50">Mark refunded</button>}
                     {order.shipmentEmailStatus === 'failed' && <button type="button" disabled={updatingOrderId === order._id} onClick={() => retryShipmentEmail(order._id)} className="ml-2 text-xs font-semibold text-rose-700 underline disabled:opacity-50">Retry email</button>}
                   </td>
                 </tr>
@@ -141,6 +156,7 @@ function ManageOrders() {
           </table>
         </div>
       )}
+      {totalOrders > 50 && <nav aria-label="Admin order pages" className="mt-5 flex items-center justify-end gap-3"><button type="button" onClick={() => { setLoading(true); setPage((current) => Math.max(1, current - 1)) }} disabled={page === 1 || loading} className="min-h-10 rounded-full border px-4 text-sm font-semibold disabled:opacity-40">Previous</button><span className="text-sm text-gray-500">Page {page} of {totalPages}</span><button type="button" onClick={() => { setLoading(true); setPage((current) => Math.min(totalPages, current + 1)) }} disabled={page >= totalPages || loading} className="min-h-10 rounded-full border px-4 text-sm font-semibold disabled:opacity-40">Next</button></nav>}
 
       {shipModalOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">

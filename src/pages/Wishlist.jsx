@@ -48,7 +48,7 @@ function Wishlist() {
                     return (
                         <div key={item._id} className="flex items-center gap-4 border-b border-gray-200 pb-4">
                             <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f2f6ff] p-2">
-                                {imageSrc ? <img src={cloudinaryImage(imageSrc, { width: 160, height: 160 })} alt={item.name} loading="lazy" decoding="async" onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain" /> : <span className="text-[10px] text-stone-500">No image</span>}
+                                {imageSrc ? <img src={cloudinaryImage(imageSrc, { width: 160, height: 160 })} alt={item.name} width="160" height="160" loading="lazy" decoding="async" onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain" /> : <span className="text-[10px] text-stone-500">No image</span>}
                             </div>
                             <div className="min-w-0 flex-1">
                                 <p className="font-semibold text-gray-800">{item.name}</p>

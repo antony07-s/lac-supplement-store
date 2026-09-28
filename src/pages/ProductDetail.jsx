@@ -12,6 +12,7 @@ import Reveal from '../components/Frame/Reveal.jsx'
 import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 import ProductReviews from '../components/product/ProductReviews.jsx'
 import { cloudinaryImage, cloudinarySrcSet } from '../utils/cloudinaryImage.js'
+import { updatePageMetadata } from '../utils/pageMetadata.js'
 
 const localImages = { BP4: bp4 }
 const sectionLabelPattern = /^(Product(?: Name)?|Botanical (?:Name|Source)|Description|Key Benefits|Suitable For|Suggested Use|Food Supplement Only|Available Sizes|Pack Size|How to Use)\s*:?[\s\u00a0]*(.*)$/i
@@ -184,10 +185,8 @@ function ProductDetail() {
   useEffect(() => {
     if (!product) return
     const title = `${product.name} | AYUSYDAH`
-    document.title = title
     const description = String(product.description || `Explore ${product.name} from AYUSYDAH.`).replace(/\s+/g, ' ').slice(0, 160)
-    const descriptionTag = document.querySelector('meta[name="description"]')
-    if (descriptionTag) descriptionTag.content = description
+    updatePageMetadata({ title, description, image: product.image })
     const schema = document.querySelector('#site-structured-data')
     if (schema) schema.textContent = JSON.stringify({
       '@context': 'https://schema.org', '@type': 'Product', name: product.name,
@@ -262,7 +261,7 @@ function ProductDetail() {
       <div className="grid gap-8 md:grid-cols-2 md:gap-12">
         <Reveal direction="scale" className="flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-[#f2f6ff] p-6">
           {imageSrc ? (
-            <img src={cloudinaryImage(displayImage, { width: 960, height: 960 })} srcSet={cloudinarySrcSet(displayImage, [480, 720, 960], { height: 960 })} sizes="(max-width: 767px) 100vw, 50vw" alt={product.name} loading="eager" fetchPriority="high" decoding="async" onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain mix-blend-multiply" />
+            <img src={cloudinaryImage(displayImage, { width: 960, height: 960 })} srcSet={cloudinarySrcSet(displayImage, [480, 720, 960], { height: 960 })} sizes="(max-width: 767px) 100vw, 50vw" width="960" height="960" alt={product.name} loading="eager" fetchPriority="high" decoding="async" onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain mix-blend-multiply" />
           ) : (
             <span className="text-sm text-stone-500">Image unavailable</span>
           )}

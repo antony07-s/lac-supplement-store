@@ -7,6 +7,7 @@ function CookieBanner() {
   const [visible, setVisible] = useState(() => localStorage.getItem(CONSENT_KEY) !== 'true')
   const dismiss = () => {
     localStorage.setItem(CONSENT_KEY, 'true')
+    window.dispatchEvent(new Event('ayusydah-cookie-consent'))
     setVisible(false)
   }
 

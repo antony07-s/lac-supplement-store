@@ -62,7 +62,7 @@ function BestSellers() {
           <StaggerGrid className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5 lg:gap-5">
             {products.map((product, index) => (
               <StaggerItem key={product._id} direction="up" className="min-w-0">
-                <ProductCard product={product} priority={index < 2} />
+                <ProductCard product={product} priority={index < 5} />
               </StaggerItem>
             ))}
           </StaggerGrid>

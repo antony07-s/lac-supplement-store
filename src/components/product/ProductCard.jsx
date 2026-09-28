@@ -1,6 +1,6 @@
 import { Star, Heart, ShoppingBag, PackageCheck } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import { useRef, useState } from 'react'
+import { memo, useMemo, useRef, useState } from 'react'
 import bp4 from '../../assets/BP4.png'
 import { useCart } from '../../context/CartContext.jsx'
 import { useWishlist } from '../../context/WishlistContext.jsx'
@@ -20,8 +20,8 @@ function ProductCard({ product, priority = false }) {
     const lowStock = !outOfStock && Number(defaultVariant?.stock ?? product.stock) > 0 && Number(defaultVariant?.stock ?? product.stock) <= 5
     const hasVariants = Array.isArray(product.variants) && product.variants.length > 1
     const image = localImages[defaultVariant?.image] || defaultVariant?.image || localImages[product.image] || product.image
-    const optimizedImage = cloudinaryImage(image, { width: 480, height: 480 })
-    const imageSrcSet = cloudinarySrcSet(image, [240, 360, 480], { height: 480 })
+    const optimizedImage = useMemo(() => cloudinaryImage(image, { width: 480, height: 480 }), [image])
+    const imageSrcSet = useMemo(() => cloudinarySrcSet(image, [240, 360, 480], { height: 480 }), [image])
     const price = Number(defaultVariant?.price ?? product.price) || 0
     const originalPrice = Number(defaultVariant?.originalPrice ?? product.originalPrice) || 0
     const discount = originalPrice > price
@@ -30,7 +30,7 @@ function ProductCard({ product, priority = false }) {
 
     const [adding, setAdding] = useState(false)
     const addingRef = useRef(false)
-    const productUrl = `/product/${product._id}?returnTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`
+    const productUrl = useMemo(() => `/product/${product._id}?returnTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`, [location.pathname, location.search, product._id])
 
     const add = () => {
         if (addingRef.current) return
@@ -63,6 +63,8 @@ function ProductCard({ product, priority = false }) {
                     src={optimizedImage}
                     srcSet={imageSrcSet}
                     sizes="(max-width: 639px) 50vw, (max-width: 1023px) 25vw, 240px"
+                    width="480"
+                    height="480"
                     alt={product.name}
                     loading={priority ? 'eager' : 'lazy'}
                     fetchPriority={priority ? 'high' : 'auto'}
@@ -106,4 +108,4 @@ function ProductCard({ product, priority = false }) {
     )
 }
 
-export default ProductCard
+export default memo(ProductCard)

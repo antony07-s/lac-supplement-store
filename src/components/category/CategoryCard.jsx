@@ -11,6 +11,8 @@ function CategoryCard({ category, to }) {
             src={cloudinaryImage(category.image, { width: 640, height: 480, crop: 'fill' })}
             srcSet={cloudinarySrcSet(category.image, [320, 480, 640], { height: 480, crop: 'fill' })}
             sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 200px"
+            width="640"
+            height="480"
             alt={category.name}
             loading="lazy"
             className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"

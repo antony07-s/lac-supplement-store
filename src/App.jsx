@@ -1,7 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { lazy, Suspense, useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
-import { AnimatePresence, motion } from 'framer-motion'
 
 import PromoBar from './components/layout/PromoBar.jsx'
 import UtilityBar from './components/layout/UtilityBar.jsx'
@@ -67,6 +66,29 @@ function App() {
     return () => { window.removeEventListener('error', handleError); window.removeEventListener('unhandledrejection', handleRejection) }
   }, [])
 
+  useEffect(() => {
+    const analyticsId = 'G-GN98K2DHYN'
+    const loadAnalytics = () => {
+      if (localStorage.getItem('ayusydah-cookie-notice-seen') !== 'true' || document.querySelector(`[data-analytics-id="${analyticsId}"]`)) return
+      window.dataLayer = window.dataLayer || []
+      window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments) }
+      window.gtag('js', new Date())
+      window.gtag('config', analyticsId)
+      const script = document.createElement('script')
+      script.async = true
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${analyticsId}`
+      script.dataset.analyticsId = analyticsId
+      document.head.appendChild(script)
+    }
+    window.addEventListener('ayusydah-cookie-consent', loadAnalytics)
+    window.addEventListener('storage', loadAnalytics)
+    loadAnalytics()
+    return () => {
+      window.removeEventListener('ayusydah-cookie-consent', loadAnalytics)
+      window.removeEventListener('storage', loadAnalytics)
+    }
+  }, [])
+
   return (
     <>
       <a href="#main-content" className="sr-only fixed left-4 top-4 z-[100] rounded-lg bg-brand-blue px-4 py-2 font-semibold text-white focus:not-sr-only">Skip to main content</a>
@@ -84,15 +106,10 @@ function App() {
         </>
       )}
 
-      <AnimatePresence mode="wait">
-        <motion.div
+      <div
           id="main-content"
           tabIndex="-1"
           key={location.pathname}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
         >
           <Suspense fallback={<RouteLoading />}>
           <Routes location={location}>
@@ -132,8 +149,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
-        </motion.div>
-      </AnimatePresence>
+      </div>
 
       {/* Show footer only on normal pages */}
       {!isAuthPage && (

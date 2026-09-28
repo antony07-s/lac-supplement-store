@@ -17,7 +17,7 @@ function CartProductImage({ image, name }) {
     return <span className="px-2 text-center text-xs font-medium text-stone-500">Product image unavailable</span>
   }
 
-  return <img src={cloudinaryImage(imageSrc, { width: 160, height: 160 })} alt={name} loading="lazy" decoding="async" onError={() => setFailed(true)} className="h-full w-full object-contain" />
+  return <img src={cloudinaryImage(imageSrc, { width: 160, height: 160 })} alt={name} width="160" height="160" loading="lazy" decoding="async" onError={() => setFailed(true)} className="h-full w-full object-contain" />
 }
 
 function Cart() {

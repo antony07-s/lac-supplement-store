@@ -28,7 +28,8 @@ export default function Seo() {
 
   useEffect(() => {
     const isProduct = pathname.startsWith('/product/')
-    const isPrivate = ['/cart', '/checkout', '/wishlist', '/my-orders', '/track-order', '/login', '/register', '/forgot-password'].some((path) => pathname === path || pathname.startsWith(`${path}/`)) || pathname.startsWith('/orders/') || pathname.startsWith('/admin')
+    const isResetPassword = pathname.startsWith('/reset-password/')
+    const isPrivate = ['/cart', '/checkout', '/wishlist', '/my-orders', '/track-order', '/login', '/register', '/forgot-password', '/account'].some((path) => pathname === path || pathname.startsWith(`${path}/`)) || pathname.startsWith('/orders/') || pathname.startsWith('/admin') || isResetPassword
     const [title, description] = pageMeta[pathname] || (isProduct
       ? ['Product details | AYUSYDAH', 'Explore AYUSYDAH product details, ingredients, and purchase options.']
       : pathname.startsWith('/category/') || pathname === '/search'
@@ -49,6 +50,7 @@ export default function Seo() {
     ensureMeta('meta[property="og:locale"]', 'property', 'en_MY')
     ensureMeta('meta[name="twitter:card"]', 'name', 'summary_large_image')
     ensureMeta('meta[name="robots"]', 'name', isPrivate ? 'noindex,nofollow' : 'index,follow')
+    ensureMeta('meta[name="referrer"]', 'name', isResetPassword ? 'no-referrer' : 'strict-origin-when-cross-origin')
     if (!isProduct) {
       let schema = document.querySelector('#site-structured-data')
       if (!schema) { schema = document.createElement('script'); schema.id = 'site-structured-data'; schema.type = 'application/ld+json'; document.head.appendChild(schema) }
