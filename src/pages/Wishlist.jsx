@@ -3,10 +3,8 @@ import { useState } from 'react'
 import { showCartToast } from '../utils/cartToast.js'
 import { useWishlist } from '../context/WishlistContext.jsx'
 import { useCart } from '../context/CartContext.jsx'
-import bp4 from '../assets/BP4.png'
 import { cloudinaryImage } from '../utils/cloudinaryImage.js'
 
-const localImages = { BP4: bp4 }
 
 function Wishlist() {
     const { wishlistItems, toggleWishlist } = useWishlist()
@@ -41,7 +39,7 @@ function Wishlist() {
 
             <div className="space-y-4">
                 {wishlistItems.map((item) => {
-                    const imageSrc = localImages[item.image] || item.image
+                    const imageSrc = item.image
                     const isAdding = addingId === item._id
                     const variant = item.variantId ? item.variants?.find((entry) => entry._id === item.variantId) : null
                     const outOfStock = (variant && !variant.isAvailable) || Number((variant || item).stock) === 0

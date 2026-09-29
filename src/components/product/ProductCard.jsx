@@ -1,14 +1,12 @@
 import { Star, Heart, ShoppingBag, PackageCheck } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { memo, useMemo, useRef, useState } from 'react'
-import bp4 from '../../assets/BP4.png'
 import { useCart } from '../../context/CartContext.jsx'
 import { useWishlist } from '../../context/WishlistContext.jsx'
 import { showCartToast } from '../../utils/cartToast.js'
 import { trackEvent } from '../../utils/telemetry.js'
 import { cloudinaryImage, cloudinarySrcSet } from '../../utils/cloudinaryImage.js'
 
-const localImages = { BP4: bp4 }
 
 function ProductCard({ product, priority = false }) {
     const location = useLocation()
@@ -19,7 +17,7 @@ function ProductCard({ product, priority = false }) {
     const outOfStock = defaultVariant ? (!defaultVariant.isAvailable || Number(defaultVariant.stock) === 0) : Number(product.stock) === 0
     const lowStock = !outOfStock && Number(defaultVariant?.stock ?? product.stock) > 0 && Number(defaultVariant?.stock ?? product.stock) <= 5
     const hasVariants = Array.isArray(product.variants) && product.variants.length > 1
-    const image = localImages[defaultVariant?.image] || defaultVariant?.image || localImages[product.image] || product.image
+    const image = defaultVariant?.image || product.image
     const optimizedImage = useMemo(() => cloudinaryImage(image, { width: 480, height: 480 }), [image])
     const imageSrcSet = useMemo(() => cloudinarySrcSet(image, [240, 360, 480], { height: 480 }), [image])
     const price = Number(defaultVariant?.price ?? product.price) || 0

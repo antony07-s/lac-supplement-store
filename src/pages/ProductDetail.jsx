@@ -2,7 +2,6 @@ import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { Star, ShoppingCart, Heart, ChevronLeft, Minus, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
-import bp4 from '../assets/BP4.png'
 import { useCart } from '../context/CartContext.jsx'
 import { useWishlist } from '../context/WishlistContext.jsx'
 import { getWithRetry } from '../api/axios.js'
@@ -14,7 +13,6 @@ import ProductReviews from '../components/product/ProductReviews.jsx'
 import { cloudinaryImage, cloudinarySrcSet } from '../utils/cloudinaryImage.js'
 import { updatePageMetadata } from '../utils/pageMetadata.js'
 
-const localImages = { BP4: bp4 }
 const sectionLabelPattern = /^(Product(?: Name)?|Botanical (?:Name|Source)|Description|Key Benefits|Suitable For|Suggested Use|Food Supplement Only|Available Sizes|Pack Size|How to Use)\s*:?[\s\u00a0]*(.*)$/i
 const whyChoosePattern = /^(Why Choose AYUSYDAH(?:\s+.+)?\??)\s*$/i
 
@@ -225,12 +223,12 @@ function ProductDetail() {
     )
   }
 
-  const imageSrc = localImages[product.image] || product.image
+  const imageSrc = product.image
   const requestedReturnTo = searchParams.get('returnTo')
   const returnTo = requestedReturnTo?.startsWith('/') ? requestedReturnTo : `/category/${encodeURIComponent(product.category)}`
   const variants = Array.isArray(product.variants) ? product.variants : []
   const selectedVariant = variants.find((variant) => variant._id === selectedVariantId) || variants[0] || null
-  const displayImage = localImages[selectedVariant?.image] || selectedVariant?.image || imageSrc
+  const displayImage = selectedVariant?.image || imageSrc
   const inWishlist = isInWishlist(product._id, selectedVariant?._id)
   const sellable = selectedVariant || product
   const parsedStock = Number(sellable.stock)

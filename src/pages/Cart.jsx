@@ -4,14 +4,12 @@ import { Minus, Plus, Trash2 } from 'lucide-react'
 import { getLineId, useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import toast from 'react-hot-toast'
-import bp4 from '../assets/BP4.png'
 import { cloudinaryImage } from '../utils/cloudinaryImage.js'
 
-const localImages = { BP4: bp4 }
 
 function CartProductImage({ image, name }) {
   const [failed, setFailed] = useState(false)
-  const imageSrc = localImages[image] || String(image || '').trim()
+  const imageSrc = String(image || '').trim()
 
   if (!imageSrc || failed) {
     return <span className="px-2 text-center text-xs font-medium text-stone-500">Product image unavailable</span>
