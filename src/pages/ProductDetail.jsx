@@ -259,17 +259,19 @@ function ProductDetail() {
         Back to {product.category}
       </Link>
 
-      <div className="grid gap-8 md:grid-cols-2 md:gap-12">
-        <Reveal direction="scale" className="flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-[#f2f6ff] p-6">
-          {imageSrc ? (
-            <img src={cloudinaryImage(displayImage, { width: 960, height: 960 })} srcSet={cloudinarySrcSet(displayImage, [480, 720, 960], { height: 960 })} sizes="(max-width: 767px) 100vw, 50vw" width="960" height="960" alt={product.name} loading="eager" fetchPriority="high" decoding="async" onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain mix-blend-multiply" />
-          ) : (
-            <span className="text-sm text-stone-500">Image unavailable</span>
-          )}
-        </Reveal>
-        {productImages.length > 1 && <div className="mt-3 flex flex-wrap gap-2 md:col-start-1">
-          {productImages.map((imageUrl, index) => <button key={imageUrl} type="button" onClick={() => setSelectedGalleryImage(imageUrl)} aria-label={`View product image ${index + 1}`} aria-pressed={displayImage === imageUrl} className={`h-16 w-16 overflow-hidden rounded-lg border-2 bg-white p-1 transition ${displayImage === imageUrl ? 'border-brand-blue' : 'border-stone-200 hover:border-brand-blue/50'}`}><img src={cloudinaryImage(imageUrl, { width: 128, height: 128 })} alt="" width="128" height="128" loading="lazy" decoding="async" className="h-full w-full object-contain" /></button>)}
-        </div>}
+      <div className="grid gap-8 md:grid-cols-2 md:items-start md:gap-12">
+        <div className="min-w-0">
+          <Reveal direction="scale" className="flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-[#f2f6ff] p-6">
+            {imageSrc ? (
+              <img src={cloudinaryImage(displayImage, { width: 960, height: 960 })} srcSet={cloudinarySrcSet(displayImage, [480, 720, 960], { height: 960 })} sizes="(max-width: 767px) 100vw, 50vw" width="960" height="960" alt={product.name} loading="eager" fetchPriority="high" decoding="async" onError={(event) => { event.currentTarget.style.display = 'none' }} className="h-full w-full object-contain mix-blend-multiply" />
+            ) : (
+              <span className="text-sm text-stone-500">Image unavailable</span>
+            )}
+          </Reveal>
+          <div className="mt-3 flex h-16 gap-2 overflow-x-auto">
+            {productImages.map((imageUrl, index) => <button key={imageUrl} type="button" onClick={() => setSelectedGalleryImage(imageUrl)} aria-label={`View product image ${index + 1}`} aria-pressed={displayImage === imageUrl} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-white p-1 transition ${displayImage === imageUrl ? 'border-brand-blue' : 'border-stone-200 hover:border-brand-blue/50'}`}><img src={cloudinaryImage(imageUrl, { width: 128, height: 128 })} alt="" width="128" height="128" loading="lazy" decoding="async" className="h-full w-full object-contain" /></button>)}
+          </div>
+        </div>
 
         <Reveal direction="up" delay={0.1}>
           <p className="eyebrow mb-3">Ayusydah wellness</p><h1 className="section-title mb-3">{product.name}</h1>
