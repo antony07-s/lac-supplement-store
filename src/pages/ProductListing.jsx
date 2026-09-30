@@ -5,7 +5,7 @@ import ProductCard from '../components/product/ProductCard.jsx'
 import { updatePageMetadata } from '../utils/pageMetadata.js'
 
 const PRODUCTS_PER_PAGE = 10
-const sortOptions = [['newest', 'Newest'], ['price-asc', 'Price: low to high'], ['price-desc', 'Price: high to low'], ['name', 'Name: A–Z']]
+const sortOptions = [['catalog', 'Default order'], ['newest', 'Newest'], ['price-asc', 'Price: low to high'], ['price-desc', 'Price: high to low'], ['name', 'Name: A–Z']]
 
 function ProductListing() {
   const { category } = useParams()
@@ -19,7 +19,7 @@ function ProductListing() {
   const headingRef = useRef(null)
   const searchTerm = searchParams.get('q')?.trim().slice(0, 100) || ''
   const healthGoal = searchParams.get('healthGoal')?.trim().slice(0, 100) || ''
-  const sort = sortOptions.some(([value]) => value === searchParams.get('sort')) ? searchParams.get('sort') : 'newest'
+  const sort = sortOptions.some(([value]) => value === searchParams.get('sort')) ? searchParams.get('sort') : 'catalog'
   const currentPage = Math.max(1, Number.parseInt(searchParams.get('page'), 10) || 1)
   const decodedCategory = category ? decodeURIComponent(category) : ''
   const showAllProducts = location.pathname === '/products'
@@ -58,7 +58,7 @@ function ProductListing() {
   const updateParams = (nextPage = 1, nextSort = sort) => {
     setLoading(true)
     const next = new URLSearchParams(searchParams)
-    if (nextSort === 'newest') next.delete('sort'); else next.set('sort', nextSort)
+    if (nextSort === 'catalog') next.delete('sort'); else next.set('sort', nextSort)
     if (nextPage === 1) next.delete('page'); else next.set('page', String(nextPage))
     setSearchParams(next)
   }

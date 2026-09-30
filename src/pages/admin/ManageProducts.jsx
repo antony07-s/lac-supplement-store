@@ -39,7 +39,8 @@ function ManageProducts() {
 
   return (
     <AdminLayout title="Products" subtitle={`${totalProducts} product${totalProducts !== 1 ? 's' : ''} in your catalog`}>
-      <div className="flex justify-end mb-5">
+      <div className="mb-5 flex flex-wrap justify-end gap-3">
+        <Link to="/admin/products/import" className="flex items-center gap-2 rounded-full border border-brand-blue px-5 py-2.5 text-sm font-semibold text-brand-blue transition-colors hover:bg-blue-50">Import CSV</Link>
         <Link
           to="/admin/products/add"
           className="flex items-center gap-2 bg-brand-blue text-white font-semibold px-5 py-2.5 rounded-full hover:bg-brand-blue-dark text-sm transition-colors"

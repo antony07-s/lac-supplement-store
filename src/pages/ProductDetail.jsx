@@ -150,6 +150,7 @@ function ProductDetail() {
   const [error, setError] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [selectedVariantId, setSelectedVariantId] = useState('')
+  const [selectedGalleryImage, setSelectedGalleryImage] = useState('')
   const [relatedProducts, setRelatedProducts] = useState([])
   const [adding, setAdding] = useState(false)
   const addingRef = useRef(false)
@@ -166,9 +167,10 @@ function ProductDetail() {
     setError('')
     setQuantity(1)
     setSelectedVariantId('')
+    setSelectedGalleryImage('')
 
     getWithRetry(`/products/${id}`)
-      .then((res) => { if (active) setProduct(res.data) })
+      .then((res) => { if (active) { setProduct(res.data); setSelectedGalleryImage(res.data.variants?.[0]?.image || res.data.images?.[0] || res.data.image || '') } })
       .catch((err) => {
         if (active) {
           setProduct(null)
@@ -228,7 +230,8 @@ function ProductDetail() {
   const returnTo = requestedReturnTo?.startsWith('/') ? requestedReturnTo : `/category/${encodeURIComponent(product.category)}`
   const variants = Array.isArray(product.variants) ? product.variants : []
   const selectedVariant = variants.find((variant) => variant._id === selectedVariantId) || variants[0] || null
-  const displayImage = selectedVariant?.image || imageSrc
+  const productImages = [...new Set([selectedVariant?.image, ...(Array.isArray(product.images) ? product.images : []), product.image].filter(Boolean))]
+  const displayImage = selectedGalleryImage || selectedVariant?.image || imageSrc
   const inWishlist = isInWishlist(product._id, selectedVariant?._id)
   const sellable = selectedVariant || product
   const parsedStock = Number(sellable.stock)
@@ -264,6 +267,9 @@ function ProductDetail() {
             <span className="text-sm text-stone-500">Image unavailable</span>
           )}
         </Reveal>
+        {productImages.length > 1 && <div className="mt-3 flex flex-wrap gap-2 md:col-start-1">
+          {productImages.map((imageUrl, index) => <button key={imageUrl} type="button" onClick={() => setSelectedGalleryImage(imageUrl)} aria-label={`View product image ${index + 1}`} aria-pressed={displayImage === imageUrl} className={`h-16 w-16 overflow-hidden rounded-lg border-2 bg-white p-1 transition ${displayImage === imageUrl ? 'border-brand-blue' : 'border-stone-200 hover:border-brand-blue/50'}`}><img src={cloudinaryImage(imageUrl, { width: 128, height: 128 })} alt="" width="128" height="128" loading="lazy" decoding="async" className="h-full w-full object-contain" /></button>)}
+        </div>}
 
         <Reveal direction="up" delay={0.1}>
           <p className="eyebrow mb-3">Ayusydah wellness</p><h1 className="section-title mb-3">{product.name}</h1>
@@ -278,7 +284,7 @@ function ProductDetail() {
               <div className="flex flex-wrap gap-2">
                 {variants.map((variant) => {
                   const unavailable = !variant.isAvailable || Number(variant.stock) === 0
-                  return <button key={variant._id} type="button" disabled={unavailable} onClick={() => { setSelectedVariantId(variant._id); setQuantity(1) }} className={`min-h-11 rounded-full border px-4 text-sm font-semibold transition ${selectedVariant?._id === variant._id ? 'border-brand-blue bg-brand-blue text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-brand-blue'} disabled:cursor-not-allowed disabled:border-stone-200 disabled:bg-stone-100 disabled:text-stone-400 disabled:line-through`}>
+                  return <button key={variant._id} type="button" disabled={unavailable} onClick={() => { setSelectedVariantId(variant._id); setSelectedGalleryImage(variant.image || product.images?.[0] || product.image); setQuantity(1) }} className={`min-h-11 rounded-full border px-4 text-sm font-semibold transition ${selectedVariant?._id === variant._id ? 'border-brand-blue bg-brand-blue text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-brand-blue'} disabled:cursor-not-allowed disabled:border-stone-200 disabled:bg-stone-100 disabled:text-stone-400 disabled:line-through`}>
                     {variant.packSize}{unavailable ? ' · Unavailable' : ''}
                   </button>
                 })}

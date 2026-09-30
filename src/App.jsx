@@ -37,6 +37,7 @@ const SiteMap = lazy(() => import('./pages/SiteMap.jsx'))
 const ContactUs = lazy(() => import('./pages/ContactUs.jsx'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard.jsx'))
 const ManageProducts = lazy(() => import('./pages/admin/ManageProducts.jsx'))
+const ImportProducts = lazy(() => import('./pages/admin/ImportProducts.jsx'))
 const AddProduct = lazy(() => import('./pages/admin/AddProduct.jsx'))
 const EditProduct = lazy(() => import('./pages/admin/EditProduct.jsx'))
 const ManageOrders = lazy(() => import('./pages/admin/ManageOrders.jsx'))
@@ -142,6 +143,7 @@ function App() {
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/products" element={<AdminRoute><ManageProducts /></AdminRoute>} />
+            <Route path="/admin/products/import" element={<AdminRoute><ImportProducts /></AdminRoute>} />
             <Route path="/admin/products/add" element={<AdminRoute><AddProduct /></AdminRoute>} />
             <Route path="/admin/products/edit/:id" element={<AdminRoute><EditProduct /></AdminRoute>} />
             <Route path="/admin/orders" element={<AdminRoute><ManageOrders /></AdminRoute>} />
