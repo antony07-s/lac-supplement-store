@@ -17,6 +17,8 @@ function EditProduct() {
   const navigate = useNavigate()
   const [form, setForm] = useState(null)
   const [imageFile, setImageFile] = useState(null)
+  const [galleryFiles, setGalleryFiles] = useState([])
+  const [galleryImages, setGalleryImages] = useState([])
   const [videoFile, setVideoFile] = useState(null)
   const [removeVideo, setRemoveVideo] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -26,7 +28,7 @@ function EditProduct() {
 
   useEffect(() => {
     api.get(`/products/${id}`)
-      .then((res) => { setForm(res.data); setVariants(res.data.variants || []) })
+      .then((res) => { setForm(res.data); setVariants(res.data.variants || []); setGalleryImages(Array.isArray(res.data.images) ? res.data.images : []) })
       .catch(() => toast.error('Failed to load product'))
       .finally(() => setLoading(false))
   }, [id])
@@ -71,6 +73,16 @@ function EditProduct() {
         })
         imageUrl = uploadRes.data.imageUrl
       }
+      let updatedGalleryImages = galleryImages
+      if (galleryFiles.length) {
+        const uploadData = new FormData()
+        galleryFiles.forEach((file) => uploadData.append('images', file))
+        const uploadRes = await api.post('/products/upload-multiple', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 120000,
+        })
+        updatedGalleryImages = [...galleryImages, ...(uploadRes.data.imageUrls || [])]
+      }
       let videoUrl = removeVideo ? '' : (form.videoUrl || '')
       let videoPublicId = removeVideo ? '' : (form.videoPublicId || '')
       if (videoFile) {
@@ -94,6 +106,7 @@ function EditProduct() {
         videoUrl,
         videoPublicId,
         image: imageUrl,
+        images: [...new Set(updatedGalleryImages)].slice(0, 20),
         variants: cleanedVariants,
       })
 
@@ -226,10 +239,17 @@ function EditProduct() {
             <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Replace Image (optional)</label>
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               onChange={(e) => setImageFile(e.target.files[0])}
               className="w-full text-sm border border-dashed border-gray-300 rounded-lg px-4 py-3"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Additional Gallery Images <span className="normal-case font-normal">(up to 20)</span></label>
+            {galleryImages.length > 0 ? <ul className="mb-3 space-y-2">{galleryImages.map((url, index) => <li key={`${url}-${index}`} className="flex items-center gap-3 rounded-lg border border-gray-200 p-2"><img src={url} alt={`Gallery image ${index + 1}`} className="h-14 w-14 rounded border bg-gray-50 object-contain" /><span className="min-w-0 flex-1 truncate text-xs text-gray-600">Image {index + 1}</span><button type="button" onClick={() => setGalleryImages((current) => current.filter((_, imageIndex) => imageIndex !== index))} className="text-xs font-semibold text-rose-600">Remove</button></li>)}</ul> : <p className="mb-3 text-xs text-gray-500">No additional gallery images.</p>}
+            <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => setGalleryFiles(Array.from(event.target.files || []).slice(0, Math.max(0, 20 - galleryImages.length)))} className="w-full text-sm border border-dashed border-gray-300 rounded-lg px-4 py-3" />
+            {galleryFiles.length > 0 && <p className="mt-2 text-xs text-gray-500">{galleryFiles.length} image{galleryFiles.length === 1 ? '' : 's'} selected: {galleryFiles.map((file) => file.name).join(', ')}</p>}
           </div>
 
           <button

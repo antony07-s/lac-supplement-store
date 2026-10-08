@@ -28,6 +28,7 @@ function AddProduct() {
   })
   const [healthGoals, setHealthGoals] = useState([])
   const [imageFile, setImageFile] = useState(null)
+  const [galleryFiles, setGalleryFiles] = useState([])
   const [videoFile, setVideoFile] = useState(null)
   const [variants, setVariants] = useState([])
   const [saving, setSaving] = useState(false)
@@ -71,6 +72,16 @@ function AddProduct() {
         })
         imageUrl = uploadRes.data.imageUrl
       }
+      let galleryImages = []
+      if (galleryFiles.length) {
+        const uploadData = new FormData()
+        galleryFiles.forEach((file) => uploadData.append('images', file))
+        const uploadRes = await api.post('/products/upload-multiple', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 120000,
+        })
+        galleryImages = uploadRes.data.imageUrls || []
+      }
       let videoUrl = form.videoUrl || ''
       let videoPublicId = ''
       if (videoFile) {
@@ -88,6 +99,7 @@ function AddProduct() {
         stock: variants.length ? undefined : stock,
         shippingWeightKg,
         image: imageUrl,
+        images: galleryImages,
         variants: cleanedVariants,
         videoUrl,
         videoPublicId,
@@ -212,10 +224,16 @@ function AddProduct() {
             <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Product Image <span className="normal-case font-normal">(optional — add later)</span></label>
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               onChange={(e) => setImageFile(e.target.files[0])}
               className="w-full text-sm border border-dashed border-gray-300 rounded-lg px-4 py-3"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Additional Gallery Images <span className="normal-case font-normal">(optional, up to 20)</span></label>
+            <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => setGalleryFiles(Array.from(event.target.files || []).slice(0, 20))} className="w-full text-sm border border-dashed border-gray-300 rounded-lg px-4 py-3" />
+            {galleryFiles.length > 0 && <p className="mt-2 text-xs text-gray-500">{galleryFiles.length} image{galleryFiles.length === 1 ? '' : 's'} selected: {galleryFiles.map((file) => file.name).join(', ')}</p>}
           </div>
 
           <button
