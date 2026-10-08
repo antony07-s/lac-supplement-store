@@ -3,7 +3,6 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 
 import PromoBar from './components/layout/PromoBar.jsx'
-import UtilityBar from './components/layout/UtilityBar.jsx'
 import Header from './components/layout/Header.jsx'
 import Footer from './components/layout/Footer.jsx'
 
@@ -103,7 +102,6 @@ function App() {
       {showStoreChrome && (
         <>
           <PromoBar />
-          <UtilityBar />
           <Header />
         </>
       )}
