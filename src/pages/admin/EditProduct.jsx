@@ -28,7 +28,7 @@ function EditProduct() {
 
   useEffect(() => {
     api.get(`/products/${id}`)
-      .then((res) => { setForm(res.data); setVariants(res.data.variants || []); setGalleryImages(Array.isArray(res.data.images) ? res.data.images : []) })
+      .then((res) => { setForm({ ...res.data, videosText: (Array.isArray(res.data.videos) ? res.data.videos : []).join('\n') }); setVariants(res.data.variants || []); setGalleryImages(Array.isArray(res.data.images) ? res.data.images : []) })
       .catch(() => toast.error('Failed to load product'))
       .finally(() => setLoading(false))
   }, [id])
@@ -85,6 +85,7 @@ function EditProduct() {
       }
       let videoUrl = removeVideo ? '' : (form.videoUrl || '')
       let videoPublicId = removeVideo ? '' : (form.videoPublicId || '')
+      const videos = [...new Set(String(form.videosText || '').split(/[\r\n,]+/).map((url) => url.trim()).filter(Boolean))]
       if (videoFile) {
         const uploadData = new FormData()
         uploadData.append('video', videoFile)
@@ -105,6 +106,7 @@ function EditProduct() {
         description: form.description,
         videoUrl,
         videoPublicId,
+        videos,
         image: imageUrl,
         images: [...new Set(updatedGalleryImages)].slice(0, 20),
         variants: cleanedVariants,
@@ -153,6 +155,7 @@ function EditProduct() {
 
           <div><label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Upload Product Video <span className="normal-case font-normal">(optional, replaces URL)</span></label><input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={(event) => setVideoFile(event.target.files[0] || null)} className="w-full text-sm border border-dashed border-gray-300 rounded-lg px-4 py-3" /></div>
           <div><label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Product Video URL <span className="normal-case font-normal">(optional)</span></label><input type="url" name="videoUrl" value={form.videoUrl || ''} onChange={handleChange} placeholder="https://..." className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm" />{form.videoUrl && <><video className="mt-3 aspect-video w-full rounded-lg bg-stone-900" controls muted playsInline preload="metadata" src={form.videoUrl} /><label className="mt-2 flex items-center gap-2 text-sm text-rose-600"><input type="checkbox" checked={removeVideo} onChange={(event) => setRemoveVideo(event.target.checked)} /> Remove current video</label></>}</div>
+          <div><label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Additional video URLs <span className="normal-case font-normal">(optional, one per line)</span></label><textarea name="videosText" value={form.videosText || ''} onChange={handleChange} rows={3} placeholder="https://..." className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm" /></div>
 
           <section className="rounded-xl border border-stone-200 p-4">
             <div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-sm font-bold text-stone-800">Product variants</h2><button type="button" onClick={() => setVariants((current) => [...current, { packSize: '', price: '', originalPrice: '', sku: '', stock: 0, shippingWeightKg: '', image: '', isAvailable: true }])} className="rounded-full border border-brand-blue px-3 py-1.5 text-xs font-semibold text-brand-blue">Add variant</button></div>

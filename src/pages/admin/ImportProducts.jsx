@@ -5,7 +5,7 @@ import AdminLayout from '../../components/admin/AdminLayout.jsx'
 
 const templateHeaders = [
   'name', 'category', 'description', 'price', 'originalPrice', 'stock', 'shippingWeightKg',
-  'bestSeller', 'healthGoals', 'imageUrl', 'variantPackSize', 'variantPrice',
+  'bestSeller', 'healthGoals', 'imageUrl', 'videoUrl', 'variantPackSize', 'variantPrice',
   'variantOriginalPrice', 'variantStock', 'variantShippingWeightKg', 'variantSku', 'variantImageUrl',
 ]
 
@@ -52,7 +52,7 @@ function groupCsvRows(csvRows) {
     if (!key) { errors.push(`Row ${line}: product name is required.`); return }
     let product = productsByTitle.get(key)
     if (!product) {
-      product = { name, values: {}, images: new Set(), variants: new Map(), line }
+      product = { name, values: {}, images: new Set(), videos: new Set(), variants: new Map(), line }
       productsByTitle.set(key, product)
     } else if (product.name.trim().replace(/\s+/g, ' ') !== name.replace(/\s+/g, ' ')) {
       errors.push(`Rows for the same product use inconsistent title spelling: "${product.name}" / "${name}".`)
@@ -70,6 +70,8 @@ function groupCsvRows(csvRows) {
 
     const imageUrl = row.imageurl || ''
     if (imageUrl) product.images.add(imageUrl)
+    const videoUrl = row.videourl || row.video || ''
+    if (videoUrl) product.videos.add(videoUrl)
 
     const packSize = row.variantpacksize || ''
     const variantFields = ['variantprice', 'variantoriginalprice', 'variantstock', 'variantshippingweightkg', 'variantsku', 'variantimageurl']
@@ -112,7 +114,7 @@ function groupCsvRows(csvRows) {
       price, originalPrice, stock: variants.length ? undefined : stock,
       shippingWeightKg: variants.length ? undefined : shippingWeightKg,
       bestSeller: ['true', 'yes', '1'].includes(bestSellerText), healthGoals,
-      image: images[0] || '', images, variants,
+      image: images[0] || '', images, videos: [...product.videos], variants,
     })
   }
   if (!products.length) errors.push('No products found in the CSV.')
@@ -184,7 +186,7 @@ function ImportProducts() {
         </div>
         <label className="mt-5 block text-sm font-semibold text-gray-700">CSV file<input type="file" accept=".csv,text/csv" onChange={handleFile} className="mt-2 block w-full rounded-lg border border-dashed border-gray-300 bg-gray-50 p-3 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-brand-blue file:px-3 file:py-2 file:font-semibold file:text-white" /></label>
         {fileName && <p className="mt-2 text-xs text-gray-500">Selected: {fileName}</p>}
-        <p className="mt-4 text-xs leading-5 text-gray-500">Required product fields: name, category, description, price, stock, shippingWeightKg. For products with pack variants, fill variantPackSize, variantPrice, variantStock and variantShippingWeightKg instead of product stock/weight. Each image uses its own HTTPS imageUrl row.</p>
+        <p className="mt-4 text-xs leading-5 text-gray-500">Required product fields: name, category, description, price, stock, shippingWeightKg. For products with pack variants, fill variantPackSize, variantPrice, variantStock and variantShippingWeightKg instead of product stock/weight. Each image uses its own HTTPS imageUrl row. Add optional HTTPS videoUrl values; repeated product rows are grouped into a video gallery.</p>
       </div>
 
       {loading && <p className="text-sm text-gray-500">Reading and grouping CSV rows…</p>}

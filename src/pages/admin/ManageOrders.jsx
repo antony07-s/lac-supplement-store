@@ -41,11 +41,11 @@ function ManageOrders() {
     if (updatingOrderId) return
     setUpdatingOrderId(orderId)
     try {
-      await api.put(`/orders/${orderId}/status`, { status: newStatus, ...extra })
+      const response = await api.put(`/orders/${orderId}/status`, { status: newStatus, ...extra })
       setOrders((prev) =>
-        prev.map((o) => (o._id === orderId ? { ...o, status: newStatus, ...extra } : o))
+        prev.map((o) => (o._id === orderId ? { ...o, ...response.data } : o))
       )
-      toast.success('Order status updated', { id: 'order-status-updated' })
+      toast.success(newStatus === 'refunded' && response.data.refundStatus !== 'completed' ? 'Refund submitted and awaiting provider confirmation' : 'Order status updated', { id: 'order-status-updated' })
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update status', { id: 'order-status-updated' })
     } finally { setUpdatingOrderId(null) }
@@ -147,6 +147,8 @@ function ManageOrders() {
                       <p className="mt-1 text-[11px] text-gray-400">{order.courierName}: {order.trackingNumber}</p>
                     )}
                     {order.shipmentEmailStatus === 'failed' && <p className="mt-1 text-[11px] font-semibold text-rose-600">Shipment email failed</p>}
+                    {order.refundStatus && !['not-requested', 'completed'].includes(order.refundStatus) && <p className="mt-1 text-[11px] font-semibold text-amber-700">Refund: {order.refundStatus.replaceAll('-', ' ')}</p>}
+                    {order.paymentIssue && <p className="mt-1 text-[11px] font-semibold text-rose-700">Payment needs reconciliation: {order.paymentIssue.replaceAll('_', ' ')}</p>}
                   </td>
                   <td className="col-span-2 block border-t border-gray-100 pt-3 md:table-cell md:border-0 md:px-5 md:py-4 md:text-right md:pt-4">
                     <span className="mb-2 block font-sans text-[10px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Actions</span>
@@ -157,8 +159,17 @@ function ManageOrders() {
                     {order.status === 'pending' && <span className="text-xs text-gray-400">Awaiting payment</span>}
                     {order.status === 'cancelled' && <span className="text-xs text-rose-600">Payment cancelled</span>}
                     {order.statusNote && <p className="mt-1 max-w-48 text-left text-[11px] text-gray-500">{order.statusNote}</p>}
-                    {['pending', 'paid'].includes(order.status) && <button type="button" disabled={updatingOrderId === order._id} onClick={() => requestStatusNote(order, 'cancelled')} className="min-h-10 rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 disabled:opacity-50">Cancel order</button>}
-                    {['paid', 'shipped', 'delivered'].includes(order.status) && <button type="button" disabled={updatingOrderId === order._id} onClick={() => requestStatusNote(order, 'refunded')} className="min-h-10 rounded-lg border border-purple-200 bg-white px-3 py-2 text-xs font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 disabled:opacity-50">Mark refunded</button>}
+                    {order.status === 'pending' && <button type="button" disabled={updatingOrderId === order._id} onClick={() => requestStatusNote(order, 'cancelled')} className="min-h-10 rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 disabled:opacity-50">Cancel order</button>}
+                    {(['paid', 'shipped', 'delivered'].includes(order.status) || (order.status === 'cancelled' && order.paymentIssue === 'late_capture')) && (['not-requested', 'failed', undefined].includes(order.refundStatus) || (order.paymentIssue === 'late_capture' && !order.refundRequestedAt)) && <button type="button" disabled={updatingOrderId === order._id} onClick={() => requestStatusNote(order, 'refunded')} className="min-h-10 rounded-lg border border-purple-200 bg-white px-3 py-2 text-xs font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 disabled:opacity-50">Issue full refund</button>}
+                    {(['pending', 'reconciliation-required'].includes(order.refundStatus) && order.refundRequestedAt) && <button type="button" disabled={updatingOrderId === order._id} onClick={async () => {
+                      setUpdatingOrderId(order._id)
+                      try {
+                        const response = await api.post(`/orders/${order._id}/refund/reconcile`)
+                        setOrders((prev) => prev.map((current) => current._id === order._id ? { ...current, ...response.data } : current))
+                        toast.success(response.data.refundStatus === 'completed' ? 'Refund confirmed by provider' : 'Refund status checked')
+                      } catch (err) { toast.error(err.response?.data?.message || 'Refund status could not be verified') }
+                      finally { setUpdatingOrderId(null) }
+                    }} className="min-h-10 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 disabled:opacity-50">Check refund</button>}
                     {order.shipmentEmailStatus === 'failed' && <button type="button" disabled={updatingOrderId === order._id} onClick={() => retryShipmentEmail(order._id)} className="min-h-10 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50">Retry email</button>}
                     </div>
                   </td>
