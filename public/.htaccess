@@ -1,8 +1,28 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # Do not turn missing compiled chunks into index.html. Browsers should get
+  # a real 404 for a stale hash so the deployment/cache issue is diagnosable.
+  RewriteCond %{REQUEST_URI} ^/assets/ [NC]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ - [R=404,L]
+
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . /index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # HTML must revalidate so it never keeps pointing at chunks from an old build.
+  <FilesMatch "^index\.html$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # Vite assets use content hashes, so they are safe to cache for a year.
+  SetEnvIf Request_URI "^/assets/" AYUSYDAH_HASHED_ASSET
+  Header set Cache-Control "public, max-age=31536000, immutable" env=AYUSYDAH_HASHED_ASSET
 </IfModule>
