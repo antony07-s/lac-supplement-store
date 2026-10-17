@@ -36,10 +36,12 @@ function Checkout() {
   const { cartItems, clearCart } = useCart()
   const { user, authReady } = useAuth()
   const navigate = useNavigate()
-  const pending = readPending()
+  const [pending] = useState(readPending)
   const [form, setForm] = useState(() => pending?.form || blank(user?.name))
   const [order, setOrder] = useState(() => pending?.order || null)
   const [quote, setQuote] = useState(() => pending?.order || null)
+  const [checkingSavedOrder, setCheckingSavedOrder] = useState(Boolean(pending?.order?._id))
+  const [savedOrderError, setSavedOrderError] = useState('')
   const [placing, setPlacing] = useState(false)
   const [paying, setPaying] = useState(false)
   const [paymentOptions, setPaymentOptions] = useState({ loading: Boolean(pending?.order), razorpay: false })
@@ -48,6 +50,46 @@ function Checkout() {
   const placingRef = useRef(false)
   const idempotencyKey = useRef(null)
   const razorpayCompleted = useRef(false)
+
+  useEffect(() => {
+    const savedOrderId = pending?.order?._id
+    if (!savedOrderId || !authReady || !user) return
+
+    let active = true
+    api.get(`/orders/${savedOrderId}`)
+      .then((response) => {
+        if (!active) return
+        const currentOrder = response.data
+        if (currentOrder.status === 'pending') {
+          setOrder(currentOrder)
+          setQuote(currentOrder)
+          return
+        }
+
+        sessionStorage.removeItem(PENDING_KEY)
+        setOrder(null)
+        setQuote(null)
+        if (['paid', 'shipped', 'delivered', 'refunded'].includes(currentOrder.status)) {
+          navigate(`/orders/${savedOrderId}`, { replace: true })
+          return
+        }
+        toast.error('Your previous checkout was cancelled. Review your bag and enter shipping details to start again.')
+      })
+      .catch((error) => {
+        if (!active) return
+        if ([401, 403, 404].includes(error.response?.status)) {
+          sessionStorage.removeItem(PENDING_KEY)
+          setOrder(null)
+          setQuote(null)
+          toast.error('We could not restore that checkout. Please review your bag and start again.')
+          return
+        }
+        setSavedOrderError('We could not verify your saved order. Reload this page before continuing to payment.')
+      })
+      .finally(() => { if (active) setCheckingSavedOrder(false) })
+
+    return () => { active = false }
+  }, [pending, authReady, user, navigate])
 
   const set = (name, value) => setForm((current) => ({ ...current, [name]: value }))
   const requestItems = () => cartItems.map((item) => ({ product: item._id, variantId: item.variantId, quantity: item.quantity }))
@@ -67,7 +109,7 @@ function Checkout() {
   }, [cartItems, form, order])
 
   useEffect(() => {
-    if (!order) return
+    if (!order || order.status !== 'pending') return
     let active = true
     api.get('/orders/payment-options')
       .then((response) => {
@@ -196,7 +238,12 @@ function Checkout() {
       checkout.open()
     } catch (error) {
       setPaying(false)
-      setRazorpayMessage(error.response?.data?.message || error.message || 'Unable to start Razorpay payment. Please try again.')
+      const message = error.response?.data?.message || error.message || 'Unable to start Razorpay payment. Please try again.'
+      if (error.response?.status === 409 && /already cancelled/i.test(message)) {
+        setOrder((current) => current ? { ...current, status: 'cancelled' } : current)
+        sessionStorage.removeItem(PENDING_KEY)
+      }
+      setRazorpayMessage(message)
     }
   }
 
@@ -218,6 +265,13 @@ function Checkout() {
           <button disabled={placing} className="w-full rounded-full bg-brand-blue py-3.5 font-semibold text-white disabled:opacity-60">{placing ? 'Calculating secure total…' : 'Continue to payment'}</button>
           <p className="flex justify-center gap-2 text-xs text-stone-500"><LockKeyhole size={14} />Final amounts are verified on our server.</p>
         </form> : <div className="mt-6">
+          {checkingSavedOrder ? <p className="rounded-lg bg-stone-50 p-3 text-sm text-stone-600" role="status">Checking your saved order…</p>
+            : savedOrderError ? <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900" role="alert">{savedOrderError}</p>
+            : order.status === 'cancelled' ? <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900" role="status">
+            <p className="font-semibold">This order was cancelled and can’t be paid.</p>
+            <p className="mt-1">Start a new checkout from the products you want to purchase.</p>
+            <Link to="/products" className="mt-3 inline-flex font-semibold underline underline-offset-2">Browse products</Link>
+          </div> : <>
           <p className="mb-4 text-sm text-stone-600">Review your final total, then choose a secure payment method.</p>
           {paymentOptions.loading ? <p className="text-sm text-stone-500">Loading payment methods…</p> : <>
             {paymentOptions.razorpay && <div className="mb-4 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Payment method">
@@ -233,6 +287,7 @@ function Checkout() {
               {paying && <p className="mt-3 text-sm font-medium text-brand-blue">Confirming your payment securely…</p>}
               <button type="button" onClick={cancelPayPal} disabled={paying} className="mt-4 text-sm font-semibold text-stone-600 underline disabled:opacity-50">Cancel payment</button>
             </>}
+          </>}
           </>}
         </div>}
       </section>
