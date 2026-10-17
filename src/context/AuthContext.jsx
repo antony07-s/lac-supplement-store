@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import api from '../api/axios.js'
+import api, { getWithRetry } from '../api/axios.js'
 
 const AuthContext = createContext()
 
@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
     window.addEventListener('ayusydah-auth-expired', handleExpiredAuth)
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    api.get('/auth/me')
+    getWithRetry('/auth/me')
       .then((response) => { if (active) setUser(response.data.user) })
       .catch(() => { if (active) setUser(null) })
       .finally(() => { if (active) setAuthReady(true) })

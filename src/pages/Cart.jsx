@@ -20,10 +20,11 @@ function CartProductImage({ image, name }) {
 
 function Cart() {
   const { cartItems, removeFromCart, updateCartQuantity, subtotal, total } = useCart()
-  const { user } = useAuth()
+  const { user, authReady } = useAuth()
   const navigate = useNavigate()
 
   const handleCheckout = () => {
+    if (!authReady) return
     if (!user) {
       toast.error('Please login to place an order')
       navigate('/login?returnTo=%2Fcheckout')
@@ -76,7 +77,7 @@ function Cart() {
         <h2 className="mb-4 text-lg font-bold text-gray-900">Order summary</h2>
         <div className="flex items-center justify-between text-stone-600"><span>Subtotal</span><span>RM {subtotal.toFixed(2)}</span></div>
         <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3"><span className="text-lg font-bold text-gray-900">Total</span><span className="text-lg font-bold text-brand-blue">RM {total.toFixed(2)}</span></div>
-        <button onClick={handleCheckout} className="mt-5 min-h-12 w-full rounded-full bg-brand-blue py-3 font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-blue-dark">Proceed to Checkout</button>
+        <button onClick={handleCheckout} disabled={!authReady} className="mt-5 min-h-12 w-full rounded-full bg-brand-blue py-3 font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-blue-dark disabled:cursor-wait disabled:opacity-60">{authReady ? 'Proceed to Checkout' : 'Checking your account…'}</button>
       </div>
     </main>
   )

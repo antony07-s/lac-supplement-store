@@ -5,7 +5,7 @@ import { ChevronLeft, LockKeyhole } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import api, { setRequestTimeout } from '../api/axios.js'
+import api, { getWithRetry, setRequestTimeout } from '../api/axios.js'
 import { trackEvent } from '../utils/telemetry.js'
 import { cloudinaryImage, cloudinarySrcSet } from '../utils/cloudinaryImage.js'
 
@@ -91,6 +91,26 @@ function Checkout() {
 
     return () => { active = false }
   }, [pending, authReady, user, navigate])
+
+  useEffect(() => {
+    if (!authReady || !user || pending?.form || order) return
+    let active = true
+    getWithRetry(`/orders/user/${user.id}`)
+      .then(({ data }) => {
+        if (!active || !Array.isArray(data)) return
+        const savedAddress = data.find((savedOrder) => {
+          const address = savedOrder.shippingAddress
+          return address?.fullName && address?.phone && address?.addressLine1
+            && address?.city && address?.state && address?.postcode
+        })?.shippingAddress
+        if (!savedAddress) return
+        setForm((current) => current.addressLine1 || current.city
+          ? current
+          : { ...blank(user.name), ...savedAddress, fullName: savedAddress.fullName || user.name })
+      })
+      .catch(() => {})
+    return () => { active = false }
+  }, [authReady, user, pending, order])
 
   const set = (name, value) => setForm((current) => ({ ...current, [name]: value }))
   const requestItems = () => cartItems.map((item) => ({ product: item._id, variantId: item.variantId, quantity: item.quantity }))
@@ -300,6 +320,11 @@ function Checkout() {
             <button type="button" onClick={restartCancelledCheckout} disabled={restartingCheckout} className="mt-3 inline-flex font-semibold underline underline-offset-2 disabled:opacity-60">{restartingCheckout ? 'Checking stock…' : 'Retry checkout'}</button>
           </div> : <>
           <p className="mb-4 text-sm text-stone-600">Review your final total, then choose a secure payment method.</p>
+          {order.shippingAddress && <div className="mb-4 rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-700">
+            <p className="font-semibold text-gray-900">Shipping to</p>
+            <p className="mt-1">{order.shippingAddress.fullName} · {order.shippingAddress.phone}</p>
+            <p>{[order.shippingAddress.addressLine1, order.shippingAddress.addressLine2, order.shippingAddress.city, order.shippingAddress.state, order.shippingAddress.postcode, order.shippingAddress.country].filter(Boolean).join(', ')}</p>
+          </div>}
           {paymentOptions.loading ? <p className="text-sm text-stone-500">Loading payment methods…</p> : <>
             {paymentOptions.razorpay && <div className="mb-4 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Payment method">
               <button type="button" onClick={() => setPaymentMethod('razorpay')} disabled={paying} className={`rounded-lg border p-3 text-left text-sm font-semibold ${paymentMethod === 'razorpay' ? 'border-brand-blue bg-blue-50 text-brand-blue' : 'border-stone-200'}`}>Razorpay</button>
