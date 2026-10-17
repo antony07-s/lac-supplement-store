@@ -47,6 +47,7 @@ function Checkout() {
   const [paymentOptions, setPaymentOptions] = useState({ loading: Boolean(pending?.order), razorpay: false })
   const [paymentMethod, setPaymentMethod] = useState('paypal')
   const [razorpayMessage, setRazorpayMessage] = useState('')
+  const [restartingCheckout, setRestartingCheckout] = useState(false)
   const placingRef = useRef(false)
   const idempotencyKey = useRef(null)
   const razorpayCompleted = useRef(false)
@@ -247,6 +248,32 @@ function Checkout() {
     }
   }
 
+  const restartCancelledCheckout = async () => {
+    if (!order || restartingCheckout) return
+    setRestartingCheckout(true)
+    try {
+      const key = crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`
+      const response = await api.post('/orders', {
+        items: order.items.map((item) => ({
+          product: item.product?._id || item.product,
+          variantId: item.variant?._id || item.variant,
+          quantity: item.quantity,
+        })),
+        shippingAddress: order.shippingAddress,
+      }, { headers: { 'Idempotency-Key': key } })
+      idempotencyKey.current = key
+      setOrder(response.data)
+      setQuote(response.data)
+      setRazorpayMessage('')
+      setPaymentOptions({ loading: true, razorpay: false })
+      sessionStorage.setItem(PENDING_KEY, JSON.stringify({ order: response.data, form }))
+    } catch (error) {
+      setRazorpayMessage(error.response?.data?.message || 'Unable to restart checkout. Please review your cart and try again.')
+    } finally {
+      setRestartingCheckout(false)
+    }
+  }
+
   const input = 'mt-1.5 w-full min-w-0 rounded-lg border border-gray-300 px-3 py-3 text-sm focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/15'
   return <main className="page-shell section-space max-w-6xl overflow-x-hidden">
     <Link to={order ? `/orders/${order._id}` : '/cart'} className="mb-5 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-stone-600 hover:text-brand-blue"><ChevronLeft size={17} />{order ? 'Back to order details' : 'Back to Cart'}</Link>
@@ -269,8 +296,8 @@ function Checkout() {
             : savedOrderError ? <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900" role="alert">{savedOrderError}</p>
             : order.status === 'cancelled' ? <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900" role="status">
             <p className="font-semibold">This order was cancelled and can’t be paid.</p>
-            <p className="mt-1">Start a new checkout from the products you want to purchase.</p>
-            <Link to="/products" className="mt-3 inline-flex font-semibold underline underline-offset-2">Browse products</Link>
+            <p className="mt-1">Create a new order to retry payment. Stock and the total will be checked again.</p>
+            <button type="button" onClick={restartCancelledCheckout} disabled={restartingCheckout} className="mt-3 inline-flex font-semibold underline underline-offset-2 disabled:opacity-60">{restartingCheckout ? 'Checking stock…' : 'Retry checkout'}</button>
           </div> : <>
           <p className="mb-4 text-sm text-stone-600">Review your final total, then choose a secure payment method.</p>
           {paymentOptions.loading ? <p className="text-sm text-stone-500">Loading payment methods…</p> : <>
