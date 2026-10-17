@@ -38,15 +38,33 @@ function GoogleSignInButton({ onCredential, disabled = false }) {
   useEffect(() => {
     if (!clientId || !containerRef.current) return undefined
     let active = true
+    let resizeObserver
+    let renderedWidth = 0
     activeCredentialHandler = onCredential
     loadGoogleScript().then(() => {
       if (!active || !window.google?.accounts?.id || !containerRef.current) return
       initializeGoogle(clientId)
-      containerRef.current.replaceChildren()
-      window.google.accounts.id.renderButton(containerRef.current, { theme: 'outline', size: 'large', text: 'continue_with', shape: 'rect', width: 360, logo_alignment: 'left' })
+      const renderResponsiveButton = () => {
+        if (!active || !containerRef.current) return
+        const parentWidth = containerRef.current.parentElement?.clientWidth || 360
+        const width = Math.max(200, Math.min(360, parentWidth - 16))
+        if (width === renderedWidth) return
+        renderedWidth = width
+        containerRef.current.replaceChildren()
+        window.google.accounts.id.renderButton(containerRef.current, { theme: 'outline', size: 'large', text: 'continue_with', shape: 'rect', width, logo_alignment: 'left' })
+      }
+      renderResponsiveButton()
+      if (typeof ResizeObserver !== 'undefined' && containerRef.current.parentElement) {
+        resizeObserver = new ResizeObserver(renderResponsiveButton)
+        resizeObserver.observe(containerRef.current.parentElement)
+      }
       setLoading(false)
     }).catch(() => { if (active) setLoading(false) })
-    return () => { active = false; if (activeCredentialHandler === onCredential) activeCredentialHandler = undefined }
+    return () => {
+      active = false
+      resizeObserver?.disconnect()
+      if (activeCredentialHandler === onCredential) activeCredentialHandler = undefined
+    }
   }, [clientId, onCredential])
 
   if (!clientId) return null
