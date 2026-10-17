@@ -28,9 +28,10 @@ const mergeWishlists = (localItems, serverItems) => {
 }
 
 export function WishlistProvider({ children }) {
-  const { user } = useAuth()
+  const { user, authReady } = useAuth()
   const [wishlistItems, setWishlistItems] = useState(getStoredWishlist)
   const hasLoadedForUser = useRef(null)
+  const hasResolvedAuth = useRef(false)
   const previousUserId = useRef(user?.id ?? null)
 
   useEffect(() => {
@@ -38,6 +39,8 @@ export function WishlistProvider({ children }) {
   }, [wishlistItems])
 
   useEffect(() => {
+    if (!authReady) return
+
     if (!user) {
       if (previousUserId.current !== null) {
         setWishlistItems([])
@@ -45,12 +48,13 @@ export function WishlistProvider({ children }) {
       }
       hasLoadedForUser.current = null
       previousUserId.current = null
+      hasResolvedAuth.current = true
       return
     }
 
     if (hasLoadedForUser.current === user.id) return
 
-    const isGuestToUserTransition = previousUserId.current === null
+    const isGuestToUserTransition = hasResolvedAuth.current && previousUserId.current === null
 
     let active = true
     api.get('/wishlist')
@@ -62,17 +66,18 @@ export function WishlistProvider({ children }) {
         ))
         hasLoadedForUser.current = user.id
         previousUserId.current = user.id
+        hasResolvedAuth.current = true
       })
       .catch((err) => console.error('Failed to load saved wishlist:', err))
 
     return () => { active = false }
-  }, [user])
+  }, [user, authReady])
 
   useEffect(() => {
-    if (!user || hasLoadedForUser.current !== user.id) return
+    if (!authReady || !user || hasLoadedForUser.current !== user.id) return
     const items = wishlistItems.map((item) => ({ productId: item._id, variantId: item.variantId }))
     api.put('/wishlist', { items }).catch((err) => console.error('Failed to sync wishlist:', err))
-  }, [wishlistItems, user])
+  }, [wishlistItems, user, authReady])
 
   const toggleWishlist = (product) => {
     setWishlistItems((prev) => {

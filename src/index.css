@@ -15,6 +15,9 @@
     color: #172554;
     background: #f8fafc;
     font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 *,
@@ -25,6 +28,7 @@
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: 7rem;
 }
 
 body {
@@ -32,6 +36,8 @@ body {
     margin: 0;
     overflow-x: hidden;
     background: #f8fafc;
+    color: #172554;
+    line-height: 1.5;
 }
 
 #root {
@@ -74,6 +80,45 @@ textarea {
     transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease, color .18s ease, transform .18s ease;
 }
 
+:focus-visible {
+    outline: 3px solid rgb(29 78 216 / 35%);
+    outline-offset: 3px;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+    color: #172554;
+    border-color: #d1d5db;
+    border-radius: .7rem;
+    background-color: #fff;
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+thead th {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .055em;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select {
+    min-height: 2.75rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #9ca3af;
+}
+
 .page-shell {
     width: min(100% - 2rem, 76rem);
     margin-inline: auto;
@@ -97,6 +142,17 @@ textarea {
     font-weight: 750;
     letter-spacing: -.035em;
     line-height: 1.1;
+}
+
+.surface-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 8px 28px rgb(15 23 42 / 5%);
+}
+
+.text-balance {
+    text-wrap: balance;
 }
 
 .shimmer {
@@ -198,5 +254,9 @@ textarea {
     select,
     textarea {
         max-width: 100%;
+    }
+
+    .section-space {
+        padding-block: 2.75rem;
     }
 }

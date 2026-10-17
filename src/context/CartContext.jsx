@@ -52,11 +52,12 @@ const mergeCarts = (localItems, serverItems) => {
 }
 
 export function CartProvider({ children }) {
-  const { user } = useAuth()
+  const { user, authReady } = useAuth()
   const [cartItems, setCartItems] = useState(getStoredCart)
   const hasLoadedForUser = useRef(null)
-  // Starts equal to whoever's already logged in at page load (or null if guest).
-  // This is what stops a page refresh from being mistaken for a fresh login.
+  const hasResolvedAuth = useRef(false)
+  // Tracks the last resolved account; the separate flag distinguishes the
+  // initial /auth/me hydration from a real guest-to-login transition.
   const previousUserId = useRef(user?.id ?? null)
 
   // Guest cart / fallback storage
@@ -65,6 +66,8 @@ export function CartProvider({ children }) {
   }, [cartItems])
 
   useEffect(() => {
+    if (!authReady) return
+
     // Logged out: wipe the visible cart immediately so the next person on this
     // browser never inherits it, and no other account can see it after this point.
     if (!user) {
@@ -74,6 +77,7 @@ export function CartProvider({ children }) {
       }
       hasLoadedForUser.current = null
       previousUserId.current = null
+      hasResolvedAuth.current = true
       return
     }
 
@@ -83,7 +87,7 @@ export function CartProvider({ children }) {
     // Only merge in leftover guest items when going guest -> logged in.
     // A page refresh while already logged in, or switching to a different
     // account, always replaces instead of merging.
-    const isGuestToUserTransition = previousUserId.current === null
+    const isGuestToUserTransition = hasResolvedAuth.current && previousUserId.current === null
 
     let active = true
     api.get('/cart')
@@ -95,19 +99,20 @@ export function CartProvider({ children }) {
         ))
         hasLoadedForUser.current = user.id
         previousUserId.current = user.id
+        hasResolvedAuth.current = true
       })
       .catch((err) => console.error('Failed to load saved cart:', err))
 
     return () => { active = false }
-  }, [user])
+  }, [user, authReady])
 
   // Only sync to the server once THIS user's cart has actually finished loading -
   // otherwise we'd briefly overwrite their saved cart with an empty array.
   useEffect(() => {
-    if (!user || hasLoadedForUser.current !== user.id) return
+    if (!authReady || !user || hasLoadedForUser.current !== user.id) return
     const items = cartItems.map((item) => ({ productId: item._id, variantId: item.variantId, quantity: getSafeQuantity(item.quantity) }))
     api.put('/cart', { items }).catch((err) => console.error('Failed to sync cart:', err))
-  }, [cartItems, user])
+  }, [cartItems, user, authReady])
 
   const addToCart = (product, quantity = 1, selectedVariant = null) => {
     const sellable = selectedVariant || product

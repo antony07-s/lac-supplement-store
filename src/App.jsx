@@ -70,7 +70,7 @@ function App() {
   useEffect(() => {
     const analyticsId = 'G-GN98K2DHYN'
     const loadAnalytics = () => {
-      if (localStorage.getItem('ayusydah-cookie-notice-seen') !== 'true' || document.querySelector(`[data-analytics-id="${analyticsId}"]`)) return
+      if (localStorage.getItem('ayusydah-analytics-consent') !== 'accepted' || document.querySelector(`[data-analytics-id="${analyticsId}"]`)) return
       window.dataLayer = window.dataLayer || []
       window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments) }
       window.gtag('js', new Date())
@@ -96,7 +96,14 @@ function App() {
       <ScrollToTop />
       <Seo />
 
-      <Toaster position="top-center" />
+      <Toaster
+        position="top-center"
+        gutter={10}
+        toastOptions={{
+          duration: 3800,
+          style: { borderRadius: '14px', padding: '12px 16px', fontSize: '14px', boxShadow: '0 12px 32px rgba(15, 23, 42, .14)' },
+        }}
+      />
 
       {/* Show website header only on normal pages */}
       {showStoreChrome && (

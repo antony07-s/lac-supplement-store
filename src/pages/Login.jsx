@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import api from '../api/axios.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import GoogleSignInButton from '../components/auth/GoogleSignInButton.jsx'
+import { safeReturnTo } from '../utils/safeReturnTo.js'
 
 function Login() {
     const [form, setForm] = useState({ email: '', password: '' })
@@ -29,10 +30,9 @@ function Login() {
         setLoading(true)
         try {
             const res = await api.post('/auth/login', { email, password: form.password })
-            login(res.data.user, res.data.token)
+            login(res.data.user)
             toast.success(`Welcome back, ${res.data.user.name}!`)
-            const returnTo = searchParams.get('returnTo')
-            navigate(returnTo?.startsWith('/') ? returnTo : '/')
+            navigate(safeReturnTo(searchParams.get('returnTo')))
         } catch (err) {
             toast.error(err.response?.data?.message || 'Login failed', { id: 'login-error' })
         } finally {
@@ -45,10 +45,9 @@ function Login() {
         setLoading(true)
         try {
             const res = await api.post('/auth/google', { credential })
-            login(res.data.user, res.data.token)
+            login(res.data.user)
             toast.success(`Welcome, ${res.data.user.name}!`)
-            const returnTo = searchParams.get('returnTo')
-            navigate(returnTo?.startsWith('/') ? returnTo : '/')
+            navigate(safeReturnTo(searchParams.get('returnTo')))
         } catch (err) {
             toast.error(err.response?.data?.message || 'Google sign-in failed. Please try again.', { id: 'google-login-error' })
         } finally { setLoading(false) }

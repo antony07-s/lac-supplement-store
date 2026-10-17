@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'
-import { LockKeyhole } from 'lucide-react'
+import { ChevronLeft, LockKeyhole } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import api from '../api/axios.js'
+import api, { setRequestTimeout } from '../api/axios.js'
 import { trackEvent } from '../utils/telemetry.js'
 import { cloudinaryImage, cloudinarySrcSet } from '../utils/cloudinaryImage.js'
 
@@ -34,7 +34,7 @@ function loadRazorpay() {
 
 function Checkout() {
   const { cartItems, clearCart } = useCart()
-  const { user } = useAuth()
+  const { user, authReady } = useAuth()
   const navigate = useNavigate()
   const pending = readPending()
   const [form, setForm] = useState(() => pending?.form || blank(user?.name))
@@ -56,6 +56,7 @@ function Checkout() {
   const cartSubtotal = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0)
   const realTotals = order || quote
   const totals = realTotals || { subtotal: cartSubtotal, totalAmount: cartSubtotal }
+  const checkoutStep = !order ? 1 : ['paid', 'shipped', 'delivered', 'refunded'].includes(order.status) ? 3 : 2
 
   useEffect(() => {
     const validPostcode = form.country === 'India' ? /^\d{6}$/.test(form.postcode) : /^\d{5}$/.test(form.postcode)
@@ -79,6 +80,7 @@ function Checkout() {
     return () => { active = false }
   }, [order])
 
+  if (!authReady) return <main className="page-shell section-space text-center text-stone-500">Checking your account…</main>
   if (!user) return <Navigate to="/login?returnTo=/checkout" replace />
   if (!cartItems.length && !order) return <Navigate to="/cart" replace />
 
@@ -106,17 +108,27 @@ function Checkout() {
 
   const cancelPayPal = async () => {
     if (!order) return
-    try { await api.post(`/orders/${order._id}/cancel-payment`) } catch { toast.error('Could not cancel automatically; check your order status.') }
-    sessionStorage.removeItem(PENDING_KEY)
-    navigate(`/orders/${order._id}?payment=cancelled`)
+    let cancelled = false
+    try { const response = await api.post(`/orders/${order._id}/cancel-payment`); cancelled = response.data?.status === 'cancelled' } catch { toast.error('Payment may still be processing. Check your order status before retrying.') }
+    if (cancelled) sessionStorage.removeItem(PENDING_KEY)
+    navigate(cancelled ? `/orders/${order._id}?payment=cancelled` : `/orders/${order._id}`)
+  }
+
+  const leaveRazorpay = async () => {
+    if (!order || paying) return
+    let cancelled = false
+    try { const response = await api.post(`/orders/${order._id}/cancel-payment`); cancelled = response.data?.status === 'cancelled' } catch { toast.error('Payment may still be processing. Check your order status before retrying.') }
+    if (cancelled) sessionStorage.removeItem(PENDING_KEY)
+    navigate(cancelled ? `/orders/${order._id}?payment=cancelled` : `/orders/${order._id}`)
   }
 
   const approvePayPal = async (data) => {
     if (paying) return
     setPaying(true)
     try {
-      const response = await api.post(`/orders/${order._id}/paypal-capture`, { paypalOrderId: data.orderID })
+      const response = await api.post(`/orders/${order._id}/paypal-capture`, { paypalOrderId: data.orderID }, setRequestTimeout())
       if (response.data.status !== 'paid') throw new Error('Payment could not be confirmed')
+      setOrder((current) => ({ ...current, ...response.data }))
       sessionStorage.removeItem(PENDING_KEY)
       trackEvent('purchase', { transaction_id: order._id, value: response.data.totalAmount || order.totalAmount, currency: 'MYR' })
       navigate(`/orders/${order._id}?payment=success`)
@@ -132,8 +144,9 @@ function Checkout() {
     setPaying(true)
     setRazorpayMessage('Confirming your payment securely…')
     try {
-      const verified = await api.post(`/orders/${order._id}/razorpay-verify`, response)
+      const verified = await api.post(`/orders/${order._id}/razorpay-verify`, response, setRequestTimeout())
       if (verified.data.status !== 'paid') throw new Error('Payment could not be confirmed')
+      setOrder((current) => ({ ...current, ...verified.data }))
       sessionStorage.removeItem(PENDING_KEY)
       trackEvent('purchase', { transaction_id: order._id, value: order.totalAmount, currency: 'MYR' })
       navigate(`/orders/${order._id}?payment=success`)
@@ -189,10 +202,11 @@ function Checkout() {
 
   const input = 'mt-1.5 w-full min-w-0 rounded-lg border border-gray-300 px-3 py-3 text-sm focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/15'
   return <main className="page-shell section-space max-w-6xl overflow-x-hidden">
-    <ol className="mb-6 flex flex-wrap gap-x-2 gap-y-1 text-xs font-semibold sm:text-sm"><li className="text-brand-blue">1. Shipping</li><li className="text-stone-400">→ 2. Payment</li><li className="text-stone-400">→ 3. Confirmation</li></ol>
+    <Link to={order ? `/orders/${order._id}` : '/cart'} className="mb-5 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-stone-600 hover:text-brand-blue"><ChevronLeft size={17} />{order ? 'Back to order details' : 'Back to Cart'}</Link>
+    <ol aria-label="Checkout progress" className="mb-7 flex flex-wrap gap-2 text-xs font-semibold sm:text-sm"><li aria-current={checkoutStep === 1 ? 'step' : undefined} className={`rounded-full px-3 py-2 ${checkoutStep > 1 ? 'bg-emerald-50 text-emerald-800' : checkoutStep === 1 ? 'bg-blue-50 text-brand-blue' : 'bg-stone-100 text-stone-500'}`}>{checkoutStep > 1 ? '✓ ' : ''}1. Shipping</li><li aria-current={checkoutStep === 2 ? 'step' : undefined} className={`rounded-full px-3 py-2 ${checkoutStep > 2 ? 'bg-emerald-50 text-emerald-800' : checkoutStep === 2 ? 'bg-blue-50 text-brand-blue' : 'bg-stone-100 text-stone-500'}`}>{checkoutStep > 2 ? '✓ ' : ''}2. Payment</li><li aria-current={checkoutStep === 3 ? 'step' : undefined} className={`rounded-full px-3 py-2 ${checkoutStep === 3 ? 'bg-blue-50 text-brand-blue' : 'bg-stone-100 text-stone-500'}`}>3. Confirmation</li></ol>
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-      <section className="min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-7">
-        <h1 className="text-2xl font-bold">{order ? 'Secure payment' : 'Shipping details'}</h1>
+      <section className="surface-card min-w-0 p-4 sm:p-7">
+        <p className="eyebrow mb-2">Secure checkout</p><h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">{order ? 'Secure payment' : 'Shipping details'}</h1>
         {!order ? <form onSubmit={submit} className="mt-6 space-y-4">
           <label className="block text-sm font-medium">Full name *<input required value={form.fullName} onChange={(e) => set('fullName', e.target.value)} className={input} /></label>
           <label className="block text-sm font-medium">Phone number *<input required type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} className={input} /></label>
@@ -213,7 +227,7 @@ function Checkout() {
             {paymentMethod === 'razorpay' && paymentOptions.razorpay ? <div>
               <button type="button" onClick={startRazorpay} disabled={paying} className="w-full rounded-full bg-brand-blue py-3.5 font-semibold text-white disabled:opacity-60">{paying ? 'Processing payment…' : 'Pay securely with Razorpay'}</button>
               {razorpayMessage && <p className="mt-3 rounded-lg bg-stone-50 p-3 text-sm text-stone-600" role="status">{razorpayMessage}</p>}
-              <button type="button" onClick={() => navigate(`/orders/${order._id}?payment=cancelled`)} disabled={paying} className="mt-4 text-sm font-semibold text-stone-600 underline disabled:opacity-50">Leave payment</button>
+              <button type="button" onClick={leaveRazorpay} disabled={paying} className="mt-4 text-sm font-semibold text-stone-600 underline disabled:opacity-50">Leave payment</button>
             </div> : <>
               {!import.meta.env.VITE_PAYPAL_CLIENT_ID ? <p className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">PayPal is unavailable. Please contact support.</p> : <PayPalScriptProvider options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: 'MYR', intent: 'capture' }}><PayPalButtons disabled={paying} style={{ layout: 'vertical', label: 'pay' }} createOrder={async () => (await api.post(`/orders/${order._id}/paypal-order`)).data.orderId} onApprove={approvePayPal} onCancel={cancelPayPal} onError={() => { setPaying(false); toast.error('PayPal could not be reached. Check your connection and try again.') }} /></PayPalScriptProvider>}
               {paying && <p className="mt-3 text-sm font-medium text-brand-blue">Confirming your payment securely…</p>}
@@ -222,7 +236,7 @@ function Checkout() {
           </>}
         </div>}
       </section>
-      <aside className="min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5 lg:sticky lg:top-28"><h2 className="text-lg font-bold">Order summary</h2><div className="mt-4 max-h-72 space-y-3 overflow-y-auto">{items.map((item) => <div key={`${item._id || item.product}-${item.variantId || item.variant || ''}`} className="flex min-w-0 gap-3"><img src={cloudinaryImage(item.image, { width: 160, height: 160 })} srcSet={cloudinarySrcSet(item.image, [80, 120, 160], { height: 160 })} sizes="56px" width="56" height="56" loading="lazy" decoding="async" alt="" className="h-14 w-14 shrink-0 rounded-lg border object-contain" /><div className="min-w-0 flex-1"><p className="break-words text-sm font-semibold">{item.name}</p><p className="text-xs text-stone-500">Qty: {item.quantity}</p></div><span className="shrink-0 text-sm font-semibold">{formatRm(Number(item.price) * item.quantity)}</span></div>)}</div><div className="mt-5 space-y-2 border-t pt-4 text-sm"><div className="flex justify-between"><span>Subtotal</span><span>{formatRm(totals?.subtotal)}</span></div>{realTotals ? <><div className="flex justify-between text-emerald-700"><span>Discount {realTotals.discount ? '(orders over RM 1,000)' : ''}</span><span>−{formatRm(realTotals.discount)}</span></div><div className="flex justify-between"><span>Shipping <small>({realTotals.shippingRegion === 'india' ? 'India' : `${realTotals.shippingRegion === 'east-malaysia' ? 'East' : 'West'} Malaysia`})</small></span><span>{formatRm(realTotals.shipping)}</span></div></> : <p className="text-xs text-stone-500">Enter your state and postcode to see shipping cost.</p>}<div className="flex justify-between border-t pt-3 text-lg font-bold"><span>Final total</span><span className="text-brand-blue">{formatRm(totals?.totalAmount)}</span></div>{realTotals && <p className="text-xs text-stone-500">Weight: {realTotals.totalWeightKg} kg</p>}</div></aside>
+      <aside className="surface-card min-w-0 p-4 sm:p-5 lg:sticky lg:top-28"><h2 className="text-lg font-bold text-gray-900">Order summary</h2><div className="mt-4 max-h-72 space-y-3 overflow-y-auto">{items.map((item) => <div key={`${item._id || item.product}-${item.variantId || item.variant || ''}`} className="flex min-w-0 gap-3"><img src={cloudinaryImage(item.image, { width: 160, height: 160 })} srcSet={cloudinarySrcSet(item.image, [80, 120, 160], { height: 160 })} sizes="56px" width="56" height="56" loading="lazy" decoding="async" alt="" className="h-14 w-14 shrink-0 rounded-lg border object-contain" /><div className="min-w-0 flex-1"><p className="break-words text-sm font-semibold">{item.name}</p><p className="text-xs text-stone-500">Qty: {item.quantity}</p></div><span className="shrink-0 text-sm font-semibold">{formatRm(Number(item.price) * item.quantity)}</span></div>)}</div><div className="mt-5 space-y-2 border-t pt-4 text-sm"><div className="flex justify-between"><span>Subtotal</span><span>{formatRm(totals?.subtotal)}</span></div>{realTotals ? <><div className="flex justify-between text-emerald-700"><span>Discount {realTotals.discount ? '(orders over RM 1,000)' : ''}</span><span>−{formatRm(realTotals.discount)}</span></div><div className="flex justify-between"><span>Shipping <small>({realTotals.shippingRegion === 'india' ? 'India' : `${realTotals.shippingRegion === 'east-malaysia' ? 'East' : 'West'} Malaysia`})</small></span><span>{formatRm(realTotals.shipping)}</span></div></> : <p className="text-xs text-stone-500">Enter your state and postcode to see shipping cost.</p>}<div className="flex justify-between border-t pt-3 text-lg font-bold"><span>Final total</span><span className="text-brand-blue">{formatRm(totals?.totalAmount)}</span></div>{realTotals && <p className="text-xs text-stone-500">Weight: {realTotals.totalWeightKg} kg</p>}</div></aside>
     </div>
   </main>
 }

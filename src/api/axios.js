@@ -1,29 +1,28 @@
 import axios from 'axios'
 
-const api = axios.create({
-  baseURL: `${(import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api`,
-  timeout: 15000,
-})
+const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '')
+const localApiUrl = !configuredApiUrl || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configuredApiUrl)
+const apiBaseUrl = import.meta.env.DEV && localApiUrl
+  ? '/api'
+  : `${(configuredApiUrl || 'http://localhost:5000').replace(/\/$/, '')}/api`
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
+const api = axios.create({
+  baseURL: apiBaseUrl,
+  timeout: 15000,
+  withCredentials: true,
 })
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
+    if (error.response?.status === 401 && error.response?.data?.code === 'AUTH_REQUIRED') {
       window.dispatchEvent(new Event('ayusydah-auth-expired'))
     }
     return Promise.reject(error)
   },
 )
+
+export const setRequestTimeout = (config = {}, timeout = 60000) => ({ ...config, timeout })
 
 const wait = (delay, signal) => new Promise((resolve, reject) => {
   const timeout = window.setTimeout(resolve, delay)

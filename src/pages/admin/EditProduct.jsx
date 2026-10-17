@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import api from '../../api/axios.js'
 import AdminLayout from '../../components/admin/AdminLayout.jsx'
@@ -15,6 +15,10 @@ const categories = [
 function EditProduct() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const requestedPage = Number(searchParams.get('page'))
+  const returnPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
+  const productListUrl = returnPage === 1 ? '/admin/products' : `/admin/products?page=${returnPage}`
   const [form, setForm] = useState(null)
   const [imageFile, setImageFile] = useState(null)
   const [galleryFiles, setGalleryFiles] = useState([])
@@ -113,7 +117,7 @@ function EditProduct() {
       })
 
       toast.success('Product updated')
-      navigate('/admin/products')
+      navigate(productListUrl)
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update')
     } finally {
@@ -138,7 +142,7 @@ function EditProduct() {
   }
 
    return (
-    <AdminLayout title="Edit Product" subtitle={form.name} backTo="/admin/products">
+    <AdminLayout title="Edit Product" subtitle={form.name} backTo={productListUrl}>
       <div className="max-w-2xl bg-white border border-gray-200 rounded-2xl p-6 md:p-8">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>

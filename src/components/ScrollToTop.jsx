@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 function ScrollToTop() {
-  const { pathname, hash } = useLocation()
+  const { pathname, hash, state } = useLocation()
 
   useEffect(() => {
     // If the URL includes a #section (e.g. /#best-sellers), scroll to that
@@ -19,9 +19,14 @@ function ScrollToTop() {
       return () => clearTimeout(timeout)
     }
 
+    if (Number.isFinite(state?.restoreScrollY)) {
+      window.scrollTo(0, state.restoreScrollY)
+      return
+    }
+
     // No hash present — normal page navigation, scroll to top as before.
     window.scrollTo(0, 0)
-  }, [pathname, hash])
+  }, [pathname, hash, state])
 
   return null
 }

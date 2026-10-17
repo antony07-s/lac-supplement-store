@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { Mail, Phone, MapPin } from 'lucide-react'
+import { ChevronLeft, Mail, Phone, MapPin } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import api from '../api/axios.js'
 
 function ContactUs() {
@@ -39,7 +40,9 @@ function ContactUs() {
     return (
         <main className="page-shell section-space grid max-w-4xl gap-10 md:grid-cols-2">
             <div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-6">Contact Us</h1>
+                <Link to="/" className="mb-7 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-stone-600 hover:text-brand-blue"><ChevronLeft size={17} /> Back to Home</Link>
+                <p className="eyebrow mb-2">Customer care</p><h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-3 sm:text-4xl">Contact Us</h1>
+                <p className="mb-7 max-w-lg text-sm leading-6 text-stone-600">We’re happy to help with product questions, orders, and general enquiries.</p>
                 <div className="space-y-4 text-sm text-gray-600">
                     <h2 className="text-base font-bold text-gray-800">Business information</h2>
                     <dl className="space-y-4">
@@ -53,7 +56,7 @@ function ContactUs() {
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+            <form onSubmit={handleSubmit} className="surface-card space-y-4 p-5 sm:p-7">
                 <label htmlFor="contact-name" className="sr-only">Name</label>
                 <input
                     id="contact-name"

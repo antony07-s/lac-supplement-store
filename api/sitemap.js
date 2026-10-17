@@ -27,9 +27,18 @@ export default async function sitemap(req, res) {
     const products = Array.isArray(firstPage) ? [...firstPage] : [...(firstPage.products || [])]
     const total = Array.isArray(firstPage) ? products.length : Number(firstPage.total || 0)
     const pageCount = Math.ceil(total / 50)
-    for (let page = 2; page <= pageCount; page += 1) {
-      const data = await readJson(`${apiHost}/api/products?page=${page}&limit=50`)
-      products.push(...(Array.isArray(data) ? data : data.products || []))
+    const pagesPerBatch = 10
+    for (let startPage = 2; startPage <= pageCount; startPage += pagesPerBatch) {
+      const pages = Array.from(
+        { length: Math.min(pagesPerBatch, pageCount - startPage + 1) },
+        (_, index) => startPage + index,
+      )
+      const pageResults = await Promise.all(pages.map((page) =>
+        readJson(`${apiHost}/api/products?page=${page}&limit=50`),
+      ))
+      pageResults.forEach((data) => {
+        products.push(...(Array.isArray(data) ? data : data.products || []))
+      })
     }
 
     const categoryNames = new Set((Array.isArray(categories) ? categories : []).map((category) => category.name).filter(Boolean))

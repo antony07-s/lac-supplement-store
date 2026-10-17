@@ -20,7 +20,7 @@ function SidebarContent({ location, onNavigate }) {
 
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map(({ label, to, icon: Icon }) => {
-          const active = location.pathname === to
+          const active = location.pathname === to || (to === '/admin/products' && location.pathname.startsWith('/admin/products/'))
           return (
             <Link
               key={to}
@@ -67,17 +67,19 @@ function AdminLayout({ children, title, subtitle, backTo }) {
       {mobileNavOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileNavOpen(false)} />
-          <aside className="absolute bottom-0 left-0 top-0 flex w-64 flex-col overflow-y-auto bg-gray-900 text-white">
+          <aside className="absolute bottom-0 left-0 top-0 flex w-64 flex-col overflow-y-auto bg-gray-900 text-white shadow-2xl">
             <SidebarContent location={location} onNavigate={closeMobileNav} />
           </aside>
         </div>
       )}
 
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden md:ml-64">
-        <header className="flex shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4 py-5 md:px-10">
+        <header className="flex shrink-0 items-center gap-3 border-b border-stone-200 bg-white px-4 py-4 shadow-sm md:px-10 md:py-5">
           <button
             onClick={() => setMobileNavOpen(true)}
-            className="md:hidden text-gray-600 shrink-0"
+            aria-label={mobileNavOpen ? 'Close admin navigation' : 'Open admin navigation'}
+            aria-expanded={mobileNavOpen}
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-gray-600 hover:bg-stone-100 md:hidden"
           >
             <Menu size={22} />
           </button>
@@ -87,7 +89,7 @@ function AdminLayout({ children, title, subtitle, backTo }) {
             {subtitle && <p className="text-sm text-gray-500 mt-1 truncate">{subtitle}</p>}
           </div>
         </header>
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-10">{children}</main>
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-10">{children}</main>
       </div>
     </div>
   )

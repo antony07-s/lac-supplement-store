@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
 // direction: 'up' | 'down' | 'left' | 'right' | 'scale' | 'fade'
 const getVariants = (direction, distance) => {
@@ -22,20 +22,23 @@ function Reveal({
   children,
   delay = 0,
   direction = 'up',
-  distance = 32,
-  duration = 0.9, // was 0.7
+  distance = 18,
+  duration = 0.5,
   className = '',
 }) {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
     <motion.div
       variants={getVariants(direction, distance)}
-      initial="hidden"
+      initial={shouldReduceMotion ? 'show' : 'hidden'}
       whileInView="show"
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{
+      viewport={{ once: true, amount: 0.15 }}
+      transition={shouldReduceMotion ? { duration: 0 } : {
         duration,
         delay,
-        type: 'spring',
+        type: 'tween',
+        ease: [0.22, 1, 0.36, 1],
         stiffness: 40,   // was 60 — lower = slower, floatier
         damping: 18,      // was 16 — slightly higher = less bounce
         mass: 1,          // was 0.9

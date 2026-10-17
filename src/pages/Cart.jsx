@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { Minus, Plus, Trash2 } from 'lucide-react'
+import { ChevronLeft, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react'
 import { getLineId, useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import toast from 'react-hot-toast'
@@ -33,12 +33,13 @@ function Cart() {
   }
 
   if (cartItems.length === 0) {
-    return <main className="page-shell py-24 text-center"><h1 className="mb-3 text-2xl font-bold text-gray-800">Your Cart is Empty</h1><p className="mb-6 text-gray-500">Looks like you haven't added anything yet.</p><Link to="/" className="font-semibold text-brand-blue hover:underline">Continue Shopping</Link></main>
+    return <main className="page-shell grid min-h-[55vh] place-items-center py-16 text-center"><section className="surface-card w-full max-w-xl px-6 py-12 sm:px-10"><div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-full bg-blue-50 text-brand-blue"><ShoppingCart size={25} /></div><h1 className="mb-3 text-2xl font-bold tracking-tight text-gray-900">Your Cart is Empty</h1><p className="mb-6 text-gray-500">Looks like you haven't added anything yet.</p><Link to="/products" className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-6 font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-blue-dark">Continue Shopping</Link></section></main>
   }
 
   return (
-    <main className="page-shell section-space max-w-3xl">
-      <h1 className="mb-6 text-2xl font-bold text-gray-800">Your Cart</h1>
+    <main className="page-shell section-space max-w-5xl">
+      <Link to="/products" className="mb-6 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-stone-600 hover:text-brand-blue"><ChevronLeft size={17} /> Back to Products</Link>
+      <h1 className="mb-7 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Your Cart <span className="text-lg font-medium text-stone-500">({cartItems.length})</span></h1>
       <div className="mb-8 space-y-4">
         {cartItems.map((item) => {
           const lineId = getLineId(item)
@@ -48,8 +49,8 @@ function Cart() {
           const canIncrease = stockLimit === null || item.quantity < stockLimit
 
           return (
-            <div key={lineId} className="flex items-center gap-3 border-b border-gray-200 pb-4 sm:gap-4">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f2f6ff] p-2">
+            <div key={lineId} className="surface-card grid grid-cols-[5rem_minmax(0,1fr)_auto] items-center gap-3 p-3 sm:grid-cols-[6rem_minmax(0,1fr)_auto] sm:gap-5 sm:p-5">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f2f6ff] p-2 sm:h-24 sm:w-24">
                 <CartProductImage image={item.image} name={item.name} />
               </div>
               <div className="min-w-0 flex-1">
@@ -71,11 +72,12 @@ function Cart() {
         })}
       </div>
 
-      <div className="space-y-3 border-t border-gray-300 pt-4">
+      <div className="ml-auto max-w-md rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+        <h2 className="mb-4 text-lg font-bold text-gray-900">Order summary</h2>
         <div className="flex items-center justify-between text-stone-600"><span>Subtotal</span><span>RM {subtotal.toFixed(2)}</span></div>
-        <div className="flex items-center justify-between"><span className="text-lg font-bold text-gray-800">Total</span><span className="text-lg font-bold text-brand-blue">RM {total.toFixed(2)}</span></div>
+        <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3"><span className="text-lg font-bold text-gray-900">Total</span><span className="text-lg font-bold text-brand-blue">RM {total.toFixed(2)}</span></div>
+        <button onClick={handleCheckout} className="mt-5 min-h-12 w-full rounded-full bg-brand-blue py-3 font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-blue-dark">Proceed to Checkout</button>
       </div>
-      <button onClick={handleCheckout} className="mt-6 w-full rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark">Proceed to Checkout</button>
     </main>
   )
 }

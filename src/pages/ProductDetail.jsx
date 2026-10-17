@@ -12,6 +12,7 @@ import { StaggerGrid, StaggerItem } from '../components/Frame/StaggerGrid.jsx'
 import ProductReviews from '../components/product/ProductReviews.jsx'
 import { cloudinaryImage, cloudinarySrcSet } from '../utils/cloudinaryImage.js'
 import { updatePageMetadata } from '../utils/pageMetadata.js'
+import { safeReturnTo } from '../utils/safeReturnTo.js'
 
 const sectionLabelPattern = /^(Product(?: Name)?|Botanical (?:Name|Source)|Description|Key Benefits|Suitable For|Suggested Use|Food Supplement Only|Available Sizes|Pack Size|How to Use)\s*:?[\s\u00a0]*(.*)$/i
 const whyChoosePattern = /^(Why Choose AYUSYDAH(?:\s+.+)?\??)\s*$/i
@@ -224,7 +225,13 @@ function ProductDetail() {
 
   const imageSrc = product.image
   const requestedReturnTo = searchParams.get('returnTo')
-  const returnTo = requestedReturnTo?.startsWith('/') ? requestedReturnTo : `/category/${encodeURIComponent(product.category)}`
+  const safeRequestedReturnTo = safeReturnTo(requestedReturnTo)
+  const returnTo = requestedReturnTo && (requestedReturnTo === '/' || safeRequestedReturnTo !== '/')
+    ? safeRequestedReturnTo
+    : `/category/${encodeURIComponent(product.category)}`
+  const returnPositionKey = `ayusydah-product-return:${id}:${returnTo}`
+  let returnScrollY = 0
+  try { returnScrollY = Number(sessionStorage.getItem(returnPositionKey)) || 0 } catch { /* Storage may be unavailable in private browsing. */ }
   const variants = Array.isArray(product.variants) ? product.variants : []
   const selectedVariant = variants.find((variant) => variant._id === selectedVariantId) || variants[0] || null
   const productImages = [...new Set([selectedVariant?.image, ...(Array.isArray(product.images) ? product.images : []), product.image].filter(Boolean))]
@@ -251,9 +258,9 @@ function ProductDetail() {
 
   return (
     <main className="page-shell section-space max-w-5xl">
-      <Link to={returnTo} className="mb-6 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-brand-blue">
-        <ChevronLeft size={16} />
-        Back to {product.category}
+      <Link to={returnTo} state={{ restoreScrollY: returnScrollY }} aria-label="Back to Products" className="mb-7 inline-flex min-h-10 items-center gap-2 rounded-lg border border-stone-300 bg-white px-4 text-sm font-semibold text-stone-700 shadow-sm transition hover:border-brand-blue/40 hover:bg-stone-50 hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2">
+        <ChevronLeft size={17} />
+        <span>Back to Products</span>
       </Link>
 
       <div className="grid gap-8 md:grid-cols-2 md:items-start md:gap-12">
@@ -270,15 +277,18 @@ function ProductDetail() {
           </div>
         </div>
 
-        <Reveal direction="up" delay={0.1}>
-          <p className="eyebrow mb-3">Ayusydah wellness</p><h1 className="section-title mb-3">{product.name}</h1>
-          <div className="mb-4 flex items-center gap-1"><Star size={16} className="fill-brand-gold text-brand-gold" /><span className="text-sm text-gray-600">{product.rating} ({product.reviews} reviews)</span></div>
-          <div className="mb-6 flex items-center gap-3"><span className="text-2xl font-bold text-brand-blue">RM {price.toFixed(2)}</span>{originalPrice > price && <span className="text-lg text-gray-400 line-through">RM {originalPrice.toFixed(2)}</span>}</div>
-          <ProductVideos product={product} />
-          <ProductDescription description={product.description} />
+        <div>
+          <Reveal direction="up" delay={0.08}>
+            <p className="eyebrow mb-3">Ayusydah wellness</p><h1 className="section-title mb-3">{product.name}</h1>
+            <div className="mb-4 flex items-center gap-1"><Star size={16} className="fill-brand-gold text-brand-gold" /><span className="text-sm text-gray-600">{product.rating} ({product.reviews} reviews)</span></div>
+            <div className="mb-6 flex items-center gap-3"><span className="text-2xl font-bold text-brand-blue">RM {price.toFixed(2)}</span>{originalPrice > price && <span className="text-lg text-gray-400 line-through">RM {originalPrice.toFixed(2)}</span>}</div>
+          </Reveal>
+          {product.videos?.length > 0 || product.videoUrl ? <Reveal><ProductVideos product={product} /></Reveal> : null}
+          <Reveal><ProductDescription description={product.description} /></Reveal>
 
-          {variants.length > 0 && (
-            <fieldset className="mb-6">
+          <Reveal>
+            {variants.length > 0 && (
+              <fieldset className="mb-6">
               <legend className="mb-3 text-sm font-semibold text-stone-700">Pack size{selectedVariant ? `: ${selectedVariant.packSize}` : ''}</legend>
               <div className="flex flex-wrap gap-2">
                 {variants.map((variant) => {
@@ -289,24 +299,24 @@ function ProductDetail() {
                 })}
               </div>
               {selectedVariant?.sku && <p className="mt-2 text-xs text-stone-500">SKU: {selectedVariant.sku}</p>}
-            </fieldset>
-          )}
+              </fieldset>
+            )}
 
-          {isOutOfStock ? (
-            <p className="mb-4 text-sm font-semibold text-rose-600">Out of Stock</p>
-          ) : (
-            <div className="mb-4 flex flex-wrap items-center gap-3">
-              <span className="text-sm font-semibold text-stone-700">Quantity</span>
-              <div className="inline-flex items-center rounded-full border border-stone-300 bg-white shadow-sm">
-                <button type="button" onClick={() => setQuantity((current) => Math.max(1, current - 1))} disabled={quantity === 1} aria-label="Decrease quantity" className="grid h-10 w-10 place-items-center rounded-l-full text-brand-blue transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"><Minus size={16} /></button>
-                <motion.span key={quantity} initial={{ scale: 1.3, opacity: 0.5 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.2 }} aria-live="polite" className="min-w-9 text-center text-sm font-bold text-stone-800">{quantity}</motion.span>
-                <button type="button" onClick={() => setQuantity((current) => stockLimit === null ? current + 1 : Math.min(current + 1, stockLimit))} disabled={!canIncreaseQuantity} aria-label="Increase quantity" className="grid h-10 w-10 place-items-center rounded-r-full text-brand-blue transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"><Plus size={16} /></button>
+            {isOutOfStock ? (
+              <p className="mb-4 text-sm font-semibold text-rose-600">Out of Stock</p>
+            ) : (
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <span className="text-sm font-semibold text-stone-700">Quantity</span>
+                <div className="inline-flex items-center rounded-full border border-stone-300 bg-white shadow-sm">
+                  <button type="button" onClick={() => setQuantity((current) => Math.max(1, current - 1))} disabled={quantity === 1} aria-label="Decrease quantity" className="grid h-10 w-10 place-items-center rounded-l-full text-brand-blue transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"><Minus size={16} /></button>
+                  <motion.span key={quantity} initial={{ scale: 1.3, opacity: 0.5 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.2 }} aria-live="polite" className="min-w-9 text-center text-sm font-bold text-stone-800">{quantity}</motion.span>
+                  <button type="button" onClick={() => setQuantity((current) => stockLimit === null ? current + 1 : Math.min(current + 1, stockLimit))} disabled={!canIncreaseQuantity} aria-label="Increase quantity" className="grid h-10 w-10 place-items-center rounded-r-full text-brand-blue transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"><Plus size={16} /></button>
+                </div>
+                {stockLimit !== null && <span className="text-xs text-stone-500">{stockLimit} available</span>}
               </div>
-              {stockLimit !== null && <span className="text-xs text-stone-500">{stockLimit} available</span>}
-            </div>
-          )}
+            )}
 
-          <div className="flex gap-3">
+            <div className="flex gap-3">
             <motion.button whileTap={{ scale: 0.96 }} onClick={handleAddToCart} disabled={isOutOfStock || adding} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-blue py-3 font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60">
               <ShoppingCart size={18} /> {isOutOfStock ? 'Out of Stock' : adding ? 'Adding...' : 'Add to Bag'}
             </motion.button>
@@ -315,14 +325,15 @@ function ProductDetail() {
                 <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />
               </motion.span>
             </motion.button>
-          </div>
-        </Reveal>
+            </div>
+          </Reveal>
+        </div>
       </div>
 
-      <ProductReviews productId={product._id} averageRating={product.rating} totalRatings={product.reviews} refreshProduct={refreshProduct} />
+      <Reveal duration={0.6} distance={20}><ProductReviews productId={product._id} averageRating={product.rating} totalRatings={product.reviews} refreshProduct={refreshProduct} /></Reveal>
 
       {relatedProducts.length > 0 && (
-        <section className="mt-16 border-t border-stone-200 pt-12">
+        <Reveal duration={0.6} distance={20}><section className="mt-16 border-t border-stone-200 pt-12">
           <p className="eyebrow">More to explore</p>
           <h2 className="section-title mt-2 mb-8">You may also like</h2>
           <StaggerGrid className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
@@ -332,7 +343,7 @@ function ProductDetail() {
               </StaggerItem>
             ))}
           </StaggerGrid>
-        </section>
+        </section></Reveal>
       )}
     </main>
   )
