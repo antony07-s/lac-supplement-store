@@ -175,6 +175,46 @@ export function CartProvider({ children }) {
 
   const clearCart = () => setCartItems([])
 
+  const restoreOrderItemsToCart = async (orderItems) => {
+    const restoredItems = (Array.isArray(orderItems) ? orderItems : []).map((item) => {
+      const productId = String(item.product?._id || item.product || '')
+      const variantId = item.variant?._id || item.variant || undefined
+      return {
+        _id: productId,
+        ...(variantId && { variantId: String(variantId) }),
+        name: item.name,
+        image: getImageUrl(item.image),
+        price: getSafePrice(item.price),
+        originalPrice: getSafePrice(item.price),
+        ...(item.packSize && { packSize: item.packSize }),
+        ...(item.sku && { sku: item.sku }),
+        quantity: getSafeQuantity(item.quantity),
+      }
+    }).filter((item) => item._id)
+
+    if (!restoredItems.length) return
+
+    let currentItems = getStoredCart()
+    try {
+      const response = await api.get('/cart')
+      if (Array.isArray(response.data)) currentItems = response.data
+    } catch { /* Restore locally if the saved cart cannot be fetched right now. */ }
+
+    const mergedItems = mergeCarts(currentItems, restoredItems)
+    const payload = mergedItems.map((item) => ({
+      productId: item._id,
+      variantId: item.variantId,
+      quantity: getSafeQuantity(item.quantity),
+    }))
+    try {
+      const response = await api.put('/cart', { items: payload })
+      setCartItems(Array.isArray(response.data) ? response.data : mergedItems)
+    } catch (err) {
+      console.error('Failed to sync cancelled order items to the cart:', err)
+      setCartItems(mergedItems)
+    }
+  }
+
   const cartCount = cartItems.reduce((count, item) => count + getSafeQuantity(item.quantity), 0)
   const subtotal = useMemo(
     () => cartItems.reduce((amount, item) => amount + getSafePrice(item.price) * getSafeQuantity(item.quantity), 0),
@@ -189,6 +229,7 @@ export function CartProvider({ children }) {
       updateCartQuantity,
       removeFromCart,
       clearCart,
+      restoreOrderItemsToCart,
       cartCount,
       subtotal,
       total,

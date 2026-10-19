@@ -33,7 +33,7 @@ function loadRazorpay() {
 }
 
 function Checkout() {
-  const { cartItems, clearCart } = useCart()
+  const { cartItems, clearCart, restoreOrderItemsToCart } = useCart()
   const { user, authReady } = useAuth()
   const navigate = useNavigate()
   const [pending] = useState(readPending)
@@ -215,8 +215,9 @@ function Checkout() {
     try {
       const response = await api.post(`/orders/${order._id}/cancel-payment`)
       if (response.data?.status !== 'cancelled') throw new Error('The payment was not cancelled. Check the order status before trying again.')
+      await restoreOrderItemsToCart(order.items)
       resetToCheckout()
-      toast.success('Payment cancelled. Your cart is unchanged.')
+      toast.success('Payment cancelled. Your items are back in your cart.')
     } catch (error) {
       const message = error.response?.data?.message || error.message || 'Unable to cancel this payment safely.'
       try {
@@ -227,8 +228,9 @@ function Checkout() {
           return
         }
         if (latest.data.status === 'cancelled') {
+          await restoreOrderItemsToCart(order.items)
           resetToCheckout()
-          toast.success('Payment cancellation confirmed. Your cart is unchanged.')
+          toast.success('Payment cancellation confirmed. Your items are back in your cart.')
           return
         }
         setOrder(latest.data)
@@ -309,6 +311,12 @@ function Checkout() {
       toast.error(error.response?.data?.message || error.message || 'Payment failed.')
       setPaying(false)
     }
+  }
+
+  const handlePayPalCancel = () => {
+    setPaying(false)
+    setRazorpayMessage('PayPal checkout was closed. Your order is still pending; you can retry PayPal or choose another payment method.')
+    toast('PayPal checkout closed. Your order is still pending.')
   }
 
   const verifyRazorpay = async (response) => {
@@ -434,7 +442,7 @@ function Checkout() {
               <button type="button" onClick={startRazorpay} disabled={paying} className="w-full rounded-full bg-brand-blue py-3.5 font-semibold text-white disabled:opacity-60">{paying ? 'Processing payment…' : 'Pay securely with Razorpay'}</button>
               <button type="button" onClick={cancelPaymentAttempt} disabled={paying || switchingMethod} className="mt-4 text-sm font-semibold text-stone-600 underline disabled:opacity-50">{switchingMethod ? 'Cancelling payment…' : 'Cancel payment'}</button>
             </div> : <>
-              {!import.meta.env.VITE_PAYPAL_CLIENT_ID ? <p className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">PayPal is unavailable. Please contact support.</p> : <PayPalScriptProvider options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: 'MYR', intent: 'capture' }}><PayPalButtons disabled={paying || switchingMethod} style={{ layout: 'vertical', label: 'pay' }} createOrder={async () => { const response = await api.post(`/orders/${order._id}/paypal-order`); setProviderStarted(true); return response.data.orderId }} onApprove={approvePayPal} onCancel={cancelPaymentAttempt} onError={() => { setPaying(false); toast.error('PayPal could not be reached. Check your connection and try again.') }} /></PayPalScriptProvider>}
+              {!import.meta.env.VITE_PAYPAL_CLIENT_ID ? <p className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">PayPal is unavailable. Please contact support.</p> : <PayPalScriptProvider options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: 'MYR', intent: 'capture' }}><PayPalButtons disabled={paying || switchingMethod} style={{ layout: 'vertical', label: 'pay' }} createOrder={async () => { const response = await api.post(`/orders/${order._id}/paypal-order`); setProviderStarted(true); return response.data.orderId }} onApprove={approvePayPal} onCancel={handlePayPalCancel} onError={() => { setPaying(false); toast.error('PayPal could not be reached. Check your connection and try again.') }} /></PayPalScriptProvider>}
               {paying && <p className="mt-3 text-sm font-medium text-brand-blue">Confirming your payment securely…</p>}
               <button type="button" onClick={cancelPaymentAttempt} disabled={paying || switchingMethod} className="mt-4 text-sm font-semibold text-stone-600 underline disabled:opacity-50">{switchingMethod ? 'Cancelling payment…' : 'Cancel payment'}</button>
             </>}
