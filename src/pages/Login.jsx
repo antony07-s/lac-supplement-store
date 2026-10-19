@@ -34,7 +34,7 @@ function Login() {
             login(res.data.user)
             toast.success(`Welcome back, ${res.data.user.name}!`)
             const returnTo = safeReturnTo(searchParams.get('returnTo'))
-            navigate(returnTo === '/' && res.data.user.isAdmin ? '/admin' : returnTo)
+            navigate(res.data.user.isAdmin ? '/' : returnTo)
         } catch (err) {
             toast.error(apiErrorMessage(err, 'Unable to sign in.'), { id: 'login-error' })
         } finally {
@@ -50,7 +50,7 @@ function Login() {
             login(res.data.user)
             toast.success(`Welcome, ${res.data.user.name}!`)
             const returnTo = safeReturnTo(searchParams.get('returnTo'))
-            navigate(returnTo === '/' && res.data.user.isAdmin ? '/admin' : returnTo)
+            navigate(res.data.user.isAdmin ? '/' : returnTo)
         } catch (err) {
             toast.error(apiErrorMessage(err, 'Google sign-in failed. Please try again.'), { id: 'google-login-error' })
         } finally { setLoading(false) }
