@@ -6,6 +6,7 @@ import api from '../api/axios.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import GoogleSignInButton from '../components/auth/GoogleSignInButton.jsx'
 import { safeReturnTo } from '../utils/safeReturnTo.js'
+import { apiErrorMessage } from '../utils/apiError.js'
 
 const RESEND_COOLDOWN_SECONDS = 30
 
@@ -18,7 +19,10 @@ function Register() {
   const [resending, setResending] = useState(false)
   const [cooldown, setCooldown] = useState(0)
   const navigate = useNavigate(); const [searchParams] = useSearchParams(); const { login } = useAuth()
-  const redirect = useCallback(() => navigate(safeReturnTo(searchParams.get('returnTo'))), [navigate, searchParams])
+  const redirect = useCallback((user) => {
+    const returnTo = safeReturnTo(searchParams.get('returnTo'))
+    navigate(returnTo === '/' && user?.isAdmin ? '/admin' : returnTo)
+  }, [navigate, searchParams])
   const change = (event) => setForm({ ...form, [event.target.name]: event.target.value })
 
   useEffect(() => {
@@ -34,13 +38,13 @@ function Register() {
     if (!/^\S+@\S+\.\S+$/.test(email)) return toast.error('Enter a valid email address.')
     if (!(password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password) && /[^A-Za-z0-9]/.test(password))) return toast.error('Use 8+ characters with uppercase, lowercase, a number, and a symbol.')
     setLoading(true)
-    try { const res = await api.post('/auth/register/request-otp', { name, email, password }); setForm((current) => ({ ...current, name, email })); setStep('verify'); setCooldown(RESEND_COOLDOWN_SECONDS); toast.success(res.data.message) } catch (err) { toast.error(err.response?.data?.message || 'Unable to send a verification code.') } finally { setLoading(false) }
+    try { const res = await api.post('/auth/register/request-otp', { name, email, password }); setForm((current) => ({ ...current, name, email })); setStep('verify'); setCooldown(RESEND_COOLDOWN_SECONDS); toast.success(res.data.message) } catch (err) { toast.error(apiErrorMessage(err, 'Unable to send a verification code.')) } finally { setLoading(false) }
   }
   const verifyCode = async (event) => {
     event.preventDefault(); if (loading) return
     if (!/^\d{6}$/.test(code)) return toast.error('Enter the six-digit code from your email.')
     setLoading(true)
-    try { const res = await api.post('/auth/register/verify-otp', { email: form.email, code }); login(res.data.user); toast.success(`Welcome, ${res.data.user.name}!`); redirect() } catch (err) { toast.error(err.response?.data?.message || 'Unable to verify your email.') } finally { setLoading(false) }
+    try { const res = await api.post('/auth/register/verify-otp', { email: form.email, code }); login(res.data.user); toast.success(`Welcome, ${res.data.user.name}!`); redirect(res.data.user) } catch (err) { toast.error(apiErrorMessage(err, 'Unable to verify your email.')) } finally { setLoading(false) }
   }
   const resendCode = async () => {
     if (resending || loading || cooldown > 0) return
@@ -51,14 +55,14 @@ function Register() {
       setCooldown(RESEND_COOLDOWN_SECONDS)
       toast.success(res.data.message || 'A new code has been sent.')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Unable to resend the verification code.')
+      toast.error(apiErrorMessage(err, 'Unable to resend the verification code.'))
     } finally {
       setResending(false)
     }
   }
   const handleGoogleCredential = useCallback(async ({ credential }) => {
     if (!credential || loading) return; setLoading(true)
-    try { const res = await api.post('/auth/google', { credential }); login(res.data.user); toast.success(`Welcome, ${res.data.user.name}!`); redirect() } catch (err) { toast.error(err.response?.data?.message || 'Google sign-in failed. Please try again.') } finally { setLoading(false) }
+    try { const res = await api.post('/auth/google', { credential }); login(res.data.user); toast.success(`Welcome, ${res.data.user.name}!`); redirect(res.data.user) } catch (err) { toast.error(apiErrorMessage(err, 'Google sign-in failed. Please try again.')) } finally { setLoading(false) }
   }, [loading, login, redirect])
 
   return <div className="min-h-screen grid lg:grid-cols-2">

@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '')
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '').replace(/\/api$/i, '')
 const localApiUrl = !configuredApiUrl || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configuredApiUrl)
 const apiBaseUrl = import.meta.env.DEV && localApiUrl
   ? '/api'

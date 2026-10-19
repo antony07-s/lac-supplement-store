@@ -44,12 +44,15 @@ function Checkout() {
   const [savedOrderError, setSavedOrderError] = useState('')
   const [placing, setPlacing] = useState(false)
   const [paying, setPaying] = useState(false)
+  const [switchingMethod, setSwitchingMethod] = useState(false)
+  const [providerStarted, setProviderStarted] = useState(Boolean(pending?.order?.paymentProvider || pending?.order?.paypalOrderId || pending?.order?.razorpayOrderId))
   const [paymentOptions, setPaymentOptions] = useState({ loading: Boolean(pending?.order), razorpay: false })
   const [paymentMethod, setPaymentMethod] = useState('paypal')
   const [razorpayMessage, setRazorpayMessage] = useState('')
   const [restartingCheckout, setRestartingCheckout] = useState(false)
   const placingRef = useRef(false)
   const idempotencyKey = useRef(null)
+  const replacementIdempotencyKey = useRef(pending?.replacementKey || null)
   const razorpayCompleted = useRef(false)
 
   useEffect(() => {
@@ -64,16 +67,27 @@ function Checkout() {
         if (currentOrder.status === 'pending') {
           setOrder(currentOrder)
           setQuote(currentOrder)
+          setProviderStarted(Boolean(currentOrder.paymentProvider || currentOrder.paypalOrderId || currentOrder.razorpayOrderId))
+          if (currentOrder.paymentProvider === 'razorpay' || currentOrder.paymentProvider === 'paypal') setPaymentMethod(currentOrder.paymentProvider)
           return
         }
 
-        sessionStorage.removeItem(PENDING_KEY)
-        setOrder(null)
-        setQuote(null)
         if (['paid', 'shipped', 'delivered', 'refunded'].includes(currentOrder.status)) {
+          sessionStorage.removeItem(PENDING_KEY)
+          setOrder(null)
+          setQuote(null)
           navigate(`/orders/${savedOrderId}`, { replace: true })
           return
         }
+        if (currentOrder.status === 'cancelled') {
+          setOrder(currentOrder)
+          setQuote(currentOrder)
+          setProviderStarted(false)
+          return
+        }
+        sessionStorage.removeItem(PENDING_KEY)
+        setOrder(null)
+        setQuote(null)
         toast.error('Your previous checkout was cancelled. Review your bag and enter shipping details to start again.')
       })
       .catch((error) => {
@@ -114,7 +128,77 @@ function Checkout() {
 
   const set = (name, value) => setForm((current) => ({ ...current, [name]: value }))
   const requestItems = () => cartItems.map((item) => ({ product: item._id, variantId: item.variantId, quantity: item.quantity }))
-  const persist = (nextOrder) => sessionStorage.setItem(PENDING_KEY, JSON.stringify({ order: nextOrder, form }))
+  const persist = (nextOrder) => sessionStorage.setItem(PENDING_KEY, JSON.stringify({ order: nextOrder, form, replacementKey: replacementIdempotencyKey.current }))
+  const createReplacementOrder = async (sourceOrder, nextMethod) => {
+    replacementIdempotencyKey.current ||= crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`
+    const key = replacementIdempotencyKey.current
+    persist(sourceOrder)
+    const response = await api.post('/orders', {
+      items: sourceOrder.items.map((item) => ({
+        product: item.product?._id || item.product,
+        variantId: item.variant?._id || item.variant,
+        quantity: item.quantity,
+      })),
+      shippingAddress: sourceOrder.shippingAddress,
+    }, { headers: { 'Idempotency-Key': key } })
+    replacementIdempotencyKey.current = null
+    idempotencyKey.current = null
+    setOrder(response.data)
+    setQuote(response.data)
+    setProviderStarted(false)
+    setPaymentMethod(nextMethod)
+    setRazorpayMessage('')
+    setPaymentOptions({ loading: true, razorpay: false })
+    persist(response.data)
+    return response.data
+  }
+  const switchPaymentMethod = async (nextMethod, { force = false } = {}) => {
+    if ((!force && nextMethod === paymentMethod) || switchingMethod || paying) return
+    setRazorpayMessage('')
+    if (!providerStarted) {
+      setPaymentMethod(nextMethod)
+      return
+    }
+    setSwitchingMethod(true)
+    let safelyCancelled = false
+    try {
+      const cancelled = await api.post(`/orders/${order._id}/cancel-payment`)
+      if (cancelled.data?.status !== 'cancelled') throw new Error('The previous payment could not be safely cancelled. Check your order status before switching.')
+      safelyCancelled = true
+      const cancelledOrder = { ...order, status: 'cancelled', stockReserved: false }
+      setOrder(cancelledOrder)
+      persist(cancelledOrder)
+      await createReplacementOrder(cancelledOrder, nextMethod)
+      toast.success(`Ready to pay with ${nextMethod === 'razorpay' ? 'Razorpay' : 'PayPal'}.`)
+    } catch (error) {
+      const message = error.response?.data?.message || error.message || 'Unable to switch payment methods safely.'
+      if (safelyCancelled) {
+        const cancelledOrder = { ...order, status: 'cancelled', stockReserved: false }
+        setOrder(cancelledOrder)
+        persist(cancelledOrder)
+        setProviderStarted(false)
+      } else {
+        try {
+          const latest = await api.get(`/orders/${order._id}`)
+          if (['paid', 'shipped', 'delivered'].includes(latest.data.status)) {
+            sessionStorage.removeItem(PENDING_KEY)
+            navigate(`/orders/${order._id}?payment=success`, { replace: true })
+            return
+          }
+          if (latest.data.status === 'cancelled') {
+            setOrder(latest.data)
+            setQuote(latest.data)
+            setProviderStarted(false)
+            persist(latest.data)
+          }
+        } catch { /* Keep the current checkout visible when its status cannot be verified. */ }
+      }
+      setRazorpayMessage(message)
+      toast.error(message)
+    } finally {
+      setSwitchingMethod(false)
+    }
+  }
   const items = order?.items || cartItems
   const cartSubtotal = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0)
   const realTotals = order || quote
@@ -137,7 +221,6 @@ function Checkout() {
         if (!active) return
         const razorpay = response.data?.razorpay === true
         setPaymentOptions({ loading: false, razorpay })
-        if (razorpay) setPaymentMethod('razorpay')
       })
       .catch(() => { if (active) setPaymentOptions({ loading: false, razorpay: false }) })
     return () => { active = false }
@@ -169,21 +252,9 @@ function Checkout() {
     }
   }
 
-  const cancelPayPal = async () => {
-    if (!order) return
-    let cancelled = false
-    try { const response = await api.post(`/orders/${order._id}/cancel-payment`); cancelled = response.data?.status === 'cancelled' } catch { toast.error('Payment may still be processing. Check your order status before retrying.') }
-    if (cancelled) sessionStorage.removeItem(PENDING_KEY)
-    navigate(cancelled ? `/orders/${order._id}?payment=cancelled` : `/orders/${order._id}`)
-  }
+  const cancelPayPal = () => switchPaymentMethod(paymentMethod, { force: true })
 
-  const leaveRazorpay = async () => {
-    if (!order || paying) return
-    let cancelled = false
-    try { const response = await api.post(`/orders/${order._id}/cancel-payment`); cancelled = response.data?.status === 'cancelled' } catch { toast.error('Payment may still be processing. Check your order status before retrying.') }
-    if (cancelled) sessionStorage.removeItem(PENDING_KEY)
-    navigate(cancelled ? `/orders/${order._id}?payment=cancelled` : `/orders/${order._id}`)
-  }
+  const leaveRazorpay = () => switchPaymentMethod(paymentMethod, { force: true })
 
   const approvePayPal = async (data) => {
     if (paying) return
@@ -227,7 +298,9 @@ function Checkout() {
     setPaying(true)
     setRazorpayMessage('Opening secure Razorpay checkout…')
     try {
-      const [Razorpay, response] = await Promise.all([loadRazorpay(), api.post(`/orders/${order._id}/razorpay-order`)])
+      const Razorpay = await loadRazorpay()
+      const response = await api.post(`/orders/${order._id}/razorpay-order`)
+      setProviderStarted(true)
       const config = response.data
       if (!config?.keyId || !config?.orderId || !Number.isInteger(config?.amount) || config.amount < 1 || config.currency !== 'MYR') throw new Error('Invalid payment configuration')
       const checkout = new Razorpay({
@@ -272,21 +345,7 @@ function Checkout() {
     if (!order || restartingCheckout) return
     setRestartingCheckout(true)
     try {
-      const key = crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`
-      const response = await api.post('/orders', {
-        items: order.items.map((item) => ({
-          product: item.product?._id || item.product,
-          variantId: item.variant?._id || item.variant,
-          quantity: item.quantity,
-        })),
-        shippingAddress: order.shippingAddress,
-      }, { headers: { 'Idempotency-Key': key } })
-      idempotencyKey.current = key
-      setOrder(response.data)
-      setQuote(response.data)
-      setRazorpayMessage('')
-      setPaymentOptions({ loading: true, razorpay: false })
-      sessionStorage.setItem(PENDING_KEY, JSON.stringify({ order: response.data, form }))
+      await createReplacementOrder(order, paymentMethod)
     } catch (error) {
       setRazorpayMessage(error.response?.data?.message || 'Unable to restart checkout. Please review your cart and try again.')
     } finally {
@@ -327,17 +386,18 @@ function Checkout() {
           </div>}
           {paymentOptions.loading ? <p className="text-sm text-stone-500">Loading payment methods…</p> : <>
             {paymentOptions.razorpay && <div className="mb-4 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Payment method">
-              <button type="button" onClick={() => setPaymentMethod('razorpay')} disabled={paying} className={`rounded-lg border p-3 text-left text-sm font-semibold ${paymentMethod === 'razorpay' ? 'border-brand-blue bg-blue-50 text-brand-blue' : 'border-stone-200'}`}>Razorpay</button>
-              <button type="button" onClick={() => setPaymentMethod('paypal')} disabled={paying} className={`rounded-lg border p-3 text-left text-sm font-semibold ${paymentMethod === 'paypal' ? 'border-brand-blue bg-blue-50 text-brand-blue' : 'border-stone-200'}`}>PayPal</button>
+              <button type="button" onClick={() => switchPaymentMethod('razorpay')} disabled={paying || switchingMethod} className={`rounded-lg border p-3 text-left text-sm font-semibold ${paymentMethod === 'razorpay' ? 'border-brand-blue bg-blue-50 text-brand-blue' : 'border-stone-200'}`}>Razorpay</button>
+              <button type="button" onClick={() => switchPaymentMethod('paypal')} disabled={paying || switchingMethod} className={`rounded-lg border p-3 text-left text-sm font-semibold ${paymentMethod === 'paypal' ? 'border-brand-blue bg-blue-50 text-brand-blue' : 'border-stone-200'}`}>PayPal</button>
             </div>}
+            {switchingMethod && <p className="mb-4 text-sm text-stone-600" role="status">Verifying the previous payment and preparing checkoutâ€¦</p>}
+            {razorpayMessage && <p className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900" role="alert">{razorpayMessage}</p>}
             {paymentMethod === 'razorpay' && paymentOptions.razorpay ? <div>
               <button type="button" onClick={startRazorpay} disabled={paying} className="w-full rounded-full bg-brand-blue py-3.5 font-semibold text-white disabled:opacity-60">{paying ? 'Processing payment…' : 'Pay securely with Razorpay'}</button>
-              {razorpayMessage && <p className="mt-3 rounded-lg bg-stone-50 p-3 text-sm text-stone-600" role="status">{razorpayMessage}</p>}
-              <button type="button" onClick={leaveRazorpay} disabled={paying} className="mt-4 text-sm font-semibold text-stone-600 underline disabled:opacity-50">Leave payment</button>
+              <button type="button" onClick={leaveRazorpay} disabled={paying || switchingMethod} className="mt-4 text-sm font-semibold text-stone-600 underline disabled:opacity-50">Cancel attempt and retry</button>
             </div> : <>
-              {!import.meta.env.VITE_PAYPAL_CLIENT_ID ? <p className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">PayPal is unavailable. Please contact support.</p> : <PayPalScriptProvider options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: 'MYR', intent: 'capture' }}><PayPalButtons disabled={paying} style={{ layout: 'vertical', label: 'pay' }} createOrder={async () => (await api.post(`/orders/${order._id}/paypal-order`)).data.orderId} onApprove={approvePayPal} onCancel={cancelPayPal} onError={() => { setPaying(false); toast.error('PayPal could not be reached. Check your connection and try again.') }} /></PayPalScriptProvider>}
+              {!import.meta.env.VITE_PAYPAL_CLIENT_ID ? <p className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">PayPal is unavailable. Please contact support.</p> : <PayPalScriptProvider options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: 'MYR', intent: 'capture' }}><PayPalButtons disabled={paying || switchingMethod} style={{ layout: 'vertical', label: 'pay' }} createOrder={async () => { const response = await api.post(`/orders/${order._id}/paypal-order`); setProviderStarted(true); return response.data.orderId }} onApprove={approvePayPal} onCancel={cancelPayPal} onError={() => { setPaying(false); toast.error('PayPal could not be reached. Check your connection and try again.') }} /></PayPalScriptProvider>}
               {paying && <p className="mt-3 text-sm font-medium text-brand-blue">Confirming your payment securely…</p>}
-              <button type="button" onClick={cancelPayPal} disabled={paying} className="mt-4 text-sm font-semibold text-stone-600 underline disabled:opacity-50">Cancel payment</button>
+              <button type="button" onClick={cancelPayPal} disabled={paying || switchingMethod} className="mt-4 text-sm font-semibold text-stone-600 underline disabled:opacity-50">Cancel attempt and retry</button>
             </>}
           </>}
           </>}

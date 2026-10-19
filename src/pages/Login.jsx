@@ -6,6 +6,7 @@ import api from '../api/axios.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import GoogleSignInButton from '../components/auth/GoogleSignInButton.jsx'
 import { safeReturnTo } from '../utils/safeReturnTo.js'
+import { apiErrorMessage } from '../utils/apiError.js'
 
 function Login() {
     const [form, setForm] = useState({ email: '', password: '' })
@@ -32,9 +33,10 @@ function Login() {
             const res = await api.post('/auth/login', { email, password: form.password })
             login(res.data.user)
             toast.success(`Welcome back, ${res.data.user.name}!`)
-            navigate(safeReturnTo(searchParams.get('returnTo')))
+            const returnTo = safeReturnTo(searchParams.get('returnTo'))
+            navigate(returnTo === '/' && res.data.user.isAdmin ? '/admin' : returnTo)
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Login failed', { id: 'login-error' })
+            toast.error(apiErrorMessage(err, 'Unable to sign in.'), { id: 'login-error' })
         } finally {
             setLoading(false)
         }
@@ -47,9 +49,10 @@ function Login() {
             const res = await api.post('/auth/google', { credential })
             login(res.data.user)
             toast.success(`Welcome, ${res.data.user.name}!`)
-            navigate(safeReturnTo(searchParams.get('returnTo')))
+            const returnTo = safeReturnTo(searchParams.get('returnTo'))
+            navigate(returnTo === '/' && res.data.user.isAdmin ? '/admin' : returnTo)
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Google sign-in failed. Please try again.', { id: 'google-login-error' })
+            toast.error(apiErrorMessage(err, 'Google sign-in failed. Please try again.'), { id: 'google-login-error' })
         } finally { setLoading(false) }
     }, [loading, login, navigate, searchParams])
 

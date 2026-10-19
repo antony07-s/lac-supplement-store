@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { CheckCircle2, PackageCheck, Truck } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../../api/axios.js'
+import { apiErrorMessage } from '../../utils/apiError.js'
 import AdminLayout from '../../components/admin/AdminLayout.jsx'
 
 const statusColors = {
@@ -19,7 +20,11 @@ function ManageOrders() {
   const [orders, setOrders] = useState([])
   const [totalOrders, setTotalOrders] = useState(0)
   const [page, setPage] = useState(1)
-  const [loading, setLoading] = useState(true)
+  const [refreshVersion, setRefreshVersion] = useState(0)
+  const requestKey = `${page}:${refreshVersion}`
+  const [requestState, setRequestState] = useState({ key: '', error: '' })
+  const loading = requestState.key !== requestKey
+  const loadError = loading ? '' : requestState.error
   const [updatingOrderId, setUpdatingOrderId] = useState(null)
   const [shipModalOrder, setShipModalOrder] = useState(null)
   const [courierName, setCourierName] = useState(couriers[0])
@@ -29,11 +34,16 @@ function ManageOrders() {
   useEffect(() => {
     let active = true
     api.get('/orders', { params: { page, limit: 50 } })
-      .then((res) => { if (active) { setOrders(res.data); setTotalOrders(Number(res.headers['x-total-count']) || res.data.length) } })
-      .catch(() => { if (active) toast.error('Failed to load orders') })
-      .finally(() => { if (active) setLoading(false) })
+      .then((res) => { if (active) { setOrders(res.data); setTotalOrders(Number(res.headers['x-total-count']) || res.data.length); setRequestState({ key: requestKey, error: '' }) } })
+      .catch((error) => {
+        if (!active) return
+        const message = apiErrorMessage(error, 'Unable to load orders.')
+        setRequestState({ key: requestKey, error: message })
+        toast.error(message, { id: 'orders-load-error' })
+      })
+      .catch(() => {})
     return () => { active = false }
-  }, [page])
+  }, [page, refreshVersion, requestKey])
 
   const totalPages = Math.max(1, Math.ceil(totalOrders / 50))
 
@@ -93,6 +103,11 @@ function ManageOrders() {
     <AdminLayout title="Orders" subtitle={`${totalOrders} order${totalOrders !== 1 ? 's' : ''} total`}>
       {loading ? (
         <p className="text-gray-500">Loading orders...</p>
+      ) : loadError ? (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-800" role="alert">
+          <p>{loadError}</p>
+          <button type="button" onClick={() => setRefreshVersion((version) => version + 1)} className="mt-3 rounded-full bg-white px-4 py-2 font-semibold text-rose-800 ring-1 ring-rose-200">Retry</button>
+        </div>
       ) : orders.length === 0 ? (
         <p className="text-gray-500">No orders yet.</p>
       ) : (
@@ -179,7 +194,7 @@ function ManageOrders() {
           </table>
         </div>
       )}
-      {totalOrders > 50 && <nav aria-label="Admin order pages" className="mt-5 flex items-center justify-end gap-3"><button type="button" onClick={() => { setLoading(true); setPage((current) => Math.max(1, current - 1)) }} disabled={page === 1 || loading} className="min-h-10 rounded-full border px-4 text-sm font-semibold disabled:opacity-40">Previous</button><span className="text-sm text-gray-500">Page {page} of {totalPages}</span><button type="button" onClick={() => { setLoading(true); setPage((current) => Math.min(totalPages, current + 1)) }} disabled={page >= totalPages || loading} className="min-h-10 rounded-full border px-4 text-sm font-semibold disabled:opacity-40">Next</button></nav>}
+      {totalOrders > 50 && <nav aria-label="Admin order pages" className="mt-5 flex items-center justify-end gap-3"><button type="button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page === 1 || loading} className="min-h-10 rounded-full border px-4 text-sm font-semibold disabled:opacity-40">Previous</button><span className="text-sm text-gray-500">Page {page} of {totalPages}</span><button type="button" onClick={() => setPage((current) => Math.min(totalPages, current + 1))} disabled={page >= totalPages || loading} className="min-h-10 rounded-full border px-4 text-sm font-semibold disabled:opacity-40">Next</button></nav>}
 
       {shipModalOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
