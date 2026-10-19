@@ -27,8 +27,8 @@ function ContactUs() {
         }
         setSubmitting(true)
         try {
-            await api.post('/contact', normalized)
-            toast.success('Thank you. Your enquiry has been sent and our team will respond shortly.')
+            const response = await api.post('/contact', normalized)
+            toast.success(response.data.message || 'Your enquiry was received.')
             setForm({ name: '', email: '', subject: '', message: '' })
         } catch (err) {
             toast.error(err.response?.data?.message || 'The enquiry service is taking too long. Please try again shortly.')
